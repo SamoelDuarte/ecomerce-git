@@ -1,0 +1,205 @@
+@extends('user.layout')
+
+@includeIf('user.partials.rtl-style')
+
+@section('content')
+  <div class="page-header">
+    <h4 class="page-title">{{ $keywords['Section Titles'] ?? __('Section Titles') }}</h4>
+    <ul class="breadcrumbs">
+      <li class="nav-home">
+        <a href="{{ route('user-dashboard') }}">
+          <i class="flaticon-home"></i>
+        </a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">{{ __('Pages') }}</a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">{{ __('Home Page') }}</a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">{{ $keywords['Section Titles'] ?? __('Section Titles') }}</a>
+      </li>
+    </ul>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-lg-10">
+              <div class="card-title">{{ $keywords['Update Section Titles'] ?? __('Update Section Titles') }}</div>
+            </div>
+            <div class="col-lg-2">
+              @if (!empty($u_langs))
+                <select name="language" class="form-control"
+                  onchange="window.location='{{ url()->current() . '?language=' }}'+this.value">
+                  <option value="" selected disabled>{{ __('Select a Language') }}</option>
+                  @foreach ($u_langs as $lang)
+                    <option value="{{ $lang->code }}"
+                      {{ $lang->code == request()->input('language') ? 'selected' : '' }}>{{ $lang->name }}</option>
+                  @endforeach
+                </select>
+              @endif
+            </div>
+          </div>
+        </div>
+        <div class="card-body pt-5 pb-4">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <form id="ajaxForm" action="{{ route('user.home.section.update', $language->id) }}" method="post"
+                enctype="multipart/form-data">
+                @csrf
+                <div class="row">
+                  @php
+                    $not_allow_theme = ['manti'];
+                  @endphp
+                  @if (!in_array($setting->theme, $not_allow_theme))
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Category Section Title'] ?? __('Category Section Title') }}</label>
+                        <input type="hidden" name="types[]" value="category_section_title">
+                        <input name="category_section_title" class="form-control"
+                          value="{{ $ubs->category_section_title ?? '' }}">
+                        <p id="errcategory_section_title" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                  @endif
+
+                  @php
+                    $not_allow_theme = ['vegetables', 'manti', 'kids'];
+                  @endphp
+                  @if (!in_array($setting->theme, $not_allow_theme))
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Category Section Subtitle'] ?? __('Category Section Subtitle') }}</label>
+                        <input type="hidden" name="types[]" value="category_section_subtitle">
+                        <input name="category_section_subtitle" class="form-control"
+                          value="{{ $ubs->category_section_subtitle ?? '' }}">
+                        <p id="errcategory_section_subtitle" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                  @endif
+
+                  @if ($setting->theme == 'manti')
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Featured Section Title'] ?? __('Featured Section Title') }}</label>
+                        <input type="hidden" name="types[]" value="featured_section_title">
+                        <input name="featured_section_title" class="form-control"
+                          value="{{ $ubs->featured_section_title ?? '' }}">
+                        <p id="errfeatured_section_title" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                  @endif
+
+                  <div class="col-lg-6">
+                    <div class="form-group">
+                      <label for="">{{ $keywords['Flash Section Title'] ?? __('Flash Section Title') }}</label>
+                      <input type="hidden" name="types[]" value="flash_section_title">
+                      <input name="flash_section_title" class="form-control"
+                        value="{{ $ubs->flash_section_title ?? '' }}">
+                      <p id="errflash_section_title" class="em text-danger mb-0"></p>
+                    </div>
+                  </div>
+                  @if ($setting->theme == 'fashion' || $setting->theme == 'furniture')
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Flash Section Subtitle'] ?? __('Flash Section Subtitle') }}</label>
+                        <input type="hidden" name="types[]" value="flash_section_subtitle">
+                        <input name="flash_section_subtitle" class="form-control"
+                          value="{{ $ubs->flash_section_subtitle ?? '' }}">
+                        <p id="errflash_section_subtitle" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                  @endif
+
+                  <div class="col-lg-6">
+                    <div class="form-group">
+                      <label for="">{{ $keywords['Tab Section Title'] ?? __('Tab Section Title') }}</label>
+                      <input type="hidden" name="types[]" value="tab_section_title">
+                      <input name="tab_section_title" class="form-control"
+                        value="{{ $ubs->tab_section_title ?? '' }}">
+                      <p id="errtab_section_title" class="em text-danger mb-0"></p>
+                    </div>
+                  </div>
+                  @if ($setting->theme == 'fashion')
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Tab Section Subtitle'] ?? __('Tab Section Subtitle') }}</label>
+                        <input type="hidden" name="types[]" value="tab_section_subtitle">
+                        <input name="tab_section_subtitle" class="form-control"
+                          value="{{ $ubs->tab_section_subtitle ?? '' }}">
+                        <p id="errtab_section_subtitle" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                  @endif
+
+                  @php
+                    $allow_theme = ['furniture', 'vegetables', 'manti'];
+                  @endphp
+                  @if (in_array($setting->theme, $allow_theme))
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Top Rated Product Section Title'] ?? __('Top Rated Product Section Title') }}</label>
+                        <input type="hidden" name="types[]" value="top_rated_product_section_title">
+                        <input name="top_rated_product_section_title" class="form-control"
+                          value="{{ $ubs->top_rated_product_section_title ?? '' }}">
+                        <p id="errtop_rated_product_section_title" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                    @if ($setting->theme != 'manti')
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label for="">{{ $keywords['Top Selling Product Section Title'] ?? __('Top Selling Product Section Title') }}</label>
+                          <input type="hidden" name="types[]" value="top_selling_product_section_title">
+                          <input name="top_selling_product_section_title" class="form-control"
+                            value="{{ $ubs->top_selling_product_section_title ?? '' }}">
+                          <p id="errtop_selling_product_section_title" class="em text-danger mb-0"></p>
+                        </div>
+                      </div>
+                    @endif
+                  @endif
+
+                  @php
+                    $allow_theme = ['kids', 'electronics'];
+                  @endphp
+                  @if (in_array($setting->theme, $allow_theme))
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="">{{ $keywords['Latest Product Section Title'] ?? __('Latest Product Section Title') }}</label>
+                        <input type="hidden" name="types[]" value="latest_product_section_title">
+                        <input name="latest_product_section_title" class="form-control"
+                          value="{{ $ubs->latest_product_section_title ?? '' }}">
+                        <p id="errlatest_product_section_title" class="em text-danger mb-0"></p>
+                      </div>
+                    </div>
+                  @endif
+                </div> <!-- End of inner row -->
+                <div class="card-footer">
+                  <div class="form">
+                    <div class="form-group from-show-notify row">
+                      <div class="col-12 text-center">
+                        <button type="submit" id="submitBtn" class="btn btn-success">{{  __('Update') }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form> <!-- Close the form here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+@endsection

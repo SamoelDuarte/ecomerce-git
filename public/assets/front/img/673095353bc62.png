@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <!--====== Required meta tags ======-->
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+
+  
+  <!-- Title -->
+  <title>Ecom </title>
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="https://ecom.test/assets/front/img/6703752f48fd2.png" type="image/x-icon">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/bootstrap.min.css">
+  <!-- Fontawesome Icon CSS -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/fonts/fontawesome/css/all.min.css">
+  <!-- Kreativ Icon -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/font-gigo.css">
+  <!-- Magnific Popup CSS -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/magnific-popup.min.css">
+  <!-- Swiper Slider -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/swiper-bundle.min.css">
+  <!-- AOS Animation CSS -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/aos.min.css">
+  <!-- toastr css -->
+  <link rel="stylesheet" href="https://ecom.test/assets/user-front/css/common/toastr.min.css">
+  <!-- Meanmenu CSS -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/meanmenu.min.css">
+  <!-- Nice Select -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/nice-select.css">
+  <!-- CountDown -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/odometer.min.css">
+  
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/floating-whatsapp.css">
+  <!-- Main Style CSS -->
+  <link rel="stylesheet" href="https://ecom.test/assets/front/css/style.css">
+
+  <meta name="csrf-token" content="magbE3kZsDi0rKg52pLEMdxfVMIdkL72aDvJ4hc4" />
+
+  
+  
+
+    <style>
+    :root {
+      --color-primary: #FF4B2B;
+      --color-primary2: #FF622E;
+      --color-primary-rgb: 255, 75, 43;
+    }
+  </style>
+
+</head>
+
+<body>
+
+      <!--====== Start Preloader ======-->
+
+    <!--====== Start Preloader ======-->
+    <div class="preloader" id="preLoader">
+      <div class="lds-ellipsis loader">
+        <img class="lazy" data-src="https://ecom.test/assets/front/img/6703753a3f315.gif" alt="">
+      </div>
+    </div><!--====== End Preloader ======-->
+    <!--====== End Preloader ======-->
+  
+  <!-- Header Start -->
+<header class="header-area header-inner-page">
+  <div class="main-responsive-nav">
+    <div class="container">
+      <div class="main-responsive-menu">
+        <div class="logo">
+          <a href="https://ecom.test">
+            <img src="https://ecom.test/assets/front/img/670375356aa64.png" alt="logo">
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main-navbar">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg">
+        <!-- Logo -->
+        <a class="navbar-brand" href="https://ecom.test">
+          <img src="https://ecom.test/assets/front/img/670375356aa64.png" alt="Logo">
+        </a>
+        <!-- Navigation items -->
+        <div class="collapse navbar-collapse mean-menu">
+          <ul id="mainMenu" class="navbar-nav mx-auto">
+                                                                    <li class="nav-item">
+                  <a class="nav-link " target="_self" href="https://ecom.test">Home</a>
+                </li>
+                                                                      <li class="nav-item">
+                  <a class="nav-link " target="_self" href="https://ecom.test/pricing">Pricing</a>
+                </li>
+                                                                      <li class="nav-item">
+                  <a class="nav-link " target="_self" href="https://ecom.test/shops">Shops</a>
+                </li>
+                                                                      <li class="nav-item">
+                  <a class="nav-link " target="_self" href="#">Pages</a>
+                  <ul class="menu-dropdown">
+                                                                <li class="nav-item">
+                        <a class="nav-link" href="https://ecom.test/about"
+                          target="_self">About</a>
+                      </li>
+                                                                <li class="nav-item">
+                        <a class="nav-link" href="https://ecom.test/p/terms-&amp;-conditions"
+                          target="_self">Terms &amp; Conditions</a>
+                      </li>
+                                      </ul>
+                </li>
+                                                                      <li class="nav-item">
+                  <a class="nav-link " target="_self" href="https://ecom.test/faqs">FAQs</a>
+                </li>
+                                                                      <li class="nav-item">
+                  <a class="nav-link " target="_self" href="https://ecom.test/contact">Contact</a>
+                </li>
+                                                                      <li class="nav-item">
+                  <a class="nav-link " target="_self" href="https://ecom.test/blog">Blog</a>
+                </li>
+                                  </div>
+
+        <div class="side-option">
+                      <div class="item">
+              <a href="https://ecom.test/login" class="btn primary-btn">
+                <span>Login</span>
+              </a>
+            </div>
+                              <div class="item">
+            <div class="language">
+                              <select onchange="handleSelect(this)">
+                                      <option value="en" selected>
+                      English</option>
+                                      <option value="ar" >
+                      Arabic</option>
+                                  </select>
+                          </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+<!-- Header End -->
+
+      <!-- Page Title Start-->
+    <div class="page-title-area" style="background-image:url('https://ecom.test/assets/front/img/91b00810e1d3a500829375608d70c224a7601fac.jpg ')">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-10">
+            <div class="content">
+              <h2>  Page Not Found
+</h1>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-start">
+                  <li class="breadcrumb-item"><a href="https://ecom.test">Home</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">  404
+ </li>
+                </ol>
+              </nav>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+    <!-- Page Title End-->
+  
+    <!--    Error section start   -->
+  <div class="error-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="not-found">
+            <img src="https://ecom.test/assets/front/img/404.png" alt="">
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="error-txt mb-20">
+            <div class="oops">
+              <img src="https://ecom.test/assets/front/img/oops.png" alt="">
+            </div>
+            <h2>You&#039;re lost...</h2>
+            <p>The page you are looking for might have been moved, renamed, or might never existed.</p>
+            <a href="https://ecom.test" class="btn primary-btn">Back Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--    Error section end   -->
+
+  
+  <!-- Footer Area -->
+<footer class="footer-area">
+  <div class="footer-top pt-120 pb-90">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3 col-md-12">
+          <div class="footer-widget" data-aos="fade-up" data-aos-delay="100">
+            <div class="navbar-brand">
+              <a href="https://ecom.test">
+                <img src="https://ecom.test/assets/front/img/6694f99155150.png" alt="Logo">
+              </a>
+            </div>
+            <p>We are a awward winning multinaitonal Company. We Believe quality and standard worlwidex Consider.</p>
+            <div class="social-link">
+
+
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-1 col-md-1"></div>
+        <div class="col-lg-2 col-md-3 col-sm-6">
+          <div class="footer-widget" data-aos="fade-up" data-aos-delay="200">
+                        <h3>Useful Links</h3>
+            <ul class="footer-links">
+                              <li><a href="http://example.com/">Our Blogs</a></li>
+                              <li><a href="http://example.com/">Contact Us</a></li>
+                              <li><a href="http://example.com/">Privacy Policy</a></li>
+                              <li><a href="http://example.com/">Terms &amp; Conditions</a></li>
+                              <li><a href="http://example.com/">About Us</a></li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6">
+          <div class="footer-widget" data-aos="fade-up" data-aos-delay="400">
+            <h3> CONTACT INFO</h3>
+
+            <ul class="info-list">
+              <li>
+                <i class="fal fa-map-marker-alt"></i>
+                <span>House - 44, Road - 03, Sector - 11, Uttara, Dhaka
+Dhanmondi, Dhaka
+Mohammadpur, Dhaka</span>
+              </li>
+              <li>
+                <i class="fal fa-phone"></i>
+                <a href="tel:00123456789">237237237,72372332</a>
+              </li>
+              <li>
+                <i class="fal fa-envelope"></i>
+                <a href="mailto:info@example.com">contact@gmail.com</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6">
+          <div class="footer-widget" data-aos="fade-up" data-aos-delay="500">
+            <h3>Newsletter</h3>
+            <p>Get latest updates first and stay with us.</p>
+            <form id="footerSubscriber" action="https://ecom.test/subscribe" method="POST">
+              <input type="hidden" name="_token" value="magbE3kZsDi0rKg52pLEMdxfVMIdkL72aDvJ4hc4">              <div class="input-group">
+                <input class="form-control" placeholder="Enter Your Email" name="email"
+                  autocomplete="off">
+                <button class="btn btn-sm primary-btn" type="submit">Subscribe</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+      <div class="copy-right-area">
+      <div class="container">
+        <div class="copy-right-content">
+                      <span>
+              <p>Copyright © 2021. All rights reserved by ecom.</p>
+            </span>
+                  </div>
+      </div>
+    </div>
+  </footer>
+<!-- Footer Area -->
+      <div class="cookie">
+      <div class="js-cookie-consent cookie-consent">
+    <div class="container">
+    <div class="cookie-container">
+      <span class="cookie-consent__message">
+        <p>Your experience on this site will be improved by allowing cookies.</p>
+      </span>
+      <button class="js-cookie-consent-agree cookie-consent__agree">
+        Allow Cookies
+      </button>
+    </div>
+  </div>
+</div>
+
+    <script>
+
+        window.laravelCookieConsent = (function () {
+
+            const COOKIE_VALUE = 1;
+            const COOKIE_DOMAIN = 'ecom.test';
+
+            function consentWithCookies() {
+                setCookie('laravel_cookie_consent', COOKIE_VALUE, 7300);
+                hideCookieDialog();
+            }
+
+            function cookieExists(name) {
+                return (document.cookie.split('; ').indexOf(name + '=' + COOKIE_VALUE) !== -1);
+            }
+
+            function hideCookieDialog() {
+                const dialogs = document.getElementsByClassName('js-cookie-consent');
+
+                for (let i = 0; i < dialogs.length; ++i) {
+                    dialogs[i].style.display = 'none';
+                }
+            }
+
+            function setCookie(name, value, expirationInDays) {
+                const date = new Date();
+                date.setTime(date.getTime() + (expirationInDays * 24 * 60 * 60 * 1000));
+                document.cookie = name + '=' + value
+                    + ';expires=' + date.toUTCString()
+                    + ';domain=' + COOKIE_DOMAIN
+                    + ';path=/'
+                    + '';
+            }
+
+            if (cookieExists('laravel_cookie_consent')) {
+                hideCookieDialog();
+            }
+
+            const buttons = document.getElementsByClassName('js-cookie-consent-agree');
+
+            for (let i = 0; i < buttons.length; ++i) {
+                buttons[i].addEventListener('click', consentWithCookies);
+            }
+
+            return {
+                consentWithCookies: consentWithCookies,
+                hideCookieDialog: hideCookieDialog
+            };
+        })();
+    </script>
+
+    </div>
+  
+  
+  <div data-popup_delay="1000" data-popup_id="3" id="modal-popup3" class="popup-wrapper">
+            <div class="popup-two bg_cover lazy" data-bg="https://ecom.test/assets/front/img/popups/6696157d3eaed.jpg">
+                <div class="popup_main-content">
+                    <h1>Stay update</h1>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt dolor dignissimos quas quaerat molestiae consectetur commodi autem, nihil dolore similique officia quibusdam sapiente cum veritatis nobis consequatur, suscipit nam asperiores.</p>
+                    <div class="subscribe-form">
+                        <form id="popupSubscribe3" class="subscribeForm" action="https://ecom.test/subscribe" method="POST">
+                            <input type="hidden" name="_token" value="magbE3kZsDi0rKg52pLEMdxfVMIdkL72aDvJ4hc4">                            <div class="form_group">
+                                <input type="email" class="form_control" placeholder="Email Address" name="email" required>
+                                <p id="erremail" class="text-white mb-3 err-email"></p>
+                            </div>
+                            <div class="form_group">
+                                <button type="submit" class="popup-main-btn" style="background-color: #451D53;">Subscibe Now</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+                    <div data-popup_delay="100" data-popup_id="6" id="modal-popup6" class="popup-wrapper">
+            <div class="popup-five bg_cover lazy" data-bg="https://ecom.test/assets/front/img/popups/66961bbd28945.jpg">
+                <div class="popup_main-content">
+                    <h1>Don&#039;t miss the offer.</h1>
+                    <h4>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Commodi, sit asperiores. Cupiditate nemo, consequatur nulla, placeat atque reiciendis nostrum, omnis quod accusamus excepturi optio expedita distinctio laudantium aliquid aut doloribus.</h4>
+                    <div class="offer-timer" data-end_date="01/01/2025" data-end_time="12:00 AM"></div>
+                                            <a href="https://ecom.test/pricing" class="popup-main-btn" style="background-color: #E33756;">Get Now</a>
+                                    </div>
+            </div>
+        </div>
+      
+
+  
+  <div id="WAButton"></div>
+
+  <!-- Go to Top -->
+  <div class="go-top"><i class="fal fa-angle-up"></i></div>
+  <!-- Go to Top -->
+
+  <!-- Jquery JS -->
+  <script src="https://ecom.test/assets/front/js/jquery.min.js"></script>
+  <!-- Popper JS -->
+  <script src="https://ecom.test/assets/front/js/popper.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://ecom.test/assets/front/js/bootstrap.min.js"></script>
+  <!-- Nice Select JS -->
+  <script src="https://ecom.test/assets/front/js/jquery.nice-select.min.js"></script>
+  <!-- Magnific Popup JS -->
+  <script src="https://ecom.test/assets/front/js/jquery.magnific-popup.min.js"></script>
+  
+  <script src="https://ecom.test/assets/front/js/vanilla-lazyload.min.js"></script>
+  
+  <script src="https://ecom.test/assets/front/js/jquery-syotimer.min.js"></script>
+  <!-- Swiper Slider JS -->
+  <script src="https://ecom.test/assets/front/js/swiper-bundle.min.js"></script>
+  <!-- Lazysizes -->
+  <script src="https://ecom.test/assets/front/js/lazysizes.min.js"></script>
+  <script src="https://ecom.test/assets/user-front/js/toastr.min.js"></script>
+  <!-- Meanmenu JS -->
+  <script src="https://ecom.test/assets/front/js/jquery.meanmenu.min.js"></script>
+  
+  <script src="https://ecom.test/assets/front/js/floating-whatsapp.js"></script>
+  <!-- AOS JS -->
+  <script src="https://ecom.test/assets/front/js/aos.min.js"></script>
+
+  <!-- CountDown -->
+  <script src="https://ecom.test/assets/front/js/appear.min.js"></script>
+  <script src="https://ecom.test/assets/front/js/odometer.min.js"></script>
+
+  <!-- Main script JS -->
+  <script src="https://ecom.test/assets/front/js/script.js"></script>
+
+  <script>
+    "use strict";
+    var rtl = 0;
+    var mainurl = "https://ecom.test";
+    var vapid_public_key = "BCf9MYKk2xu8xrCi90WFn_dcfKiRhYx-h-zFru0xoNm22QxvEITtM5h4owxk55ubIoldRBhPw--gwLaPZF-l7gk";
+  </script>
+
+  
+  <script src="https://ecom.test/assets/front/js/push-notification.js"></script>
+
+  
+  
+
+  
+  
+    <script>
+    "use strict";
+
+    function handleSelect(elm) {
+      window.location.href = "https://ecom.test/changelanguage" + "/" + elm.value;
+    }
+  </script>
+
+  
+  
+      <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/66b746680cca4f8a7a74334b/1i4tum2ck';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+  
+</body>
+
+</html>
