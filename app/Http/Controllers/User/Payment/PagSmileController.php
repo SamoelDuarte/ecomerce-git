@@ -47,7 +47,7 @@ class PagSmileController extends Controller
         $order = Common::saveOrder($request->all(), $txnId, $chargeId, 'Pending', 'online', $user->id);
         $order_id = $order->id;
         Common::saveOrderedItems($order->id);
-
+dd(route('customer.itemcheckout.pagSmile.notify',getParam()));
         // Payload para PagSmile
         $payload = [
             'app_id'            => $app_id,
