@@ -29,6 +29,7 @@ class VerifyCsrfToken extends Middleware
         '*/coupon',
         '*/paytabs/success',
         '*/iyzico/success', 
-        '/order/pagsmile/notify'
+        '*order/pagsmile/notify',
+        
     ];
 }
