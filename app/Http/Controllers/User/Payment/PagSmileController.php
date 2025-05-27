@@ -48,13 +48,12 @@ class PagSmileController extends Controller
         $order_id = $order->id;
         Common::saveOrderedItems($order->id);
 
-        dd(request()->route('domain'));
         // Payload para PagSmile
         $payload = [
             'app_id'            => $app_id,
             'out_trade_no'      => $order_id,
             'timestamp'         => $timestamp,
-            'notify_url'        => route('customer.itemcheckout.pagSmile.notify', ['domain' => request()->route('domain')]),
+            'notify_url'        => route('customer.itemcheckout.pagSmile.notify',getParam()),
             // 'notify_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
             'subject'           => $title,
             'body'              => $description,
