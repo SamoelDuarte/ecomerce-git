@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\User\Payment\PagSmileController;
+
 $domain = env('WEBSITE_HOST');
 
 if (!app()->runningInConsole()) {
@@ -153,6 +155,7 @@ Route::group(['domain' => $domain, 'prefix' => $prefix, 'middleware' => ['userVi
         Route::get('/testimonial', 'Front\FrontendController@userTestimonial')->name('front.user.testimonial');
     });
 
+
     Route::group(['middleware' => ['routeAccess:Contact']], function () {
         Route::post('/contact/message', 'Front\FrontendController@contactMessage')->name('front.contact.message')->middleware('Demo');
     });
@@ -188,6 +191,11 @@ Route::group(['domain' => $domain, 'prefix' => $prefix, 'middleware' => ['userVi
         Route::get('/midtrans/success', 'User\Payment\MidtransController@successPayment')->name('customer.itemcheckout.midtrans.success');
         Route::post('/iyzico/success', 'User\Payment\IyzicoController@successPayment')->name('customer.itemcheckout.iyzico.success');
 
+        Route::get('/pagsmile/success', [PagSmileController::class, 'successPayment'])->name('customer.itemcheckout.pagSmile.success');
+        Route::get('/pagsmile/cancel', [PagSmileController::class, 'cancelPayment'])->name('customer.itemcheckout.pagSmile.cancel');
+        Route::post('/pagsmile/notify', [PagSmileController::class, 'notifyPayment'])->name('customer.itemcheckout.pagSmile.notify');
+
+        
         Route::get('/offline/success', 'UserFront\UsercheckoutController@offlineSuccess')->name('customer.itemcheckout.offline.success');
 
         Route::post('paytm/payment-status', "User\Payment\PaytmController@paymentStatus")->name('customer.itemcheckout.paytm.status');

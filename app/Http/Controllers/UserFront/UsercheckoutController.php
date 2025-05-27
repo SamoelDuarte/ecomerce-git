@@ -11,6 +11,7 @@ use App\Http\Controllers\User\Payment\MercadopagoController;
 use App\Http\Controllers\User\Payment\MidtransController;
 use App\Http\Controllers\User\Payment\MollieController;
 use App\Http\Controllers\User\Payment\MyfatoorahController;
+use App\Http\Controllers\User\Payment\PagSmileController;
 use App\Http\Controllers\User\Payment\PaypalController;
 use App\Http\Controllers\User\Payment\PaystackController;
 use App\Http\Controllers\User\Payment\PaytabsController;
@@ -377,6 +378,21 @@ class UsercheckoutController extends Controller
             $paymentData = new IyzicoController();
             $title = $user->first_name . ' ' . $user->last_name;
             return $paymentData->paymentProcess($request, $amount, $success_url, $cancel_url);
+        } elseif ($request->payment_method == "Pagsmile") {
+            if ($currency->text != "BRL") {
+                session()->flash('message', __('only_pagSmile_BRL'));
+                session()->flash('alert-type', 'error');
+                return redirect()->back()->withInput($request->all());
+            }
+            $amount = $total;
+            $email = $request->billing_email ?? 'cliente@email.com'; // ou outro campo que tenha o e-mail
+            $success_url = route('customer.itemcheckout.pagSmile.success', getParam());
+            $cancel_url = route('customer.itemcheckout.pagSmile.cancel', getParam());
+            $title = 'Pagamento de pedido';
+            $description = 'Pedido de compra realizado pelo cliente';
+
+            $pagSmile = new PagSmileController();
+            return $pagSmile->paymentProcess($request, $amount, $email, $success_url, $cancel_url, $title, $description);
         } elseif (in_array($request->payment_method, $offline_payment_gateways)) {
             $request['mode'] = 'offline';
             $request['status'] = 0;

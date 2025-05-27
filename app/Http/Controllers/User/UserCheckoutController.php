@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PagSmileController;
 use App\Http\Controllers\Payment\AuthorizenetController;
 use App\Http\Controllers\Payment\FlutterWaveController;
 use App\Http\Controllers\Payment\InstamojoController;
@@ -302,7 +303,21 @@ class UserCheckoutController extends Controller
             $password = uniqid('qrcode');
             $this->store($request, $transaction_id, json_encode($transaction_details), $amount, $be, $password);
             return redirect()->route('success.page');
+        } elseif ($request->payment_method == "PagSmile") {
+          
+            if ($be->base_currency_text != "BRL") {
+                return redirect()->back()->with('error', __('only_pagSmile_BRL'))->withInput($request->all());
+            }
+
+            $amount = $request->price;
+            $email = $request->email;
+            $success_url = route('membership.pagSmile.success');
+            $cancel_url = route('membership.pagSmile.cancel');
+            $pagSmile = new PagSmileController();
+
+            return $pagSmile->paymentProcess($request, $amount, $email, $success_url, $cancel_url, $title, $description, $be);
         }
+       
     }
 
     public function store($request, $transaction_id, $transaction_details, $amount, $be, $password)

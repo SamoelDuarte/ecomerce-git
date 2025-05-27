@@ -26,7 +26,8 @@ class GatewayController extends Controller
         $data['razorpay'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'razorpay']])->first();
         $data['mercadopago'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'mercadopago']])->first();
         $data['anet'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'authorize.net']])->first();
-
+        $data['pagsmile'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'pagsmile']])->first();
+        // dd($data['pagsmile']);
         $data['yoco'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'yoco']])->first();
         $data['xendit'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'xendit']])->first();
         $data['perfect_money'] = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'perfect_money']])->first();
@@ -271,6 +272,37 @@ class GatewayController extends Controller
         Session::flash('success', __('Updated Successfully'));
         return back();
     }
+
+    public function pagsmileUpdate(Request $request)
+    {
+        $pagsmile = UserPaymentGeteway::where([
+            ['user_id', Auth::guard('web')->user()->id],
+            ['keyword', 'pagsmile']
+        ])->first();
+
+        if (empty($pagsmile)) {
+            $pagsmile = new UserPaymentGeteway();
+            $pagsmile->name = 'Pagsmile';
+            $pagsmile->keyword = 'pagsmile';
+            $pagsmile->type = 'automatic';
+            $pagsmile->user_id = Auth::guard('web')->user()->id;
+        }
+
+        $pagsmile->status = $request->status;
+
+        $information = [];
+        $information['APP ID'] = $request->app_id;
+        $information['Security Key '] = $request->security_key; // espaço mantido como no JSON
+        $information['sandbox_check'] = $request->sandbox_check;
+        $information['text'] = $request->text;
+
+        $pagsmile->information = json_encode($information);
+        $pagsmile->save();
+
+        Session::flash('success', __('Updated Successfully'));
+        return back();
+    }
+
 
     public function yocoUpdate(Request $request)
     {

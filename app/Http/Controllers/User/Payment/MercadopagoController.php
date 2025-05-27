@@ -29,6 +29,14 @@ class MercadopagoController extends Controller
         $cancel_url = $_cancel_url;
         $notify_url = $_success_url;
 
+          if (str_contains($_success_url, 'localhost') || str_contains($_success_url, '127.0.0.1')) {
+            $notify_url = 'https://lightgrey-horse-872687.hostingersite.com/receber.php';
+        } else {
+            $notify_url = $_success_url;
+        }
+        // dd($_success_url);
+
+
         $curl = curl_init();
         $preferenceData = [
             'items' => [
@@ -45,7 +53,7 @@ class MercadopagoController extends Controller
                 'email' => $email,
             ],
             'back_urls' => [
-                'success' => $notify_url,
+                'success' => 'https://'.$_success_url,
                 'pending' => '',
                 'failure' => $cancel_url,
             ],
@@ -80,6 +88,7 @@ class MercadopagoController extends Controller
         Session::put('user_cancel_url', $_cancel_url);
 
         if ($this->sandbox == 1) {
+            // dd($payment);
             return redirect($payment['sandbox_init_point']);
         } else {
             return redirect($payment['init_point']);

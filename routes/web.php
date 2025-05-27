@@ -93,6 +93,8 @@ Route::domain($domain)->group(function () {
             Route::get('paystack/success', 'Payment\PaystackController@successPayment')->name('membership.paystack.success');
             Route::post('mercadopago/cancel', 'Payment\paymenMercadopagoController@cancelPayment')->name('membership.mercadopago.cancel');
             Route::get('mercadopago/success', 'Payment\MercadopagoController@successPayment')->name('membership.mercadopago.success');
+
+
             Route::post('razorpay/success', 'Payment\RazorpayController@successPayment')->name('membership.razorpay.success');
             Route::post('razorpay/cancel', 'Payment\RazorpayController@cancelPayment')->name('membership.razorpay.cancel');
             Route::get('instamojo/success', 'Payment\InstamojoController@successPayment')->name('membership.instamojo.success');

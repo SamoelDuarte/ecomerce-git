@@ -22,6 +22,7 @@ use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\ToyyibpayController;
 use App\Http\Controllers\Payment\XenditController;
 use App\Http\Controllers\Payment\YocoController;
+use App\Http\Controllers\User\Payment\PagSmileController;
 use App\Http\Helpers\Common;
 use App\Http\Helpers\MegaMailer;
 use App\Http\Helpers\UserPermissionHelper;
@@ -69,7 +70,7 @@ class CheckoutController extends Controller
             $lastMemb = $user->memberships()->orderBy('id', 'DESC')->first();
             $activation = Carbon::parse($lastMemb->start_date);
             $expire = Carbon::parse($lastMemb->expire_date);
-            $file_name = Common::makeInvoice($request->all(), "membership", $user, $request->password, $request['price'], "Trial", $request['phone'], $be->base_currency_symbol_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title,1);
+            $file_name = Common::makeInvoice($request->all(), "membership", $user, $request->password, $request['price'], "Trial", $request['phone'], $be->base_currency_symbol_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title, 1);
 
             $mailer = new MegaMailer();
             $data = [
@@ -101,7 +102,7 @@ class CheckoutController extends Controller
             $lastMemb = $user->memberships()->orderBy('id', 'DESC')->first();
             $activation = Carbon::parse($lastMemb->start_date);
             $expire = Carbon::parse($lastMemb->expire_date);
-            $file_name = Common::makeInvoice($request->all(), "membership", $user, $request->password, $request['price'], "Free", $request['phone'], $be->base_currency_symbol_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title,1);
+            $file_name = Common::makeInvoice($request->all(), "membership", $user, $request->password, $request['price'], "Free", $request['phone'], $be->base_currency_symbol_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title, 1);
 
             $mailer = new MegaMailer();
             $data = [
@@ -128,6 +129,18 @@ class CheckoutController extends Controller
             $cancel_url = route('membership.paypal.cancel');
             $success_url = route('membership.paypal.success');
             return $paypal->paymentProcess($request, $amount, $title, $success_url, $cancel_url);
+        } elseif ($request->payment_method == "PagSmile") {
+            if ($be->base_currency_text != "BRL") {
+                return redirect()->back()->with('error', __('only_pagSmile_BRL'))->withInput($request->all());
+            }
+
+            $amount = $request->price;
+            $email = $request->email;
+            $success_url = route('membership.pagSmile.success');
+            $cancel_url = route('membership.pagSmile.cancel');
+            $pagSmile = new PagSmileController();
+
+            return $pagSmile->paymentProcess($request, $amount, $email, $success_url, $cancel_url, $title, $description, $be);
         } elseif ($request->payment_method == "Stripe") {
             $amount = round($request->price, 2);
             $stripe = new StripeController();

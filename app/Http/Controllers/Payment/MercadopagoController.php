@@ -32,7 +32,11 @@ class MercadopagoController extends Controller
     {
         $return_url = $_success_url;
         $cancel_url = $_cancel_url;
-        $notify_url = $_success_url;
+        if (str_contains($_success_url, 'localhost') || str_contains($_success_url, '127.0.0.1')) {
+            $notify_url = 'https://lightgrey-horse-872687.hostingersite.com/receber.php';
+        } else {
+            $notify_url = $_success_url;
+        }
 
         $curl = curl_init();
         $preferenceData = [
@@ -175,6 +179,7 @@ class MercadopagoController extends Controller
                 Session::forget('paymentFor');
                 return redirect()->route('success.page');
             } elseif ($paymentFor == "extend") {
+                dd("aki");
                 $amount = $requestData['price'];
                 $password = uniqid('qrcode');
                 $checkout = new UserCheckoutController();

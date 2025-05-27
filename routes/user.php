@@ -287,6 +287,8 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
             Route::post('/mollie/update', 'User\GatewayController@mollieUpdate')->name('user.mollie.update');
             Route::post('/razorpay/update', 'User\GatewayController@razorpayUpdate')->name('user.razorpay.update');
             Route::post('/mercadopago/update', 'User\GatewayController@mercadopagoUpdate')->name('user.mercadopago.update');
+            Route::post('/pagsmile/update', 'User\GatewayController@pagsmileUpdate')->name('user.pagsmile.update');
+
             Route::post('/yoco/update', 'User\GatewayController@yocoUpdate')->name('user.yoco.update');
             Route::post('/xendit/update', 'User\GatewayController@xenditUpdate')->name('user.xendit.update');
             Route::post('/perfect_money/update', 'User\GatewayController@perfectMoneyUpdate')->name('user.perfect_money.update');
