@@ -48,6 +48,7 @@ class PagSmileController extends Controller
         $order_id = $order->id;
         Common::saveOrderedItems($order->id);
 
+        dd(request()->route('domain'));
         // Payload para PagSmile
         $payload = [
             'app_id'            => $app_id,
