@@ -193,7 +193,7 @@ Route::group(['domain' => $domain, 'prefix' => $prefix, 'middleware' => ['userVi
 
         Route::get('/pagsmile/success', [PagSmileController::class, 'successPayment'])->name('customer.itemcheckout.pagSmile.success');
         Route::get('/pagsmile/cancel', [PagSmileController::class, 'cancelPayment'])->name('customer.itemcheckout.pagSmile.cancel');
-        Route::post('{username}/order/pagsmile/notify', [PagSmileController::class, 'notifyPayment'])
+        Route::post('{domain}/order/pagsmile/notify', [PagSmileController::class, 'notifyPayment'])
             ->name('customer.itemcheckout.pagSmile.notify');
 
 
