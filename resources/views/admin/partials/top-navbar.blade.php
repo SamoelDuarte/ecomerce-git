@@ -1,4 +1,4 @@
-<div class="main-header2">
+<div class="main-header">
   <!-- Logo Header -->
   <div class="logo-header" @if (request()->cookie('admin-theme') == 'dark') data-background-color="dark2" @endif>
 
