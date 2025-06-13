@@ -40,7 +40,7 @@
   }
 @endphp
 
-<div class="main-header">
+<div class="main-header2">
   <!-- Logo Header -->
   <div class="logo-header" @if (request()->cookie('user-theme') == 'dark') data-background-color="dark2" @endif>
     <a href="{{ route('front.index') }}" class="logo" target="_blank">
