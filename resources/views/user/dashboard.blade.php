@@ -11,7 +11,7 @@
 
 @section('content')
   <div class="mt-2 mb-4">
-    <h2 class="pb-2">{{ __('Welcome back') }},
+    <h2 class="pb-23">{{ __('Welcome back') }},
       {{ Auth::guard('web')->user()->shop_name ?? Auth::guard('web')->user()->username }}!</h2>
   </div>
   @if (is_null($package))
