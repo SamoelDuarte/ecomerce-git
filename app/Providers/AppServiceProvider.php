@@ -347,7 +347,7 @@ class AppServiceProvider extends ServiceProvider
                 if (session()->has('user_curr')) {
                     session()->put('user_curr', session()->get('user_curr'));
                 } else {
-                    $userCurrentCurr = UserCurrency::where('user_id', $user->id)->where('is_default', 1)->first();
+                    $userCurrentCurr = UserCurrency::where('user_id', $user->id)->first();
                     session()->put('user_curr', $userCurrentCurr->id);
                     session()->put('user_curr_sign', $userCurrentCurr->symbol);
                 }
