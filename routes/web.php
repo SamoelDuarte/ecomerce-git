@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\User;
+use App\Http\Controllers\GitWebhookController;
+
+Route::post('/git-webhook', [GitWebhookController::class, 'handle']);
 
 $domain = env('WEBSITE_HOST');
 
