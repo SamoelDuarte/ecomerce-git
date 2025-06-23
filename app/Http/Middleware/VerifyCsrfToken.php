@@ -30,6 +30,7 @@ class VerifyCsrfToken extends Middleware
         '*/paytabs/success',
         '*/iyzico/success', 
         '*order/pagsmile/notify',
+        '/git-webhook'
         
     ];
 }
