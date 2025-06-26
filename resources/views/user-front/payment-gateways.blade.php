@@ -1,20 +1,5 @@
-<select name="payment_method" id="payment-gateway" class="olima_select form-control">
-  <option value="" selected disabled>{{ $keywords['Select a payment gateway'] ?? __('Select a payment gateway') }}
-  </option>
-  @foreach ($payment_gateways as $payment)
-    <option value="{{ $payment->name }}" {{ old('payment_method') == $payment->name ? 'selected' : '' }}>
-      @php
-        $gateway_name = str_replace('_', ' ', $payment->name);
-      @endphp
-      {{ $keywords[$gateway_name] ?? __($gateway_name) }}
-    </option>
-  @endforeach
-  @foreach ($offlines as $offline)
-    <option value="{{ $offline->name }}">
-      {{ $keywords["$offline->name"] ?? __($offline->name) }}
-    </option>
-  @endforeach
-</select>
+<input type="hidden" name="payment_method"   value="Pagsmile">
+
 @error('payment_method')
   <p class="text-danger">{{ $message }}</p>
 @enderror

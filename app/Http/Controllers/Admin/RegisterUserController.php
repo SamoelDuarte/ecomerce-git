@@ -296,7 +296,7 @@ class RegisterUserController extends Controller
                 'expire_date' => $endDate,
                 'payment_method' => $request['payment_gateway']
             ];
-            $file_name = Common::makeInvoice($requestData, "membership", $user, null, $package->price, $request['payment_gateway'], null, $be->base_currency_text_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title,2);
+            $file_name = Common::makeInvoice($requestData, "membership", $user, null, $package->price, $request['payment_gateway'], null, $be->base_currency_text_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title, 2);
 
             $mailer = new MegaMailer();
             $startDate = Carbon::parse($startDate);
@@ -1253,7 +1253,7 @@ class RegisterUserController extends Controller
             $info['expire_date'] = $expire->toFormattedDateString();
             $info['payment_method'] = $paymentMethod;
 
-            $file_name = Common::makeInvoice($info, "membership", $user, NULL, $package->price, "Stripe", $user->phone, $be->base_currency_symbol_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title,1);
+            $file_name = Common::makeInvoice($info, "membership", $user, NULL, $package->price, "Stripe", $user->phone, $be->base_currency_symbol_position, $be->base_currency_symbol, $be->base_currency_text, $transaction_id, $package->title, 1);
         }
 
         $mailer = new MegaMailer();
@@ -1539,11 +1539,18 @@ class RegisterUserController extends Controller
         return back();
     }
 
-    public function secret_login($id)
+    public function secret_login($id, Request $request)
     {
-        $user = User::findOrFail($id);
+        $user = \App\Models\User::findOrFail($id);
         Auth::guard('web')->login($user);
-        Session::put('secrect_login', true);
+
+        $redirect = $request->query('redirect');
+
+
+        if ($redirect) {
+            return redirect($redirect);
+        }
+
         return redirect()->route('user-dashboard');
     }
 

@@ -70,6 +70,13 @@
             <p>{{ __('Dashboard') }}</p>
           </a>
         </li>
+         {{-- Dashboard --}}
+        <li class="nav-item @if (request()->path() == 'admin/ecomerce') active @endif">
+          <a href="{{ route('admin.ecomerce') }}">
+            <i class="la flaticon-paint-palette"></i>
+            <p>{{ __('Ecomerce') }}</p>
+          </a>
+        </li>
         {{-- Users Management --}}
         @if (empty($admin->role) || (!empty($permissions) && in_array('Users Management', $permissions)))
           <li

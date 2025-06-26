@@ -371,12 +371,12 @@
               <tbody>
                 @foreach ($order->orderitems as $key => $item)
                   @php
+                  // dd($itemLang->id);
                     $item_variant = json_decode($item->variations);
                     $variant_total = 0;
                     $item_price = $item->price;
                     $slug = App\Models\User\UserItemContent::where([
                         ['item_id', $item->item_id],
-                        ['language_id', $itemLang->id],
                     ])
                         ->pluck('slug')
                         ->first();

@@ -16,6 +16,7 @@ class ItemCategoryController extends Controller
 {
     public function index(Request $request)
     {
+       
         $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
         $lang_id = $lang->id;
         $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);

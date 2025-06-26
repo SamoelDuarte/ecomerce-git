@@ -203,7 +203,9 @@ class ItemOrderController extends Controller
 
     public function details($id)
     {
-        $itemLang = Language::where([['dashboard_default', 1], ['user_id', Auth::guard('web')->user()->id]])->select('id')->first();
+       
+        $itemLang = Language::where([['user_id', Auth::guard('web')->user()->id]])->select('id')->first();
+       
         $order = UserOrder::findOrFail($id);
         return view('user.item.order.details', compact('order', 'itemLang'));
     }
