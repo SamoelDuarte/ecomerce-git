@@ -84,4 +84,10 @@ class Language extends Model
     {
         return $this->hasOne(Heading::class, 'language_id');
     }
+
+    // Dentro do model Language
+    public function scopeDefault($query)
+    {
+        return $query->where('code', 'pt-br');
+    }
 }

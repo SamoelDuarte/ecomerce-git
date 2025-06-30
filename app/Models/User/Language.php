@@ -97,4 +97,10 @@ class Language extends Model
     {
         return $this->hasMany('App\Models\User\BlogCategory')->where('user_id', Auth::id());
     }
+
+    // Dentro do model Language
+    public function scopeDefault($query)
+    {
+        return $query->where('is_default', 1);
+    }
 }
