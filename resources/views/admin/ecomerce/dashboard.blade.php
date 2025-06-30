@@ -336,7 +336,7 @@
                                                                         <p><strong>{{ __('Expire Date') }}:</strong>
                                                                             @if (\Carbon\Carbon::parse($membership->start_date)->year == 9999)
                                                                                 -
-                                                                            @elseif ($membership->package->term == 'lifetime')
+                                                                            @elseif ($membership->package->term == 'vitalicio')
                                                                                 {{ __('Lifetime') }}
                                                                             @else
                                                                                 {{ \Carbon\Carbon::parse($membership->expire_date)->format('jS M, Y') }}
