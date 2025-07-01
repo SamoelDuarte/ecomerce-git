@@ -22,9 +22,6 @@
     @endif
     <div class="container">
       <div class="content text-start">
-        <h2>
-          {{ truncateString($product->title, 40) ?? ($keywords['Product_Details'] ?? __('Product Details')) }}
-        </h2>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-start">
             <li class="breadcrumb-item"><a
