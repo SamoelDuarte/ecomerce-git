@@ -48,44 +48,9 @@
         <div class="col-xl-3 col-lg-4 text-end">
           <div class="header-right">
             <ul class="menu ">
-              <li class="menu-item">
-
-                @if ($userCurrentLang->id)
-                  <a href="javascript:void(0)"><i class="fal fa-globe"></i>{{ convertUtf8($userCurrentLang->name) }}</a>
-                @endif
-                <ul class="setting-dropdown">
-
-                  @foreach ($userLangs as $userLang)
-                    <li>
-                      <a href="{{ route('front.user.changeUserLanguage', ['code' => $userLang->code, getParam()]) }}"
-                        class="menu-link" data-value="{{ $userLang->code }}">
-                        {{ convertUtf8($userLang->name) }}
-                      </a>
-                    </li>
-                  @endforeach
-                </ul>
-              </li>
-
               @php
                 $userCurrentCurr = \App\Models\User\UserCurrency::where('id', session()->get('user_curr'))->first();
               @endphp
-
-              <li class="menu-item">
-                @if ($userCurrentCurr->id)
-                  <a href="javascript:void(0)">{{ $userCurrentCurr->symbol }}
-                    &nbsp;{{ convertUtf8($userCurrentCurr->text) }}</a>
-                @endif
-
-                <ul class="setting-dropdown">
-                  @foreach ($userCurrency as $userCurr)
-                    <li>
-                      <a href="{{ route('front.user.changeUserCurrency', ['id' => $userCurr->id, getParam()]) }}"
-                        class="menu-link">{{ $userCurr->text }}</a>
-                    </li>
-                  @endforeach
-                </ul>
-
-              </li>
 
               <li class="menu-item">
                 <a href="#"><i class="fal fa-user"></i>{{ $keywords['My Account'] ?? __('My Account') }}</a>
