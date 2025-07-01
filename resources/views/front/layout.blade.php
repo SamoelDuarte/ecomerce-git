@@ -119,7 +119,7 @@
 
   @if (!request()->routeIs('front.index'))
     <!-- Page Title Start-->
-    <div class="page-title-area" style="background-image:url('{{ asset('assets/front/img/' . $bs->breadcrumb) }} ')">
+    <div class="page-title-area">
       <div class="container">
         <div class="row">
           <div class="col-lg-10">

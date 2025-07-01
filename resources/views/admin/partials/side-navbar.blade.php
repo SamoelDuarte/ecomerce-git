@@ -948,7 +948,7 @@ $permissions = json_decode($permissions, true);
             </div>
           </li>
 
-          <li
+          <li style="display: none;"
             class="submenu
                     @if (request()->path() == 'admin/gateways') selected
                     @elseif(request()->path() == 'admin/offline/gateways') selected @endif
