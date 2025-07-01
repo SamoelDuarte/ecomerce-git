@@ -6667,3 +6667,10 @@ figure.product-img.skeleton.skeleton-big-img {
     /* Prevent interactions while fading out */
     transition: opacity 0.3s ease-in-out;
 }
+
+
+/* CUSTOM */
+
+h4.product-title.lc-2 {
+    font-size: 15px;
+}
