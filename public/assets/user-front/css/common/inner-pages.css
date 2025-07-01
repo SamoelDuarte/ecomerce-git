@@ -48,7 +48,7 @@
 .page-title-area {
     position: relative;
     padding: 30px 0 40px;
-    border-radius: 0 0 30px 30px;
+    border-radius: 0;
     background: unset !important;
 }
 
