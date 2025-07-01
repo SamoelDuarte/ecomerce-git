@@ -71,10 +71,10 @@
           </a>
         </li>
          {{-- Dashboard --}}
-        <li class="nav-item @if (request()->path() == 'admin/ecomerce') active @endif">
-          <a href="{{ route('admin.ecomerce') }}">
+        <li class="nav-item @if (request()->path() == 'admin/ecommerce') active @endif">
+          <a href="{{ route('admin.ecommerce') }}">
             <i class="la flaticon-paint-palette"></i>
-            <p>{{ __('Ecomerce') }}</p>
+            <p>{{ __('Ecommerce') }}</p>
           </a>
         </li>
         {{-- Users Management --}}

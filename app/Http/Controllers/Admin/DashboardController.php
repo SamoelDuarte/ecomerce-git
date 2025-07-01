@@ -40,7 +40,7 @@ class DashboardController extends Controller
     return view('admin.dashboard', $data);
   }
 
-  // public function ecomerce()
+  // public function ecommerce()
   // {
   //   $user = Auth::guard('web')->user();
   //   $data['user'] = $user;
@@ -101,10 +101,10 @@ class DashboardController extends Controller
 
   //   $data['orders'] = UserOrder::where('user_id', $user->id)
   //     ->orderBy('id', 'DESC')->limit(10)->get();
-  //   return view('admin.ecomerce.dashboard', $data);
+  //   return view('admin.ecommerce.dashboard', $data);
   // }
 
-  public function ecomerce()
+  public function ecommerce()
   {
     $data = [];
 
@@ -154,7 +154,7 @@ class DashboardController extends Controller
     // Lista de usuários (opcional)
     $data['users'] = User::select('id', 'username', 'shop_name')->get();
 
-    return view('admin.ecomerce.dashboard', $data);
+    return view('admin.ecommerce.dashboard', $data);
   }
 
 
