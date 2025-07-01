@@ -214,13 +214,6 @@
                                                                                 {{ __('Details') }}
                                                                             </a>
                                                                         @endif
-
-
-                                                                        @if ($order->invoice_number)
-                                                                            <a class="dropdown-item"
-                                                                                href="{{ asset('assets/front/invoices/' . $order->invoice_number) }}"
-                                                                                target="_blank">{{ __('Invoice') }}</a>
-                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             </td>
