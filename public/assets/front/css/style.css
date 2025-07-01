@@ -5100,3 +5100,10 @@ html[dir="rtl"] .search-group-field .search-icon {
 .form-control:focus {
     border-color: var(--color-primary);
 }
+
+
+/* CUSTOM */
+
+h4.product-title.lc-2 {
+    font-size: 15px;
+}
