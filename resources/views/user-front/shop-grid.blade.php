@@ -11,9 +11,6 @@
         </figure>
 
         <div class="product-details">
-          <a href="javascript:void(0)" class="category" data-slug="{{ $item->category_slug }}">
-            <span class="product-category text-sm">{{ $item->category_name }}</span>
-          </a>
           <h4 class="product-title lc-2">
             <a
               href="{{ route('front.user.productDetails', [getParam(), 'slug' => $item->product_slug]) }}">{{ $item->title }}</a>
