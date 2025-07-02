@@ -25,15 +25,15 @@
         @csrf
         <input type="text" name="username" placeholder="{{ __('username') }}"/>
         @if ($errors->has('username'))
-          <p class="text-danger text-left">{{ $errors->first('username') }}</p>
+          <p class="text-danger text-left">Usuário</p>
         @endif
         <input type="password" name="password" placeholder="{{ __('password') }}"/>
         @if ($errors->has('password'))
-          <p class="text-danger text-left">{{ $errors->first('password') }}</p>
+          <p class="text-danger text-left">Senha</p>
         @endif
         <button type="submit">{{ __('login') }}</button>
       </form>
-      <a class="forget-link" href="{{ route('admin.forget.form') }}">{{ __('Forgot Password / Username') . '?' }}</a>
+      <a class="forget-link" href="{{ route('admin.forget.form') }}">Esqueceu a Senha / Nome de Usuário</a>
     </div>
   </div>
 
