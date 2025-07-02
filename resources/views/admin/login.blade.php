@@ -23,13 +23,13 @@
       @endif
       <form class="login-form" action="{{ route('admin.auth') }}" method="POST">
         @csrf
-        <input type="text" name="username" placeholder="{{ __('username') }}"/>
+        <input type="text" name="username" placeholder="Usuário"/>
         @if ($errors->has('username'))
-          <p class="text-danger text-left">Usuário</p>
+          <p class="text-danger text-left">{{ $errors->first('username') }}</p>
         @endif
-        <input type="password" name="password" placeholder="{{ __('password') }}"/>
+        <input type="password" name="password" placeholder="Senha"/>
         @if ($errors->has('password'))
-          <p class="text-danger text-left">Senha</p>
+          <p class="text-danger text-left">{{ $errors->first('password') }}</p>
         @endif
         <button type="submit">{{ __('login') }}</button>
       </form>
