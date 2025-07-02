@@ -24,15 +24,15 @@
       @endif
       <form class="login-form" action="{{ route('admin.forget.mail') }}" method="POST">
         @csrf
-        <input type="email" name="email" placeholder="{{ __('Enter email address') }}" />
+        <input type="email" name="email" placeholder="Digite seu e-mail" />
         @if ($errors->has('email'))
           <p class="text-danger text-left">{{ $errors->first('email') }}</p>
         @endif
-        <button type="submit">{{ __('Send Mail') }}</button>
+        <button type="submit">Enviar e-mail</button>
       </form>
 
       <p class="back-link">
-        <a href="{{ route('admin.login') }}">&lt;&lt; {{ __('Back') }}</a>
+        <a href="{{ route('admin.login') }}">&lt;&lt; Voltar</a>
       </p>
     </div>
   </div>
