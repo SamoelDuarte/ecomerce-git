@@ -1,0 +1,3455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Platform - Documentação Wiki</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #2c3e50;
+            color: white;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar h3 {
+            color: #3498db;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            display: block;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background: #3498db;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            margin-left: 300px;
+            padding: 2rem;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #34495e;
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            opacity: 0.9;
+        }
+
+        .section-content {
+            padding: 2rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h4 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-card ul {
+            list-style-type: none;
+        }
+
+        .feature-card li {
+            padding: 0.3rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .feature-card li:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .api-endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .method.get { background: #27ae60; }
+        .method.post { background: #e74c3c; }
+        .method.put { background: #f39c12; }
+        .method.delete { background: #c0392b; }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: #3498db;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin: 0.2rem;
+        }
+
+        .badge.admin { background: #e74c3c; }
+        .badge.user { background: #27ae60; }
+        .badge.public { background: #95a5a6; }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-active { background: #27ae60; }
+        .status-inactive { background: #e74c3c; }
+        .status-development { background: #f39c12; }
+
+        .toc {
+            background: #ecf0f1;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .toc h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .search-box {
+            position: sticky;
+            top: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <h2 style="color: #3498db; margin-bottom: 2rem;">📚 Documentação</h2>
+        
+        <h3>🏠 Geral</h3>
+        <ul>
+            <li><a href="#overview">Visão Geral</a></li>
+            <li><a href="#architecture">Arquitetura</a></li>
+            <li><a href="#installation">Instalação</a></li>
+            <li><a href="#configuration">Configuração</a></li>
+        </ul>
+
+        <h3>👑 Funcionalidades Admin</h3>
+        <ul>
+            <li><a href="#admin-dashboard">Dashboard</a></li>
+            <li><a href="#admin-users">Gestão de Usuários</a></li>
+            <li><a href="#admin-categories">Gestão de Categorias</a></li>
+            <li><a href="#admin-packages">Gestão de Pacotes</a></li>
+            <li><a href="#admin-payments">Pagamentos</a></li>
+            <li><a href="#admin-settings">Configurações</a></li>
+        </ul>
+
+        <h3>👤 Funcionalidades Usuário</h3>
+        <ul>
+            <li><a href="#user-dashboard">Dashboard do Usuário</a></li>
+            <li><a href="#user-shop">Gestão da Loja</a></li>
+            <li><a href="#user-products">Gestão de Produtos</a></li>
+            <li><a href="#user-orders">Pedidos</a></li>
+            <li><a href="#user-profile">Perfil</a></li>
+        </ul>
+
+        <h3>🔧 Desenvolvimento</h3>
+        <ul>
+            <li><a href="#api-docs">API Documentation</a></li>
+            <li><a href="#database">Estrutura do Banco</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+
+        <h3>🛒 E-commerce Frontend</h3>
+        <ul>
+            <li><a href="#frontend-overview">Visão Geral</a></li>
+            <li><a href="#frontend-catalog">Catálogo de Produtos</a></li>
+            <li><a href="#frontend-checkout">Checkout</a></li>
+            <li><a href="#frontend-customer">Área do Cliente</a></li>
+        </ul>
+
+        <h3>💳 Pagamentos</h3>
+        <ul>
+            <li><a href="#payment-gateways">Gateways</a></li>
+            <li><a href="#payment-config">Configuração</a></li>
+            <li><a href="#payment-logs">Logs e Relatórios</a></li>
+        </ul>
+
+        <h3>🎨 Personalização</h3>
+        <ul>
+            <li><a href="#themes">Temas</a></li>
+            <li><a href="#customization">Customização</a></li>
+            <li><a href="#seo">SEO</a></li>
+        </ul>
+
+        <h3>📊 Analytics & Blog</h3>
+        <ul>
+            <li><a href="#blog-content">Blog e Conteúdo</a></li>
+            <li><a href="#analytics-reports">Analytics</a></li>
+            <li><a href="#email-marketing">Email Marketing</a></li>
+        </ul>
+
+        <h3>⚙️ Configurações</h3>
+        <ul>
+            <li><a href="#advanced-settings">Configurações Avançadas</a></li>
+            <li><a href="#security">Segurança</a></li>
+            <li><a href="#backup">Backup</a></li>
+        </ul>
+
+        <h3>❓ Suporte</h3>
+        <ul>
+            <li><a href="#faq-support">FAQ e Suporte</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+            <li><a href="#best-practices">Melhores Práticas</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Pesquisar na documentação..." onkeyup="searchContent()">
+        </div>
+
+        <header>
+            <h1>🛒 E-commerce Platform</h1>
+            <p>Documentação Completa do Sistema - Wiki Interativa</p>
+        </header>
+
+        <!-- Visão Geral -->
+        <section class="section" id="overview">
+            <div class="section-header">
+                <h2>🏠 Visão Geral do Sistema</h2>
+                <p>Plataforma completa de e-commerce multi-tenant com gestão avançada</p>
+            </div>
+            <div class="section-content">
+                <div class="toc">
+                    <h3>📋 Índice Rápido</h3>
+                    <ul>
+                        <li><a href="#features-overview">Funcionalidades Principais</a></li>
+                        <li><a href="#tech-stack">Stack Tecnológica</a></li>
+                        <li><a href="#user-types">Tipos de Usuário</a></li>
+                    </ul>
+                </div>
+
+                <div id="features-overview">
+                    <h3>🎯 Funcionalidades Principais</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>👑 Painel Administrativo</h4>
+                            <ul>
+                                <li>Gestão completa de usuários</li>
+                                <li>Sistema de categorias</li>
+                                <li>Gestão de pacotes/planos</li>
+                                <li>Dashboard com métricas</li>
+                                <li>Configurações globais</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>🏪 Sistema Multi-Tenant</h4>
+                            <ul>
+                                <li>Lojas independentes por usuário</li>
+                                <li>Domínios personalizados</li>
+                                <li>Temas customizáveis</li>
+                                <li>Gestão de produtos</li>
+                                <li>Sistema de pedidos</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>💳 Sistema de Pagamentos</h4>
+                            <ul>
+                                <li>Múltiplos gateways</li>
+                                <li>Stripe, PayPal, etc.</li>
+                                <li>Gestão de assinaturas</li>
+                                <li>Faturamento automático</li>
+                                <li>Relatórios financeiros</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tech-stack" style="margin-top: 2rem;">
+                    <h3>🔧 Stack Tecnológica</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>Backend</h4>
+                            <span class="badge">Laravel 9+</span>
+                            <span class="badge">PHP 8.0+</span>
+                            <span class="badge">MySQL</span>
+                            <span class="badge">Redis</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Frontend</h4>
+                            <span class="badge">Blade Templates</span>
+                            <span class="badge">Bootstrap</span>
+                            <span class="badge">jQuery</span>
+                            <span class="badge">Chart.js</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gestão de Usuários -->
+        <section class="section" id="admin-users">
+            <div class="section-header">
+                <h2>👤 Gestão de Usuários</h2>
+                <p>Sistema completo de gerenciamento de usuários registrados</p>
+            </div>
+            <div class="section-content">
+                <h3>📊 Funcionalidades Implementadas</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/register-users</strong>
+                    <p>Lista todos os usuários registrados com informações detalhadas incluindo categorias</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><span class="status-indicator status-active"></span>Listagem de Usuários</h4>
+                        <ul>
+                            <li>Username e Email</li>
+                            <li><strong>Categoria do Negócio</strong> (Nova funcionalidade)</li>
+                            <li>Status de Featured</li>
+                            <li>Preview Template</li>
+                            <li>Status do Email</li>
+                            <li>Status da Conta</li>
+                            <li>Ações (Editar, Deletar, etc.)</li>
+                        </ul>
+                    </div>                        <div class="feature-card">
+                            <h4><span class="status-indicator status-active"></span>Gestão de Categorias</h4>
+                            <ul>
+                                <li>Criação de categorias de negócio</li>
+                                <li>Multi-idioma support</li>
+                                <li>Relacionamento com usuários</li>
+                                <li>Interface de gerenciamento</li>
+                                <li>Diagnóstico automático de dados</li>
+                                <li>Correção de relacionamentos</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3>🆕 Sistema de Categorias de Usuários</h3>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>✅ Recentemente Implementado:</strong> Sistema completo de categorização de usuários com correção de relacionamentos.
+                    </div>
+
+                    <h4>📋 Estrutura da Tabela user_categories</h4>
+                    <div class="code-block">
+-- Estrutura implementada:
+user_categories (
+    id              - Chave primária
+    unique_id       - ID único para relacionamento
+    language_id     - Suporte multi-idioma  
+    name            - Nome da categoria
+    slug            - URL amigável
+    status          - Status ativo/inativo
+    serial_number   - Ordem de exibição
+    created_at      - Data de criação
+    updated_at      - Data de atualização
+)
+
+-- Relacionamento corrigido:
+users.category_id = user_categories.unique_id
+                    </div>
+
+                    <h4>🔧 Comando de Diagnóstico</h4>
+                    <p>Foi criado um comando artisan para diagnóstico e correção automática:</p>
+                    <div class="code-block">
+# Executar diagnóstico completo
+php artisan fix:user-categories
+
+# O comando verifica:
+# - Estrutura da tabela user_categories
+# - Relacionamentos entre users e categorias
+# - Dados inconsistentes
+# - Sugere correções automáticas
+                    </div>
+
+                    <h4>📊 Implementação no Controller</h4>
+                    <div class="code-block">
+// RegisterUserController@index() - Correção implementada
+$data['users'] = User::select(
+    'users.*',
+    'user_categories.name as category_name'
+)
+->leftJoin('user_categories', function($join) {
+    $join->on('users.category_id', '=', 'user_categories.unique_id')
+         ->where('user_categories.language_id', '=', $language_id);
+})
+->where('users.id', '!=', 0)
+->orderBy('users.id', 'DESC')
+->get();
+                    </div>
+
+                    <h4>🎨 Visualização na Interface</h4>
+                    <p>A coluna "Category" agora é exibida corretamente na listagem de usuários:</p>
+                    <ul>
+                        <li><strong>Nome da Categoria:</strong> Exibe o nome real da categoria</li>
+                        <li><strong>Fallback:</strong> Mostra "N/A" apenas para usuários sem categoria</li>
+                        <li><strong>Multi-idioma:</strong> Respeita o idioma configurado</li>
+                        <li><strong>Performance:</strong> JOIN otimizado para melhor performance</li>
+                    </ul>
+
+                    <h4>🛠️ Scripts de Automação</h4>
+                    <p>Criados scripts para facilitar testes e manutenção:</p>
+                    <div class="code-block">
+# test-categories.bat - Script automatizado
+# Executa sequencialmente:
+# 1. Migration da tabela user_categories
+# 2. Seeder com dados de exemplo
+# 3. Comando de diagnóstico
+# 4. Verificação final
+
+@echo off
+echo === Testando Sistema de Categorias ===
+php artisan migrate --path=database/migrations/2025_07_09_000001_create_user_categories_table.php
+php artisan db:seed --class=UserCategorySeeder  
+php artisan fix:user-categories
+echo === Teste Concluído ===
+pause
+                    </div>
+
+                    <h4>📈 Benefícios da Implementação</h4>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>🔍 Melhor Organização</h4>
+                            <ul>
+                                <li>Usuários categorizados por tipo de negócio</li>
+                                <li>Filtros e buscas mais eficientes</li>
+                                <li>Relatórios segmentados</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4><span class="status-indicator status-active"></span>Ações de Usuário</h4>
+                        <ul>
+                            <li>Criar novo usuário</li>
+                            <li>Editar informações</li>
+                            <li>Alterar senha</li>
+                            <li>Gerenciar status</li>
+                            <li>Atribuir categorias</li>
+                            <li>Login secreto</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🔧 Implementação Técnica</h3>
+                <div class="code-block">
+// Controller: RegisterUserController@index()
+// Relacionamento otimizado com categorias
+$users = User::when($term, function ($query, $term) {
+    $query->where('username', 'like', '%' . $term . '%')
+          ->orWhere('email', 'like', '%' . $term . '%');
+})->leftJoin('user_categories', function($join) use ($language) {
+    $join->on('users.category_id', '=', 'user_categories.unique_id')
+         ->where('user_categories.language_id', '=', $language->id);
+})
+->select('users.*', 'user_categories.name as category_name')
+->orderBy('users.id', 'DESC')->paginate(10);
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/store</strong>
+                    <p>Cria um novo usuário com categoria selecionada</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/register-users/categories</strong>
+                    <p>Interface para gerenciar categorias de usuários</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Arquitetura -->
+        <section class="section" id="architecture">
+            <div class="section-header">
+                <h2>🏗️ Arquitetura do Sistema</h2>
+                <p>Estrutura e organização do projeto</p>
+            </div>
+            <div class="section-content">
+                <h3>📁 Estrutura de Diretórios</h3>
+                <div class="code-block">
+ecomerce-git/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/           # Controllers do admin
+│   │   │   │   └── RegisterUserController.php
+│   │   │   └── User/            # Controllers do usuário
+│   │   └── Middleware/          # Middlewares customizados
+│   ├── Models/
+│   │   ├── Admin/               # Models do admin
+│   │   │   └── UserCategory.php
+│   │   └── User/                # Models específicos do usuário
+│   └── Console/Commands/        # Comandos artisan customizados
+├── database/
+│   ├── migrations/              # Migrações do banco
+│   └── seeders/                 # Seeders para dados iniciais
+├── resources/
+│   ├── views/
+│   │   ├── admin/               # Views do admin
+│   │   │   └── register_user/
+│   │   └── user/                # Views do usuário
+│   └── lang/                    # Arquivos de tradução
+└── routes/
+    ├── admin.php                # Rotas do admin
+    ├── user.php                 # Rotas do usuário
+    └── web.php                  # Rotas públicas
+                </div>
+
+                <h3>🔄 Fluxo de Dados</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>1. Request</h4>
+                        <ul>
+                            <li>Router (admin.php, user.php)</li>
+                            <li>Middleware de autenticação</li>
+                            <li>Controller específico</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>2. Processamento</h4>
+                        <ul>
+                            <li>Validação de dados</li>
+                            <li>Lógica de negócio</li>
+                            <li>Interação com Models</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>3. Response</h4>
+                        <ul>
+                            <li>Renderização de Views</li>
+                            <li>JSON para APIs</li>
+                            <li>Redirects com mensagens</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Documentation -->
+        <section class="section" id="api-docs">
+            <div class="section-header">
+                <h2>📡 Documentação da API</h2>
+                <p>Endpoints e estruturas de dados</p>
+            </div>
+            <div class="section-content">
+                <h3>🔐 Endpoints Admin - Usuários</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/register-users</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Lista usuários registrados com categorias</p>
+                    <p><strong>Parâmetros:</strong></p>
+                    <ul>
+                        <li><code>term</code> (opcional) - Termo de busca por username/email</li>
+                        <li><code>page</code> (opcional) - Página da paginação</li>
+                    </ul>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/store</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Cria novo usuário</p>
+                    <p><strong>Campos obrigatórios:</strong></p>
+                    <div class="code-block">
+{
+    "username": "string (único)",
+    "email": "string (email válido)",
+    "password": "string",
+    "password_confirmation": "string",
+    "shop_name": "string (máx: 255)",
+    "category": "string (unique_id da categoria)",
+    "package_id": "integer",
+    "payment_gateway": "string",
+    "online_status": "boolean"
+}
+                    </div>
+                </div>
+
+                <h3>📂 Endpoints - Categorias</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/register-users/categories</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Lista categorias de usuários disponíveis</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/categories/store</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Cria nova categoria</p>
+                    <div class="code-block">
+{
+    "language_id": "integer",
+    "name": "string",
+    "slug": "string (opcional)",
+    "status": "integer (0|1)",
+    "serial_number": "integer"
+}
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/categories/update</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Atualiza categoria existente</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/categories/delete</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Remove categoria</p>
+                    <div class="code-block">
+{
+    "id": "integer (ID da categoria)"
+}
+                    </div>
+                </div>
+
+                <h3>👤 Endpoints - Gestão de Usuários</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/ban</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Banir/desbanir usuário</p>
+                    <div class="code-block">
+{
+    "user_id": "integer",
+    "is_banned": "boolean"
+}
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/featured</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Marcar usuário como featured</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/register-users/details/{id}</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Visualizar detalhes completos do usuário</p>
+                </div>
+
+                <h3>🛠️ Comandos Artisan</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔧 fix:user-categories</h4>
+                        <p><strong>Descrição:</strong> Comando de diagnóstico e correção automática do sistema de categorias</p>
+                        <div class="code-block">
+# Executar comando
+php artisan fix:user-categories
+
+# Funcionalidades:
+# - Verifica estrutura da tabela
+# - Analisa relacionamentos
+# - Identifica inconsistências
+# - Sugere correções
+# - Relatório detalhado
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>📊 db:seed UserCategorySeeder</h4>
+                        <p><strong>Descrição:</strong> Popula categorias de exemplo</p>
+                        <div class="code-block">
+# Executar seeder
+php artisan db:seed --class=UserCategorySeeder
+
+# Cria categorias padrão:
+# - Restaurantes
+# - Lojas de Roupas  
+# - Serviços Gerais
+# - Eletrônicos
+# - Casa e Jardim
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🔄 Fluxos de Trabalho</h3>
+                
+                <h4>👤 Criação de Usuário</h4>
+                <div class="code-block">
+1. Admin acessa /admin/register-users
+2. Clica em "Add User" 
+3. Preenche formulário com:
+   - Dados básicos (username, email, senha)
+   - Informações da loja (nome, categoria)
+   - Seleção de pacote
+   - Gateway de pagamento
+4. Sistema valida dados
+5. Cria usuário com categoria associada
+6. Redireciona para listagem com sucesso
+                </div>
+
+                <h4>🏷️ Gestão de Categorias</h4>
+                <div class="code-block">
+1. Admin acessa /admin/register-users/categories
+2. Visualiza categorias existentes
+3. Para criar nova:
+   - Clica "Add Category"
+   - Define nome e configurações
+   - Seleciona idioma
+   - Define ordem de exibição
+4. Para editar:
+   - Clica no ícone de edição
+   - Modifica informações
+   - Salva alterações
+5. Sistema atualiza automaticamente listagem de usuários
+                </div>
+
+                <h4>🔍 Diagnóstico de Problemas</h4>
+                <div class="code-block">
+1. Identificar problema (ex: "N/A" na coluna Category)
+2. Executar: php artisan fix:user-categories
+3. Analisar relatório gerado
+4. Seguir recomendações do comando
+5. Verificar correção na interface admin
+6. Se necessário, executar seeders:
+   php artisan db:seed --class=UserCategorySeeder
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/register-users/categories</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Interface de gestão de categorias</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/admin/register-users/categories/store</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Cria nova categoria</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Database -->
+        <section class="section" id="database">
+            <div class="section-header">
+                <h2>🗄️ Estrutura da Base de Dados</h2>
+                <p>Tabelas e relacionamentos principais</p>
+            </div>
+            <div class="section-content">
+                <h3>📊 Tabelas Principais</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>users</h4>
+                        <ul>
+                            <li><code>id</code> - Primary Key</li>
+                            <li><code>username</code> - Nome de usuário único</li>
+                            <li><code>email</code> - Email único</li>
+                            <li><code>category_id</code> - FK para user_categories</li>
+                            <li><code>shop_name</code> - Nome da loja</li>
+                            <li><code>status</code> - Status da conta</li>
+                            <li><code>featured</code> - Usuário em destaque</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>user_categories</h4>
+                        <ul>
+                            <li><code>id</code> - Primary Key</li>
+                            <li><code>unique_id</code> - ID único para agrupamento</li>
+                            <li><code>language_id</code> - FK para languages</li>
+                            <li><code>name</code> - Nome da categoria</li>
+                            <li><code>slug</code> - URL amigável</li>
+                            <li><code>status</code> - Ativo/Inativo</li>
+                            <li><code>serial_number</code> - Ordem</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>packages</h4>
+                        <ul>
+                            <li><code>id</code> - Primary Key</li>
+                            <li><code>name</code> - Nome do pacote</li>
+                            <li><code>price</code> - Preço</li>
+                            <li><code>features</code> - JSON com recursos</li>
+                            <li><code>status</code> - Ativo/Inativo</li>
+                            <li><code>is_trial</code> - Período de teste</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>memberships</h4>
+                        <ul>
+                            <li><code>id</code> - Primary Key</li>
+                            <li><code>user_id</code> - FK para users</li>
+                            <li><code>package_id</code> - FK para packages</li>
+                            <li><code>start_date</code> - Data início</li>
+                            <li><code>expire_date</code> - Data expiração</li>
+                            <li><code>status</code> - Status da assinatura</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🔗 Relacionamentos Importantes</h3>
+                
+                <h4>👤 Usuários e Categorias (Relacionamento Corrigido)</h4>
+                <div class="code-block">
+-- Relacionamento principal (1:N)
+users.category_id = user_categories.unique_id
+
+-- Query otimizada implementada:
+SELECT users.*, user_categories.name as category_name
+FROM users 
+LEFT JOIN user_categories ON (
+    users.category_id = user_categories.unique_id 
+    AND user_categories.language_id = ?
+)
+WHERE users.id != 0 
+ORDER BY users.id DESC;
+                </div>
+
+                <h4>💼 Usuários e Pacotes</h4>
+                <div class="code-block">
+-- Relacionamento via tabela memberships
+users (1) ←→ (N) memberships (N) ←→ (1) packages
+
+-- Para obter pacote atual do usuário:
+SELECT p.* FROM packages p
+JOIN memberships m ON p.id = m.package_id  
+WHERE m.user_id = ? AND m.status = 'active'
+AND m.expire_date > NOW()
+ORDER BY m.id DESC LIMIT 1;
+                </div>
+
+                <h4>🌐 Multi-idioma</h4>
+                <div class="code-block">
+-- Categorias suportam múltiplos idiomas
+user_categories.unique_id = Agrupa traduções
+user_categories.language_id = Define o idioma
+
+-- Exemplo: Categoria "Restaurantes"
+unique_id=1, language_id=1 → "Restaurants" (EN)  
+unique_id=1, language_id=2 → "Restaurantes" (PT)
+unique_id=1, language_id=3 → "Restaurantes" (ES)
+                </div>
+
+                <h3>📋 Migrations Implementadas</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">FILE</span>
+                    <strong>2025_07_09_000001_create_user_categories_table.php</strong>
+                    <p><strong>Descrição:</strong> Migration para criação da tabela user_categories</p>
+                    <div class="code-block">
+Schema::create('user_categories', function (Blueprint $table) {
+    $table->id();
+    $table->string('unique_id')->index();
+    $table->unsignedBigInteger('language_id');
+    $table->string('name');
+    $table->string('slug')->nullable();
+    $table->tinyInteger('status')->default(1);
+    $table->integer('serial_number')->default(0);
+    $table->timestamps();
+    
+    // Índices para otimização
+    $table->index(['unique_id', 'language_id']);
+    $table->index('status');
+});
+                    </div>
+                </div>
+
+                <h3>🌱 Seeders Disponíveis</h3>
+                
+                <div class="feature-card">
+                    <h4>UserCategorySeeder</h4>
+                    <p><strong>Localização:</strong> <code>database/seeders/UserCategorySeeder.php</code></p>
+                    <p><strong>Função:</strong> Cria categorias padrão para facilitar testes</p>
+                    <div class="code-block">
+# Executar seeder
+php artisan db:seed --class=UserCategorySeeder
+
+# Categorias criadas:
+1. Restaurantes e Alimentação
+2. Lojas de Roupas e Moda  
+3. Serviços Gerais
+4. Eletrônicos e Tecnologia
+5. Casa e Jardim
+6. Saúde e Beleza
+                    </div>
+                </div>
+
+                <h3>🔍 Queries de Diagnóstico</h3>
+                
+                <div class="code-block">
+-- Verificar usuários sem categoria
+SELECT COUNT(*) as usuarios_sem_categoria
+FROM users 
+WHERE category_id IS NULL OR category_id = '';
+
+-- Verificar relacionamentos quebrados  
+SELECT COUNT(*) as relacionamentos_quebrados
+FROM users u
+LEFT JOIN user_categories uc ON u.category_id = uc.unique_id
+WHERE u.category_id IS NOT NULL 
+AND u.category_id != ''
+AND uc.unique_id IS NULL;
+
+-- Listar categorias disponíveis
+SELECT unique_id, name, COUNT(*) as total_usuarios
+FROM user_categories uc
+LEFT JOIN users u ON u.category_id = uc.unique_id  
+GROUP BY unique_id, name;
+                </div>
+
+                <div class="alert" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0;">
+                    <strong>⚠️ Importante:</strong> O comando <code>php artisan fix:user-categories</code> executa essas queries automaticamente e gera um relatório detalhado sobre a integridade dos dados.
+                </div>
+
+                    <div class="feature-card">
+                        <h4>languages</h4>
+                        <ul>
+                            <li><code>id</code> - Primary Key</li>
+                            <li><code>name</code> - Nome do idioma</li>
+                            <li><code>code</code> - Código ISO</li>
+                            <li><code>is_default</code> - Idioma padrão</li>
+                            <li><code>rtl</code> - Direção da escrita</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🔗 Relacionamentos</h3>
+                <div class="code-block">
+-- Relacionamento Users -> Categories
+users.category_id = user_categories.unique_id
+AND user_categories.language_id = [idioma_atual]
+
+-- Relacionamento Categories -> Languages  
+user_categories.language_id = languages.id
+
+-- Exemplo de Query
+SELECT u.username, u.email, uc.name as category_name
+FROM users u
+LEFT JOIN user_categories uc ON u.category_id = uc.unique_id
+WHERE uc.language_id = 1 AND uc.status = 1;
+                </div>
+            </div>
+        </section>
+
+        <!-- Instalação -->
+        <section class="section" id="installation">
+            <div class="section-header">
+                <h2>⚙️ Guia de Instalação</h2>
+                <p>Configuração completa do ambiente</p>
+            </div>
+            <div class="section-content">
+                <h3>📋 Pré-requisitos</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Software Necessário</h4>
+                        <ul>
+                            <li>PHP 8.0+ com extensões</li>
+                            <li>Composer</li>
+                            <li>Node.js 14+</li>
+                            <li>MySQL 5.7+ ou MariaDB</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Extensões PHP</h4>
+                        <ul>
+                            <li>pdo_mysql</li>
+                            <li>mbstring</li>
+                            <li>openssl</li>
+                            <li>gd</li>
+                            <li>curl</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🚀 Instalação Rápida</h3>
+                <div class="code-block">
+# 1. Clone do repositório
+git clone [repositorio]
+cd ecomerce-git
+
+# 2. Instalação de dependências
+composer install
+npm install
+
+# 3. Configuração do ambiente
+cp .env.example .env
+php artisan key:generate
+
+# 4. Configuração do banco
+php artisan migrate
+php artisan db:seed --class=UserCategorySeeder
+
+# 5. Configuração de storage
+php artisan storage:link
+
+# 6. Compilação de assets
+npm run build
+
+# 7. Iniciar servidor
+php artisan serve
+                </div>
+
+                <h3>🔧 Scripts Automatizados</h3>
+                <p>Para facilitar a configuração, utilize os scripts criados:</p>
+                <ul>
+                    <li><code>setup-local.bat</code> - Configuração inicial completa</li>
+                    <li><code>setup-database.bat</code> - Configuração do banco interativa</li>
+                    <li><code>start-dev.bat</code> - Iniciar servidor de desenvolvimento</li>
+                    <li><code>test-categories.bat</code> - Testar funcionalidade de categorias</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section class="section" id="troubleshooting">
+            <div class="section-header">
+                <h2>🔧 Troubleshooting</h2>
+                <p>Soluções para problemas comuns</p>
+            </div>
+            <div class="section-content">
+                <h3>❌ Problemas Frequentes e Soluções</h3>
+
+                <div class="api-endpoint">
+                    <span class="method get">PROBLEMA</span>
+                    <strong>Coluna "Category" exibe "N/A" para todos os usuários</strong>
+                    <div class="alert" style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 1rem; margin: 1rem 0;">
+                        <strong>Causa:</strong> Relacionamento entre tabelas users e user_categories não está funcionando.
+                    </div>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>✅ Solução:</strong>
+                        <div class="code-block">
+# 1. Executar comando de diagnóstico
+php artisan fix:user-categories
+
+# 2. Se necessário, recriar tabela
+php artisan migrate:refresh --path=database/migrations/2025_07_09_000001_create_user_categories_table.php
+
+# 3. Popular com dados de exemplo  
+php artisan db:seed --class=UserCategorySeeder
+
+# 4. Verificar correção
+php artisan fix:user-categories
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">PROBLEMA</span>
+                    <strong>Erro 500 ao acessar listagem de usuários</strong>
+                    <div class="alert" style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 1rem; margin: 1rem 0;">
+                        <strong>Causa:</strong> Possível problema na query JOIN ou tabela inexistente.
+                    </div>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>✅ Solução:</strong>
+                        <div class="code-block">
+# 1. Verificar logs do Laravel
+tail -f storage/logs/laravel.log
+
+# 2. Verificar se tabela existe
+mysql -u [user] -p [database]
+SHOW TABLES LIKE 'user_categories';
+
+# 3. Se não existir, executar migration
+php artisan migrate --path=database/migrations/2025_07_09_000001_create_user_categories_table.php
+
+# 4. Limpar cache
+php artisan config:clear
+php artisan view:clear
+php artisan route:clear
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">PROBLEMA</span>
+                    <strong>Formulário de criação não mostra categorias</strong>
+                    <div class="alert" style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 1rem; margin: 1rem 0;">
+                        <strong>Causa:</strong> Tabela user_categories vazia ou sem dados para o idioma atual.
+                    </div>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>✅ Solução:</strong>
+                        <div class="code-block">
+# 1. Verificar se existem categorias
+SELECT * FROM user_categories WHERE language_id = 1;
+
+# 2. Se vazio, executar seeder
+php artisan db:seed --class=UserCategorySeeder
+
+# 3. Verificar controller está carregando categorias
+# Em RegisterUserController@create()
+# Deve ter: $data['categories'] = UserCategory::where('language_id', $language_id)->get();
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🐛 Debugging e Logs</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📋 Logs do Sistema</h4>
+                        <ul>
+                            <li><strong>Laravel:</strong> <code>storage/logs/laravel.log</code></li>
+                            <li><strong>Nginx:</strong> <code>/var/log/nginx/error.log</code></li>
+                            <li><strong>Apache:</strong> <code>/var/log/apache2/error.log</code></li>
+                            <li><strong>MySQL:</strong> <code>/var/log/mysql/error.log</code></li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🔧 Comandos Úteis</h4>
+                        <div class="code-block">
+# Verificar status do sistema
+php artisan about
+
+# Limpar caches
+php artisan cache:clear
+php artisan config:clear  
+php artisan view:clear
+php artisan route:clear
+
+# Recriar autoload
+composer dump-autoload
+
+# Verificar permissões
+ls -la storage/
+ls -la bootstrap/cache/
+                        </div>
+                    </div>
+                </div>
+
+                <h3>⚠️ Problemas de Performance</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">OTIMIZAÇÃO</span>
+                    <strong>Listagem de usuários lenta</strong>
+                    <div class="alert" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0;">
+                        <strong>Soluções implementadas:</strong>
+                        <ul>
+                            <li>✅ LEFT JOIN otimizado com condições específicas</li>
+                            <li>✅ Índices criados em user_categories</li>
+                            <li>✅ Query limitada com paginação</li>
+                            <li>✅ Cache de resultados para categorias</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📊 Monitoramento</h3>
+                
+                <div class="code-block">
+# Monitorar queries lentas no MySQL
+SET GLOBAL slow_query_log = 'ON';
+SET GLOBAL long_query_time = 2;
+
+# Verificar queries em tempo real
+SHOW PROCESSLIST;
+
+# Analisar uso de índices
+EXPLAIN SELECT users.*, user_categories.name as category_name
+FROM users 
+LEFT JOIN user_categories ON users.category_id = user_categories.unique_id;
+                </div>
+
+                <h3>🛡️ Melhores Práticas</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔒 Segurança</h4>
+                        <ul>
+                            <li>Sempre validar dados de entrada</li>
+                            <li>Usar prepared statements</li>
+                            <li>Implementar rate limiting</li>
+                            <li>Manter Laravel atualizado</li>
+                            <li>Configurar HTTPS em produção</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>⚡ Performance</h4>
+                        <ul>
+                            <li>Usar eager loading para relacionamentos</li>
+                            <li>Implementar cache Redis</li>
+                            <li>Otimizar queries com índices</li>
+                            <li>Comprimir assets (CSS/JS)</li>
+                            <li>Usar CDN para arquivos estáticos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🔧 Manutenção</h4>
+                        <ul>
+                            <li>Backup regular do banco</li>
+                            <li>Monitorar logs de erro</li>
+                            <li>Testar funcionalidades críticas</li>
+                            <li>Documentar alterações</li>
+                            <li>Versionamento com Git</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📈 Escalabilidade</h4>
+                        <ul>
+                            <li>Separar leitura/escrita do DB</li>
+                            <li>Implementar queue workers</li>
+                            <li>Usar load balancer</li>
+                            <li>Configurar auto-scaling</li>
+                            <li>Monitorar métricas de sistema</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert" style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 1rem; margin: 1rem 0;">
+                    <strong>💡 Dica:</strong> O comando <code>php artisan fix:user-categories</code> deve ser executado após qualquer alteração na estrutura de categorias para garantir a integridade dos dados.
+                </div>
+
+                <h3>📞 Suporte</h3>
+                <p>Para problemas não cobertos nesta documentação:</p>
+                <ol>
+                    <li>Verifique os logs do sistema</li>
+                    <li>Execute o comando de diagnóstico</li>
+                    <li>Consulte a documentação do Laravel</li>
+                    <li>Verifique issues similares no GitHub</li>
+                    <li>Entre em contato com a equipe de desenvolvimento</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Painel do Usuário -->
+        <section class="section" id="user-dashboard">
+            <div class="section-header">
+                <h2>👤 Painel do Usuário (Proprietário da Loja)</h2>
+                <p>Sistema completo de gestão de loja multi-tenant</p>
+            </div>
+            <div class="section-content">
+                <h3>🏪 Dashboard Principal</h3>
+                <p>O dashboard do usuário oferece uma visão completa da performance da loja:</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📊 Métricas Principais</h4>
+                        <ul>
+                            <li>Total de produtos cadastrados</li>
+                            <li>Pedidos pendentes/processados</li>
+                            <li>Receita mensal/anual</li>
+                            <li>Visitantes únicos</li>
+                            <li>Taxa de conversão</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📈 Gráficos e Relatórios</h4>
+                        <ul>
+                            <li>Vendas por período</li>
+                            <li>Produtos mais vendidos</li>
+                            <li>Origem do tráfego</li>
+                            <li>Análise de comportamento</li>
+                            <li>Relatórios financeiros</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>⚡ Ações Rápidas</h4>
+                        <ul>
+                            <li>Adicionar novo produto</li>
+                            <li>Processar pedidos pendentes</li>
+                            <li>Atualizar informações da loja</li>
+                            <li>Configurar promoções</li>
+                            <li>Gerenciar cupons</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🛍️ Gestão de Produtos</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/shop-management/products</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Interface principal de gestão de produtos</p>
+                </div>
+
+                <h4>📦 Funcionalidades de Produtos</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>➕ Criação de Produtos</h4>
+                        <ul>
+                            <li>Informações básicas (nome, descrição, preço)</li>
+                            <li>Categorias e subcategorias</li>
+                            <li>Variações (tamanho, cor, modelo)</li>
+                            <li>Galeria de imagens</li>
+                            <li>Configurações de estoque</li>
+                            <li>SEO (meta title, description)</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🏷️ Categorização</h4>
+                        <ul>
+                            <li>Categorias ilimitadas</li>
+                            <li>Subcategorias aninhadas</li>
+                            <li>Imagens para categorias</li>
+                            <li>Ordenação personalizada</li>
+                            <li>Status ativo/inativo</li>
+                            <li>SEO por categoria</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📋 Gestão de Estoque</h4>
+                        <ul>
+                            <li>Controle de quantidades</li>
+                            <li>Alertas de estoque baixo</li>
+                            <li>Histórico de movimentações</li>
+                            <li>Produtos em falta</li>
+                            <li>Previsão de reposição</li>
+                            <li>Relatórios de giro</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📋 Gestão de Pedidos</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/orders/all</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Lista todos os pedidos da loja</p>
+                </div>
+
+                <h4>📊 Status de Pedidos</h4>
+                <div class="code-block">
+Fluxo padrão de pedidos:
+1. 🆕 Pending (Pendente) - Aguardando processamento
+2. ⚡ Processing (Processando) - Em preparação  
+3. 📦 Shipped (Enviado) - A caminho do cliente
+4. ✅ Delivered (Entregue) - Pedido finalizado
+5. ❌ Cancelled (Cancelado) - Pedido cancelado
+6. 🔄 Returned (Devolvido) - Produto devolvido
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📋 Listagem de Pedidos</h4>
+                        <ul>
+                            <li>Filtros por status</li>
+                            <li>Busca por número/cliente</li>
+                            <li>Ordenação por data</li>
+                            <li>Exportação para Excel/PDF</li>
+                            <li>Ações em lote</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📄 Detalhes do Pedido</h4>
+                        <ul>
+                            <li>Informações do cliente</li>
+                            <li>Produtos e quantidades</li>
+                            <li>Endereços de entrega/cobrança</li>
+                            <li>Método de pagamento</li>
+                            <li>Histórico de status</li>
+                            <li>Notas internas</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📧 Comunicação</h4>
+                        <ul>
+                            <li>Email automático por status</li>
+                            <li>Templates personalizáveis</li>
+                            <li>Notificações SMS (opcional)</li>
+                            <li>Chat interno</li>
+                            <li>Avisos de entrega</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🎨 Personalização da Loja</h3>
+
+                <h4>🖌️ Temas e Design</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🎭 Temas Disponíveis</h4>
+                        <ul>
+                            <li><strong>Vegetables:</strong> Para orgânicos/alimentação</li>
+                            <li><strong>Fashion:</strong> Para roupas e acessórios</li>
+                            <li><strong>Electronics:</strong> Para tecnologia</li>
+                            <li><strong>Minimal:</strong> Design clean e moderno</li>
+                            <li><strong>Colorful:</strong> Vibrante e jovem</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🎨 Customizações</h4>
+                        <ul>
+                            <li>Cores primárias e secundárias</li>
+                            <li>Tipografia personalizada</li>
+                            <li>Logo e favicon</li>
+                            <li>Banner principal</li>
+                            <li>Layout do menu</li>
+                            <li>Footer personalizado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4>📱 Responsividade</h4>
+                <p>Todos os temas são responsivos e otimizados para:</p>
+                <ul>
+                    <li>Desktop (1920px+)</li>
+                    <li>Tablet (768px - 1024px)</li>
+                    <li>Mobile (320px - 767px)</li>
+                    <li>Touch devices</li>
+                </ul>
+
+                <h3>🌐 Configurações de Domínio</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/domains-urls/domains</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Configuração de domínio personalizado</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔗 Opções de URL</h4>
+                        <ul>
+                            <li><strong>Subdomínio:</strong> loja.plataforma.com</li>
+                            <li><strong>Domínio Próprio:</strong> www.minhaloja.com</li>
+                            <li><strong>Path:</strong> plataforma.com/minhaloja</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🛡️ SSL e Segurança</h4>
+                        <ul>
+                            <li>Certificado SSL automático</li>
+                            <li>HTTPS obrigatório</li>
+                            <li>Redirecionamento automático</li>
+                            <li>Verificação de domínio</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gestão de Produtos -->
+        <section class="section" id="user-products">
+            <div class="section-header">
+                <h2>📦 Gestão de Produtos</h2>
+                <p>Sistema completo para cadastro e gerenciamento de produtos</p>
+            </div>
+            <div class="section-content">
+                <div class="toc">
+                    <h3>📋 Índice da Seção</h3>
+                    <ul>
+                        <li><a href="#product-creation">Criação de Produtos</a></li>
+                        <li><a href="#product-categories">Categorias e Subcategorias</a></li>
+                        <li><a href="#product-variations">Variações de Produtos</a></li>
+                        <li><a href="#inventory-management">Gestão de Estoque</a></li>
+                        <li><a href="#product-images">Galeria de Imagens</a></li>
+                        <li><a href="#product-seo">SEO de Produtos</a></li>
+                        <li><a href="#bulk-operations">Operações em Lote</a></li>
+                    </ul>
+                </div>
+
+                <div id="product-creation">
+                    <h3>➕ Criação de Produtos</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/user/shop-management/products/create</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Formulário de criação de produto</p>
+                    </div>
+
+                    <h4>📝 Informações Básicas</h4>
+                    <div class="code-block">
+Campos obrigatórios:
+• Nome do produto
+• Descrição curta  
+• Descrição detalhada
+• Preço de venda
+• SKU (código único)
+• Categoria principal
+
+Campos opcionais:
+• Preço promocional
+• Data início/fim promoção
+• Peso e dimensões
+• Tags de busca
+• Meta título e descrição
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>💰 Configurações de Preço</h4>
+                            <ul>
+                                <li>Preço de custo (privado)</li>
+                                <li>Preço de venda (público)</li>
+                                <li>Preço promocional</li>
+                                <li>Desconto percentual</li>
+                                <li>Período de promoção</li>
+                                <li>Preço por quantidade</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📏 Especificações</h4>
+                            <ul>
+                                <li>Peso (kg/g)</li>
+                                <li>Dimensões (cm)</li>
+                                <li>Cor principal</li>
+                                <li>Material/Composição</li>
+                                <li>Marca/Fabricante</li>
+                                <li>Modelo/Referência</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>⚙️ Configurações Avançadas</h4>
+                            <ul>
+                                <li>Status (ativo/inativo)</li>
+                                <li>Produto digital/físico</li>
+                                <li>Requer frete</li>
+                                <li>Prazo de entrega</li>
+                                <li>Idade mínima</li>
+                                <li>Produto controlado</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="product-categories">
+                    <h3>🏷️ Categorias e Subcategorias</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/user/shop-management/categories</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Gestão de categorias de produtos</p>
+                    </div>
+
+                    <h4>📂 Estrutura Hierárquica</h4>
+                    <div class="code-block">
+Exemplo de estrutura:
+├── Eletrônicos
+│   ├── Smartphones
+│   │   ├── Android
+│   │   └── iPhone
+│   ├── Notebooks
+│   └── Acessórios
+├── Roupas
+│   ├── Masculino
+│   │   ├── Camisetas
+│   │   ├── Calças
+│   │   └── Sapatos
+│   └── Feminino
+└── Casa e Decoração
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>📝 Criação de Categorias</h4>
+                            <ul>
+                                <li>Nome da categoria</li>
+                                <li>Slug personalizado</li>
+                                <li>Descrição</li>
+                                <li>Imagem de capa</li>
+                                <li>Categoria pai (opcional)</li>
+                                <li>Ordem de exibição</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>🎨 Personalização Visual</h4>
+                            <ul>
+                                <li>Imagem de banner</li>
+                                <li>Cor temática</li>
+                                <li>Ícone da categoria</li>
+                                <li>Layout especial</li>
+                                <li>Template customizado</li>
+                                <li>CSS personalizado</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>🔍 SEO por Categoria</h4>
+                            <ul>
+                                <li>Meta título</li>
+                                <li>Meta descrição</li>
+                                <li>Palavras-chave</li>
+                                <li>URL amigável</li>
+                                <li>Schema markup</li>
+                                <li>Canonical URL</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="inventory-management">
+                    <h3>📊 Gestão de Estoque</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/user/shop-management/inventory</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Dashboard de controle de estoque</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>📈 Controle de Quantidades</h4>
+                            <ul>
+                                <li>Estoque atual por produto</li>
+                                <li>Estoque mínimo (alerta)</li>
+                                <li>Estoque máximo</li>
+                                <li>Ponto de reposição</li>
+                                <li>Produtos em falta</li>
+                                <li>Reservas de estoque</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📋 Movimentações</h4>
+                            <ul>
+                                <li>Entrada de mercadorias</li>
+                                <li>Saída por vendas</li>
+                                <li>Ajustes manuais</li>
+                                <li>Perdas e danos</li>
+                                <li>Transferências</li>
+                                <li>Histórico completo</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>🚨 Alertas e Relatórios</h4>
+                            <ul>
+                                <li>Estoque baixo</li>
+                                <li>Produtos parados</li>
+                                <li>Curva ABC</li>
+                                <li>Giro de estoque</li>
+                                <li>Previsão de vendas</li>
+                                <li>Relatório de inventário</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bulk-operations">
+                    <h3>⚡ Operações em Lote</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method post">POST</span>
+                        <strong>/user/shop-management/products/bulk-actions</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Ações em massa para múltiplos produtos</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>📥 Importação</h4>
+                            <ul>
+                                <li>Import via CSV/Excel</li>
+                                <li>Template padrão fornecido</li>
+                                <li>Validação de dados</li>
+                                <li>Preview antes de importar</li>
+                                <li>Log de erros detalhado</li>
+                                <li>Rollback em caso de erro</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📤 Exportação</h4>
+                            <ul>
+                                <li>Export para CSV/Excel</li>
+                                <li>Filtros personalizados</li>
+                                <li>Campos selecionáveis</li>
+                                <li>Agendamento de exports</li>
+                                <li>Compressão automática</li>
+                                <li>Download por email</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>⚙️ Ações em Massa</h4>
+                            <ul>
+                                <li>Alterar preços (% ou valor)</li>
+                                <li>Alterar categoria</li>
+                                <li>Ativar/desativar produtos</li>
+                                <li>Duplicar produtos</li>
+                                <li>Excluir em lote</li>
+                                <li>Aplicar tags</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gestão de Pedidos -->
+        <section class="section" id="user-orders">
+            <div class="section-header">
+                <h2>📋 Gestão de Pedidos</h2>
+                <p>Sistema completo para processamento e acompanhamento de pedidos</p>
+            </div>
+            <div class="section-content">
+                <div class="toc">
+                    <h3>📋 Índice da Seção</h3>
+                    <ul>
+                        <li><a href="#order-listing">Listagem de Pedidos</a></li>
+                        <li><a href="#order-details">Detalhes do Pedido</a></li>
+                        <li><a href="#order-status">Status e Workflow</a></li>
+                        <li><a href="#order-processing">Processamento</a></li>
+                        <li><a href="#order-shipping">Gestão de Envios</a></li>
+                        <li><a href="#order-communication">Comunicação</a></li>
+                    </ul>
+                </div>
+
+                <div id="order-listing">
+                    <h3>📋 Listagem de Pedidos</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/user/orders/all</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Lista todos os pedidos da loja com filtros</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>🔍 Filtros Avançados</h4>
+                            <ul>
+                                <li>Por status do pedido</li>
+                                <li>Por período de data</li>
+                                <li>Por valor total</li>
+                                <li>Por método de pagamento</li>
+                                <li>Por cliente (nome/email)</li>
+                                <li>Por número do pedido</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📊 Visualização</h4>
+                            <ul>
+                                <li>Grid com paginação</li>
+                                <li>Ordenação customizável</li>
+                                <li>Colunas selecionáveis</li>
+                                <li>Busca em tempo real</li>
+                                <li>Ações rápidas</li>
+                                <li>Status visual com cores</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>⚡ Ações Rápidas</h4>
+                            <ul>
+                                <li>Alterar status em lote</li>
+                                <li>Imprimir etiquetas</li>
+                                <li>Exportar selecionados</li>
+                                <li>Marcar como urgente</li>
+                                <li>Adicionar notas</li>
+                                <li>Reenviar emails</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="order-details">
+                    <h3>📄 Detalhes do Pedido</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/user/orders/{id}</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Visualiza detalhes completos de um pedido</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>👤 Informações do Cliente</h4>
+                            <ul>
+                                <li>Nome completo</li>
+                                <li>Email e telefone</li>
+                                <li>CPF/CNPJ</li>
+                                <li>Histórico de compras</li>
+                                <li>Método de contato preferido</li>
+                                <li>Observações especiais</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>🛍️ Itens do Pedido</h4>
+                            <ul>
+                                <li>Lista completa de produtos</li>
+                                <li>Variações selecionadas</li>
+                                <li>Quantidades e preços</li>
+                                <li>Subtotais por item</li>
+                                <li>Descontos aplicados</li>
+                                <li>Status individual por item</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📍 Endereços</h4>
+                            <ul>
+                                <li>Endereço de entrega</li>
+                                <li>Endereço de cobrança</li>
+                                <li>Instruções de entrega</li>
+                                <li>Referências do local</li>
+                                <li>Código postal/CEP</li>
+                                <li>Validação de endereço</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="order-status">
+                    <h3>🔄 Status e Workflow</h3>
+                    
+                    <div class="api-endpoint">
+                        <span class="method put">PUT</span>
+                        <strong>/user/orders/{id}/status</strong>
+                        <span class="badge user">User</span>
+                        <p><strong>Descrição:</strong> Atualiza status do pedido</p>
+                    </div>
+
+                    <h4>📊 Fluxo de Status</h4>
+                    <div class="code-block">
+Fluxo padrão de pedidos:
+1. 🆕 Pending (Pendente) - Aguardando processamento
+2. ✅ Confirmed (Confirmado) - Pagamento aprovado
+3. ⚡ Processing (Processando) - Em preparação  
+4. 📦 Shipped (Enviado) - A caminho do cliente
+5. 🏠 Delivered (Entregue) - Pedido finalizado
+6. ❌ Cancelled (Cancelado) - Pedido cancelado
+7. 🔄 Returned (Devolvido) - Produto devolvido
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>⚙️ Automações</h4>
+                            <ul>
+                                <li>Emails automáticos por status</li>
+                                <li>Reserva de estoque</li>
+                                <li>Geração de etiquetas</li>
+                                <li>Atualização de tracking</li>
+                                <li>Liberação de pagamento</li>
+                                <li>Solicitar avaliação</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📧 Comunicação</h4>
+                            <ul>
+                                <li>Templates personalizáveis</li>
+                                <li>Múltiplos canais (email/SMS)</li>
+                                <li>Histórico de mensagens</li>
+                                <li>Chat interno</li>
+                                <li>Notificações push</li>
+                                <li>WhatsApp Business</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>📊 Relatórios</h4>
+                            <ul>
+                                <li>Tempo por status</li>
+                                <li>Taxa de conversão</li>
+                                <li>Motivos de cancelamento</li>
+                                <li>Eficiência operacional</li>
+                                <li>Satisfação do cliente</li>
+                                <li>Performance da equipe</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Frontend E-commerce -->
+        <section class="section" id="frontend-overview">
+            <div class="section-header">
+                <h2>🛒 Frontend E-commerce (Área do Cliente)</h2>
+                <p>Experiência completa de compra para os clientes finais</p>
+            </div>
+            <div class="section-content">
+                <h3>🏠 Página Principal da Loja</h3>
+                <p>Cada loja possui sua própria URL e identidade visual:</p>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/{username}</strong>
+                    <span class="badge public">Public</span>
+                    <p><strong>Descrição:</strong> Página principal da loja do usuário</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🎯 Elementos da Home</h4>
+                        <ul>
+                            <li>Hero banner principal</li>
+                            <li>Produtos em destaque</li>
+                            <li>Categorias populares</li>
+                            <li>Ofertas especiais</li>
+                            <li>Depoimentos de clientes</li>
+                            <li>Newsletter signup</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📱 Menu de Navegação</h4>
+                        <ul>
+                            <li>Logo da loja</li>
+                            <li>Categorias de produtos</li>
+                            <li>Busca inteligente</li>
+                            <li>Carrinho de compras</li>
+                            <li>Área do cliente</li>
+                            <li>Wishlist</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🔍 Busca e Filtros</h4>
+                        <ul>
+                            <li>Busca por texto</li>
+                            <li>Filtros por categoria</li>
+                            <li>Filtros por preço</li>
+                            <li>Ordenação (preço, popularidade)</li>
+                            <li>Sugestões automáticas</li>
+                            <li>Resultados paginados</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📦 Catálogo de Produtos</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/{username}/products</strong>
+                    <span class="badge public">Public</span>
+                    <p><strong>Descrição:</strong> Listagem de todos os produtos da loja</p>
+                </div>
+
+                <h4>🛍️ Página de Produto</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🖼️ Galeria de Imagens</h4>
+                        <ul>
+                            <li>Múltiplas imagens por produto</li>
+                            <li>Zoom on hover</li>
+                            <li>Lightbox para visualização</li>
+                            <li>Thumbnails navegáveis</li>
+                            <li>Imagens das variações</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📝 Informações Detalhadas</h4>
+                        <ul>
+                            <li>Título e descrição</li>
+                            <li>Preço e ofertas</li>
+                            <li>Disponibilidade em estoque</li>
+                            <li>Especificações técnicas</li>
+                            <li>Reviews de clientes</li>
+                            <li>Produtos relacionados</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🛒 Ações de Compra</h4>
+                        <ul>
+                            <li>Seleção de variações</li>
+                            <li>Quantidade desejada</li>
+                            <li>Adicionar ao carrinho</li>
+                            <li>Adicionar à wishlist</li>
+                            <li>Comparar produtos</li>
+                            <li>Compartilhar social</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🛒 Carrinho de Compras</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/{username}/cart</strong>
+                    <span class="badge public">Public</span>
+                    <p><strong>Descrição:</strong> Página do carrinho de compras</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/{username}/cart/add</strong>
+                    <span class="badge public">Public</span>
+                    <p><strong>Descrição:</strong> Adicionar produto ao carrinho</p>
+                    <div class="code-block">
+{
+    "product_id": "integer",
+    "quantity": "integer", 
+    "variation_id": "integer (opcional)",
+    "options": "object (opcional)"
+}
+                    </div>
+                </div>
+
+                <h4>🛍️ Funcionalidades do Carrinho</h4>
+                <ul>
+                    <li>Visualização de produtos adicionados</li>
+                    <li>Alteração de quantidades</li>
+                    <li>Remoção de itens</li>
+                    <li>Cálculo de frete</li>
+                    <li>Aplicação de cupons</li>
+                    <li>Cálculo de impostos</li>
+                    <li>Total do pedido</li>
+                </ul>
+
+                <h3>💳 Processo de Checkout</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/{username}/checkout</strong>
+                    <span class="badge public">Public</span>
+                    <p><strong>Descrição:</strong> Página de finalização da compra</p>
+                </div>
+
+                <h4>📋 Etapas do Checkout</h4>
+                <div class="code-block">
+1. 📧 Informações do Cliente
+   - Email, nome, telefone
+   - Criação de conta (opcional)
+
+2. 📍 Endereço de Entrega  
+   - CEP, endereço completo
+   - Cálculo automático de frete
+   - Opções de entrega
+
+3. 💳 Pagamento
+   - Seleção do método
+   - Dados do cartão/PIX
+   - Revisão do pedido
+
+4. ✅ Confirmação
+   - Resumo final
+   - Finalização do pedido
+   - Redirect para sucesso
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>💰 Métodos de Pagamento</h4>
+                        <ul>
+                            <li>Cartão de crédito/débito</li>
+                            <li>PIX (Brasil)</li>
+                            <li>Boleto bancário</li>
+                            <li>PayPal</li>
+                            <li>Stripe</li>
+                            <li>Transferência bancária</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🚚 Opções de Entrega</h4>
+                        <ul>
+                            <li>Correios (PAC, SEDEX)</li>
+                            <li>Transportadoras parceiras</li>
+                            <li>Retirada na loja</li>
+                            <li>Entrega agendada</li>
+                            <li>Frete grátis (condicionais)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>👤 Área do Cliente</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/{username}/customer/dashboard</strong>
+                    <span class="badge customer">Customer</span>
+                    <p><strong>Descrição:</strong> Dashboard do cliente logado</p>
+                </div>
+
+                <h4>🏠 Dashboard do Cliente</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📊 Visão Geral</h4>
+                        <ul>
+                            <li>Últimos pedidos</li>
+                            <li>Status de entregas</li>
+                            <li>Produtos favoritos</li>
+                            <li>Recomendações</li>
+                            <li>Promoções exclusivas</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📋 Meus Pedidos</h4>
+                        <ul>
+                            <li>Histórico completo</li>
+                            <li>Tracking de entrega</li>
+                            <li>Download de notas fiscais</li>
+                            <li>Solicitação de devolução</li>
+                            <li>Avaliação de produtos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>⚙️ Configurações</h4>
+                        <ul>
+                            <li>Dados pessoais</li>
+                            <li>Endereços salvos</li>
+                            <li>Cartões salvos</li>
+                            <li>Preferências de email</li>
+                            <li>Alterar senha</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sistema de Pagamentos -->
+        <section class="section" id="payment-gateways">
+            <div class="section-header">
+                <h2>💳 Sistema de Pagamentos</h2>
+                <p>Integração completa com múltiplos gateways de pagamento</p>
+            </div>
+            <div class="section-content">
+                <h3>🌐 Gateways Suportados</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🇺🇸 Internacionais</h4>
+                        <ul>
+                            <li><strong>Stripe:</strong> Cartões, Apple Pay, Google Pay</li>
+                            <li><strong>PayPal:</strong> Conta PayPal, cartões</li>
+                            <li><strong>Authorize.net:</strong> Cartões de crédito</li>
+                            <li><strong>Square:</strong> Pagamentos mobile</li>
+                            <li><strong>Mollie:</strong> Europa - múltiplos métodos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🇧🇷 Brasil</h4>
+                        <ul>
+                            <li><strong>Razorpay:</strong> PIX, cartões, boleto</li>
+                            <li><strong>PagSeguro:</strong> Todos os métodos BR</li>
+                            <li><strong>Mercado Pago:</strong> LATAM</li>
+                            <li><strong>Pagarme:</strong> PIX, cartões</li>
+                            <li><strong>Cielo:</strong> Cartões brasileiros</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🌏 Ásia & Outros</h4>
+                        <ul>
+                            <li><strong>Razorpay:</strong> Índia - UPI, cartões</li>
+                            <li><strong>Midtrans:</strong> Indonésia</li>
+                            <li><strong>Iyzico:</strong> Turquia</li>
+                            <li><strong>Xendit:</strong> Sudeste Asiático</li>
+                            <li><strong>Yoco:</strong> África do Sul</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>⚙️ Configuração de Gateways</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/payment-gateways</strong>
+                    <span class="badge
+                    <p><strong>Descrição:</strong> Configuração global de gateways</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/gateways</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Configuração de gateway por loja</p>
+                </div>
+
+                <h4>🔧 Configuração Stripe</h4>
+                <div class="code-block">
+// Configurações necessárias:
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+// Métodos suportados:
+- Cartões de crédito/débito
+- Apple Pay / Google Pay  
+- SEPA Direct Debit (Europa)
+- Alipay, WeChat Pay
+- Klarna (Buy now, pay later)
+                </div>
+
+                <h4>🔧 Configuração PayPal</h4>
+                <div class="code-block">
+// Configurações necessárias:
+PAYPAL_CLIENT_ID=your_client_id
+PAYPAL_CLIENT_SECRET=your_secret
+PAYPAL_MODE=sandbox // ou live
+
+// Métodos suportados:
+- PayPal Account
+- Cartões via PayPal
+- PayPal Credit
+- Venmo (EUA)
+                </div>
+
+                <h4>🇧🇷 Configuração PIX (Brasil)</h4>
+                <div class="code-block">
+// Via Razorpay/PagSeguro:
+PIX_KEY=sua_chave_pix
+PIX_MERCHANT_ID=seu_merchant_id
+
+// Fluxo PIX:
+1. Cliente seleciona PIX
+2. Sistema gera QR Code
+3. Cliente paga pelo app do banco
+4. Confirmação automática via webhook
+5. Pedido aprovado instantaneamente
+                </div>
+
+                <h3>📊 Logs e Monitoramento</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/admin/payment-logs</strong>
+                    <span class="badge admin">Admin</span>
+                    <p><strong>Descrição:</strong> Logs detalhados de todas as transações</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📋 Informações Registradas</h4>
+                        <ul>
+                            <li>ID da transação</li>
+                            <li>Gateway utilizado</li>
+                            <li>Status (pending, approved, failed)</li>
+                            <li>Valor e moeda</li>
+                            <li>Dados do cliente</li>
+                            <li>Timestamp completo</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🔍 Filtros e Busca</h4>
+                        <ul>
+                            <li>Por período</li>
+                            <li>Por gateway</li>
+                            <li>Por status</li>
+                            <li>Por valor</li>
+                            <li>Por usuário/loja</li>
+                            <li>Exportar relatórios</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🛡️ Segurança e Compliance</h3>
+                
+                <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                    <strong>🔒 Certificações:</strong>
+                    <ul>
+                        <li>PCI DSS Compliance</li>
+                        <li>SSL/TLS Encryption</li>
+                        <li>LGPD/GDPR Ready</li>
+                        <li>2FA para admin</li>
+                    </ul>
+                </div>
+
+                <h4>🔐 Webhooks e Notificações</h4>
+                <div class="code-block">
+// Endpoint para webhooks:
+POST /webhooks/{gateway}
+
+// Eventos monitorados:
+- payment.succeeded
+- payment.failed  
+- payment.refunded
+- subscription.created
+- subscription.cancelled
+
+// Ações automáticas:
+- Atualizar status do pedido
+- Enviar email de confirmação
+- Gerar nota fiscal
+- Atualizar estoque
+- Liberar produto digital
+                </div>
+            </div>
+        </section>
+
+        <!-- Temas e Personalização -->
+        <section class="section" id="themes">
+            <div class="section-header">
+                <h2>🎨 Temas e Personalização</h2>
+                <p>Sistema completo de personalização visual das lojas</p>
+            </div>
+            <div class="section-content">
+                <h3>🎭 Temas Disponíveis</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🥬 Vegetables Theme</h4>
+                        <p><strong>Ideal para:</strong> Orgânicos, alimentação saudável</p>
+                        <ul>
+                            <li>Cores naturais (verde, laranja)</li>
+                            <li>Layout clean e fresco</li>
+                            <li>Foco em imagens de produtos</li>
+                            <li>Seção de benefícios</li>
+                            <li>Blog integrado</li>
+                        </ul>
+                        <span class="badge" style="background: #27ae60;">Mais Popular</span>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>👗 Fashion Theme</h4>
+                        <p><strong>Ideal para:</strong> Roupas, acessórios, beleza</p>
+                        <ul>
+                            <li>Design elegante e moderno</li>
+                            <li>Galeria de lookbooks</li>
+                            <li>Filtros avançados</li>
+                            <li>Wishlist destacada</li>
+                            <li>Zoom em imagens</li>
+                        </ul>
+                        <span class="badge" style="background: #e74c3c;">Novo</span>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📱 Electronics Theme</h4>
+                        <p><strong>Ideal para:</strong> Tecnologia, eletrônicos</p>
+                        <ul>
+                            <li>Layout técnico e organizado</li>
+                            <li>Comparação de produtos</li>
+                            <li>Especificações detalhadas</li>
+                            <li>Reviews de clientes</li>
+                            <li>Cores escuras/tech</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🏠 Home & Garden Theme</h4>
+                        <p><strong>Ideal para:</strong> Casa, decoração, jardim</p>
+                        <ul>
+                            <li>Layout aconchegante</li>
+                            <li>Inspirações e ambientes</li>
+                            <li>Guias de produtos</li>
+                            <li>Cores neutras e suaves</li>
+                            <li>Seção de projetos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>✨ Minimal Theme</h4>
+                        <p><strong>Ideal para:</strong> Qualquer nicho, design clean</p>
+                        <ul>
+                            <li>Design minimalista</li>
+                            <li>Foco no conteúdo</li>
+                            <li>Carregamento rápido</li>
+                            <li>Tipografia elegante</li>
+                            <li>Cores personalizáveis</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🌈 Colorful Theme</h4>
+                        <p><strong>Ideal para:</strong> Jovem, vibrante, criativo</p>
+                        <ul>
+                            <li>Cores vibrantes</li>
+                            <li>Animações suaves</li>
+                            <li>Layout divertido</li>
+                            <li>Ideal para público jovem</li>
+                            <li>Social media integrado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🎨 Customizador Visual</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/themes</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Interface de seleção e customização de temas</p>
+                </div>
+
+                <h4>🖌️ Opções de Personalização</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🎨 Cores</h4>
+                        <ul>
+                            <li>Cor primária (botões, links)</li>
+                            <li>Cor secundária (destaques)</li>
+                            <li>Cor de fundo</li>
+                            <li>Cor do texto</li>
+                            <li>Cor do header/footer</li>
+                            <li>Gradient personalizado</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📝 Tipografia</h4>
+                        <ul>
+                            <li>Fonte para títulos</li>
+                            <li>Fonte para corpo do texto</li>
+                            <li>Tamanho da fonte</li>
+                            <li>Peso da fonte (bold, light)</li>
+                            <li>Espaçamento entre linhas</li>
+                            <li>Google Fonts integrado</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📐 Layout</h4>
+                        <ul>
+                            <li>Largura máxima do container</li>
+                            <li>Espaçamento entre seções</li>
+                            <li>Bordas e raios</li>
+                            <li>Sombras e efeitos</li>
+                            <li>Posição do menu</li>
+                            <li>Layout do footer</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4>🖼️ Elementos Visuais</h4>
+                <div class="code-block">
+Elementos personalizáveis:
+
+🏷️ Logo da Loja
+- Upload de logo personalizado
+- Dimensões automáticas
+- Formatos: PNG, JPG, SVG
+- Favicon automático
+
+🎯 Banner Principal  
+- Hero image de alta resolução
+- Texto sobreposto
+- Call-to-action customizável
+- Slideshow com múltiplas imagens
+
+🎨 Ícones e Elementos
+- Ícones de redes sociais
+- Ícones de métodos de pagamento
+- Badges de segurança
+- Certificações e selos
+                </div>
+
+                <h3>📱 Responsividade</h3>
+                <p>Todos os temas são otimizados para todos os dispositivos:</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🖥️ Desktop (1200px+)</h4>
+                        <ul>
+                            <li>Layout em grid completo</li>
+                            <li>Sidebar de filtros</li>
+                            <li>Múltiplas colunas</li>
+                            <li>Hover effects</li>
+                            <li>Quick view modal</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📱 Tablet (768px-1199px)</h4>
+                        <ul>
+                            <li>Layout adaptado</li>
+                            <li>Menu colapsável</li>
+                            <li>Touch-friendly</li>
+                            <li>Swipe gestures</li>
+                            <li>2 colunas de produtos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📱 Mobile (320px-767px)</h4>
+                        <ul>
+                            <li>Mobile-first design</li>
+                            <li>Menu hamburger</li>
+                            <li>1 coluna de produtos</li>
+                            <li>Bottom navigation</li>
+                            <li>Thumb-friendly buttons</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🚀 Performance e SEO</h3>
+
+                <div class="alert" style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 1rem; margin: 1rem 0;">
+                    <strong>⚡ Otimizações Implementadas:</strong>
+                    <ul>
+                        <li>Lazy loading de imagens</li>
+                        <li>Minificação CSS/JS automática</li>
+                        <li>Cache de assets</li>
+                        <li>Compressão GZIP</li>
+                        <li>WebP para imagens (quando suportado)</li>
+                        <li>Critical CSS inline</li>
+                    </ul>
+                </div>
+
+                <h4>🔍 SEO por Tema</h4>
+                <div class="code-block">
+Meta tags automáticas por página:
+
+Homepage:
+- Title: {nome_da_loja} - {categoria} 
+- Description: {descrição_da_loja}
+- Keywords: {produtos_principais}
+
+Categoria:
+- Title: {nome_categoria} | {nome_loja}
+- Description: {descrição_categoria}
+
+Produto:
+- Title: {nome_produto} | {nome_loja}
+- Description: {resumo_produto}
+- Schema.org Product markup
+- Open Graph tags
+- Twitter Cards
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog e Conteúdo -->
+        <section class="section" id="blog-content">
+            <div class="section-header">
+                <h2>📝 Sistema de Blog Integrado</h2>
+                <p>Marketing de conteúdo para cada loja</p>
+            </div>
+            <div class="section-content">
+                <h3>📰 Funcionalidades do Blog</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/pages/blog</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Gestão completa do blog da loja</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>✍️ Editor de Posts</h4>
+                        <ul>
+                            <li>Editor WYSIWYG avançado</li>
+                            <li>Upload de imagens</li>
+                            <li>Formatação rica</li>
+                            <li>Embedding de vídeos</li>
+                            <li>Preview em tempo real</li>
+                            <li>Agendamento de posts</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🏷️ Organização</h4>
+                        <ul>
+                            <li>Categorias ilimitadas</li>
+                            <li>Tags personalizadas</li>
+                            <li>Status (rascunho, publicado)</li>
+                            <li>Featured posts</li>
+                            <li>Ordenação customizada</li>
+                            <li>Arquivo por data</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🔍 SEO do Blog</h4>
+                        <ul>
+                            <li>Meta title/description</li>
+                            <li>URL amigável (slug)</li>
+                            <li>Schema markup</li>
+                            <li>Sitemap automático</li>
+                            <li>Open Graph tags</li>
+                            <li>Twitter Cards</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📱 Frontend do Blog</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/{username}/blog</strong>
+                    <span class="badge public">Public</span>
+                    <p><strong>Descrição:</strong> Página principal do blog da loja</p>
+                </div>
+
+                <h4>🎨 Layout do Blog</h4>
+                <ul>
+                    <li><strong>Grid de Posts:</strong> Cards com imagem, título, resumo</li>
+                    <li><strong>Sidebar:</strong> Categorias, posts populares, archive</li>
+                    <li><strong>Post Individual:</strong> Conteúdo completo, compartilhamento</li>
+                    <li><strong>Comentários:</strong> Sistema de comentários (opcional)</li>
+                    <li><strong>Newsletter:</strong> Signup integrado</li>
+                </ul>
+
+                <h3>💌 Newsletter e Email Marketing</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/subscribers</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Gestão de subscribers do newsletter</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📧 Templates de Email</h4>
+                        <ul>
+                            <li>Welcome email</li>
+                            <li>Order confirmation</li>
+                            <li>Shipping notification</li>
+                            <li>Newsletter template</li>
+                            <li>Abandoned cart</li>
+                            <li>Product launch</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🎯 Segmentação</h4>
+                        <ul>
+                            <li>Por interesse de produto</li>
+                            <li>Por localização</li>
+                            <li>Por frequência de compra</li>
+                            <li>Por valor de compra</li>
+                            <li>Por engagement</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4>📊 Métricas de Email</h4>
+                <div class="code-block">
+Dados disponíveis:
+- Taxa de abertura (open rate)
+- Taxa de clique (click rate) 
+- Taxa de conversão
+- Unsubscribes
+- Bounces (emails inválidos)
+- Horário de melhor engajamento
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics e Relatórios -->
+        <section class="section" id="analytics">
+            <div class="section-header">
+                <h2>📊 Analytics e Relatórios</h2>
+                <p>Insights detalhados sobre performance da loja</p>
+            </div>
+            <div class="section-content">
+                <h3>📈 Dashboard de Analytics</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/dashboard</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Dashboard principal com métricas em tempo real</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>💰 Métricas Financeiras</h4>
+                        <ul>
+                            <li>Receita total</li>
+                            <li>Receita por período</li>
+                            <li>Ticket médio</li>
+                            <li>RPV (Revenue per Visitor)</li>
+                            <li>LTV (Lifetime Value)</li>
+                            <li>Margem de lucro</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🛒 Métricas de Vendas</h4>
+                        <ul>
+                            <li>Total de pedidos</li>
+                            <li>Conversion rate</li>
+                            <li>Carrinho abandonado</li>
+                            <li>Produtos mais vendidos</li>
+                            <li>Categorias populares</li>
+                            <li>Tendências sazonais</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>👥 Métricas de Tráfego</h4>
+                        <ul>
+                            <li>Visitantes únicos</li>
+                            <li>Pageviews</li>
+                            <li>Tempo na página</li>
+                            <li>Taxa de rejeição</li>
+                            <li>Origem do tráfego</li>
+                            <li>Dispositivos utilizados</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📊 Relatórios Detalhados</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/orders/report</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Relatórios de vendas exportáveis</p>
+                </div>
+
+                <h4>📋 Tipos de Relatórios</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>💳 Relatório de Vendas</h4>
+                        <ul>
+                            <li>Vendas por dia/mês/ano</li>
+                            <li>Comparativo período anterior</li>
+                            <li>Breakdown por método pagamento</li>
+                            <li>Status de pedidos</li>
+                            <li>Devoluções e cancelamentos</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📦 Relatório de Produtos</h4>
+                        <ul>
+                            <li>Performance por produto</li>
+                            <li>Estoque atual vs vendas</li>
+                            <li>Produtos sem movimento</li>
+                            <li>Análise de precificação</li>
+                            <li>Reviews e ratings</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>👤 Relatório de Clientes</h4>
+                        <ul>
+                            <li>Novos vs recorrentes</li>
+                            <li>Segmentação demográfica</li>
+                            <li>Padrões de compra</li>
+                            <li>Churn rate</li>
+                            <li>Customer satisfaction</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🔗 Integrações</h3>
+                
+                <h4>📊 Google Analytics</h4>
+                <div class="code-block">
+// Configuração automática:
+// - Enhanced Ecommerce tracking
+// - Goal setup para conversões
+// - Event tracking personalizado
+// - UTM campaign tracking
+// - Demographics e Interests
+
+// Eventos rastreados:
+- purchase (compra finalizada)
+- add_to_cart (produto adicionado)
+- begin_checkout (início checkout)
+- view_item (visualização produto)
+- search (busca realizada)
+                </div>
+
+                <h4📍 Google Tag Manager</h4>
+                <div class="code-block">
+// Tags automáticas configuradas:
+- Google Analytics 4
+- Google Ads Conversion
+- Facebook Pixel
+- TikTok Pixel (opcional)
+- Custom conversion events
+
+// DataLayer estruturado:
+{
+  'event': 'purchase',
+  'transaction_id': '12345',
+  'value': 199.90,
+  'currency': 'BRL',
+  'items': [...produtos]
+}
+                </div>
+
+                <h3>🎯 Marketing e Campanhas</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🎁 Sistema de Cupons</h4>
+                        <ul>
+                            <li>Cupons de desconto fixo/percentual</li>
+                            <li>Frete grátis</li>
+                            <li>Compre X leve Y</li>
+                            <li>Desconto por categoria</li>
+                            <li>Limite de uso</li>
+                            <li>Validade personalizada</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>⚡ Flash Sales</h4>
+                        <ul>
+                            <li>Promoções por tempo limitado</li>
+                            <li>Countdown timer</li>
+                            <li>Estoque limitado</li>
+                            <li>Desconto progressivo</li>
+                            <li>Notificação de urgência</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🎖️ Sistema de Pontos</h4>
+                        <ul>
+                            <li>Pontos por compra</li>
+                            <li>Pontos por review</li>
+                            <li>Pontos por indicação</li>
+                            <li>Troca por desconto</li>
+                            <li>Níveis de fidelidade</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configurações Avançadas -->
+        <section class="section" id="advanced-config">
+            <div class="section-header">
+                <h2>⚙️ Configurações Avançadas</h2>
+                <p>Configurações técnicas e administrativas</p>
+            </div>
+            <div class="section-content">
+                <h3>🌐 Multi-idioma</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/languages</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Configuração de idiomas da loja</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🗣️ Idiomas Suportados</h4>
+                        <ul>
+                            <li>🇧🇷 Português (Brasil)</li>
+                            <li>🇺🇸 English (US)</li>
+                            <li>🇪🇸 Español</li>
+                            <li>🇫🇷 Français</li>
+                            <li>🇩🇪 Deutsch</li>
+                            <li>🇮🇹 Italiano</li>
+                            <li>➕ Adicionar customizado</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🔄 Elementos Traduzíveis</h4>
+                        <ul>
+                            <li>Menu de navegação</li>
+                            <li>Categorias e produtos</li>
+                            <li>Textos da interface</li>
+                            <li>Emails automáticos</li>
+                            <li>Páginas estáticas</li>
+                            <li>Checkout e pagamento</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4>💱 Multi-moeda</h4>
+                <div class="code-block">
+// Moedas configuráveis:
+USD - Dólar Americano ($)
+EUR - Euro (€)  
+BRL - Real Brasileiro (R$)
+GBP - Libra Esterlina (£)
+CAD - Dólar Canadense (C$)
+AUD - Dólar Australiano (A$)
+
+// Conversão automática:
+- API de câmbio em tempo real
+- Cache de 1 hora para performance
+- Fallback para taxa manual
+- Exibição baseada na localização
+                </div>
+
+                <h3>📧 Configurações de Email</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/user/basic-settings/email-settings</strong>
+                    <span class="badge user">User</span>
+                    <p><strong>Descrição:</strong> Configuração SMTP personalizada</p>
+                </div>
+
+                <h4>📮 Provedores Suportados</h4>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>☁️ Cloud Services</h4>
+                        <ul>
+                            <li>SendGrid</li>
+                            <li>Mailgun</li>
+                            <li>Amazon SES</li>
+                            <li>Postmark</li>
+                            <li>SparkPost</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📧 SMTP Tradicional</h4>
+                        <ul>
+                            <li>Gmail/G Suite</li>
+                            <li>Outlook/Office 365</li>
+                            <li>Yahoo Mail</li>
+                            <li>Servidor próprio</li>
+                            <li>Hospedagem compartilhada</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🔒 Segurança e Backup</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🛡️ Proteções Ativas</h4>
+                        <ul>
+                            <li>Rate limiting por IP</li>
+                            <li>CSRF protection</li>
+                            <li>SQL injection prevention</li>
+                            <li>XSS filtering</li>
+                            <li>Firewall de aplicação</li>
+                            <li>2FA para admins</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>💾 Backup Automático</h4>
+                        <ul>
+                            <li>Backup diário do banco</li>
+                            <li>Backup de arquivos</li>
+                            <li>Retenção de 30 dias</li>
+                            <li>Restore via dashboard</li>
+                            <li>Download manual</li>
+                            <li>Backup para S3</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📊 Auditoria</h4>
+                        <ul>
+                            <li>Log de ações admin</li>
+                            <li>Tentativas de login</li>
+                            <li>Alterações em produtos</li>
+                            <li>Transações financeiras</li>
+                            <li>Acesso de clientes</li>
+                            <li>Relatórios de segurança</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🚀 Performance e Cache</h3>
+                
+                <div class="alert" style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 1rem; margin: 1rem 0;">
+                    <strong>⚡ Otimizações Ativas:</strong>
+                    <ul>
+                        <li>Redis cache para sessões</li>
+                        <li>Opcache PHP ativo</li>
+                        <li>Database query cache</li>
+                        <li>CDN para assets estáticos</li>
+                        <li>Image optimization automática</li>
+                        <li>Gzip compression</li>
+                    </ul>
+                </div>
+
+                <h4>📈 Monitoramento</h4>
+                <div class="code-block">
+// Métricas monitoradas:
+- Response time médio
+- Throughput (requests/sec)
+- Error rate (4xx/5xx)
+- Database query time
+- Memory usage
+- CPU utilization
+
+// Alertas automáticos:
+- Response time > 2s
+- Error rate > 5%
+- Database queries > 100ms
+- Disk space < 10%
+- Memory usage > 80%
+                </div>
+
+                <h3>🔧 Manutenção e Updates</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔄 Updates Automáticos</h4>
+                        <ul>
+                            <li>Security patches</li>
+                            <li>Bug fixes menores</li>
+                            <li>Otimizações de performance</li>
+                            <li>Compatibilidade com gateways</li>
+                            <li>Rollback automático se erro</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📋 Modo Manutenção</h4>
+                        <ul>
+                            <li>Página de manutenção customizada</li>
+                            <li>Bypass para admins</li>
+                            <li>Agendamento de manutenção</li>
+                            <li>Notificação prévia</li>
+                            <li>Tempo estimado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🌍 Configurações Regionais</h3>
+                
+                <h4>🇧🇷 Brasil</h4>
+                <div class="code-block">
+// Configurações específicas:
+- CEP para cálculo de frete
+- CPF/CNPJ validation
+- PIX como método de pagamento
+- Correios integration
+- Nota fiscal eletrônica
+- LGPD compliance
+                </div>
+
+                <h4>🇺🇸 Estados Unidos</h4>
+                <div class="code-block">
+// Configurações específicas:
+- ZIP code validation
+- State tax calculation
+- USPS/UPS/FedEx shipping
+- Sales tax by state
+- CCPA compliance
+- PayPal/Stripe native
+                </div>
+
+                <h4>🇪🇺 União Europeia</h4>
+                <div class="code-block">
+// Configurações específicas:
+- VAT calculation by country
+- GDPR compliance tools
+- Cookie consent banner
+- Right to be forgotten
+- Data export tools
+- Multi-language support
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ e Suporte -->
+        <section class="section" id="support-faq">
+            <div class="section-header">
+                <h2>❓ FAQ e Suporte</h2>
+                <p>Perguntas frequentes e canais de suporte</p>
+            </div>
+            <div class="section-content">
+                <h3>🤔 Perguntas Frequentes</h3>
+                
+                <div class="api-endpoint">
+                    <span class="method get">PERGUNTA</span>
+                    <strong>Como configurar um gateway de pagamento?</strong>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>Resposta:</strong>
+                        <ol>
+                            <li>Acesse o painel admin > Payment Gateways</li>
+                            <li>Selecione o gateway desejado (Stripe, PayPal, etc.)</li>
+                            <li>Insira as credenciais fornecidas pelo provedor</li>
+                            <li>Configure os métodos de pagamento ativos</li>
+                            <li>Teste em modo sandbox antes de ativar</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">PERGUNTA</span>
+                    <strong>Como personalizar o tema da minha loja?</strong>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>Resposta:</strong>
+                        <ol>
+                            <li>Vá em User Dashboard > Themes</li>
+                            <li>Escolha um tema base</li>
+                            <li>Use o customizador visual para cores, fontes</li>
+                            <li>Faça upload do seu logo</li>
+                            <li>Configure banner principal e layout</li>
+                            <li>Preview antes de publicar</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">PERGUNTA</span>
+                    <strong>Como configurar frete para minha loja?</strong>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>Resposta:</strong>
+                        <ol>
+                            <li>Acesse Shipping Charges no painel</li>
+                            <li>Configure seu CEP de origem</li>
+                            <li>Defina regras de frete:</li>
+                            <ul>
+                                <li>Por peso/dimensão</li>
+                                <li>Por região/estado</li>
+                                <li>Valor fixo ou percentual</li>
+                                <li>Frete grátis acima de X valor</li>
+                            </ul>
+                            <li>Integre com Correios (opcional)</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method get">PERGUNTA</span>
+                    <strong>Como configurar meu domínio personalizado?</strong>
+                    <div class="alert" style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; margin: 1rem 0;">
+                        <strong>Resposta:</strong>
+                        <ol>
+                            <li>Registre seu domínio com um provedor</li>
+                            <li>No painel User > Domains, solicite domínio customizado</li>
+                            <li>Configure DNS apontando para nossos servidores</li>
+                            <li>Aguarde validação (até 24h)</li>
+                            <li>SSL será configurado automaticamente</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <h3>🛠️ Problemas Técnicos Comuns</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🚫 Página não carrega</h4>
+                        <ul>
+                            <li>Verificar status do domínio</li>
+                            <li>Limpar cache do navegador</li>
+                            <li>Verificar DNS settings</li>
+                            <li>Contatar suporte se persistir</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>💳 Pagamento não processou</h4>
+                        <ul>
+                            <li>Verificar credenciais do gateway</li>
+                            <li>Confirmar se está em modo live</li>
+                            <li>Verificar logs de transação</li>
+                            <li>Testar com cartão diferente</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📧 Emails não chegam</h4>
+                        <ul>
+                            <li>Verificar configuração SMTP</li>
+                            <li>Conferir caixa de spam</li>
+                            <li>Validar templates de email</li>
+                            <li>Testar com provedor diferente</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📞 Canais de Suporte</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>💬 Chat Online</h4>
+                        <p><strong>Horário:</strong> 9h às 18h (UTC-3)</p>
+                        <ul>
+                            <li>Suporte técnico imediato</li>
+                            <li>Dúvidas sobre configuração</li>
+                            <li>Problemas urgentes</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📧 Email Suporte</h4>
+                        <p><strong>Resposta:</strong> até 24h</p>
+                        <ul>
+                            <li>suporte@plataforma.com</li>
+                            <li>Anexar prints se necessário</li>
+                            <li>Incluir URL da loja</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📚 Base de Conhecimento</h4>
+                        <p><strong>Disponível:</strong> 24/7</p>
+                        <ul>
+                            <li>Tutoriais passo a passo</li>
+                            <li>Vídeos explicativos</li>
+                            <li>Templates prontos</li>
+                            <li>Best practices</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🎓 Recursos de Aprendizado</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📹 Video Tutoriais</h4>
+                        <ul>
+                            <li>Setup inicial da loja</li>
+                            <li>Configuração de pagamentos</li>
+                            <li>Personalização de tema</li>
+                            <li>Gestão de produtos</li>
+                            <li>Marketing e SEO</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📖 Guias Escritos</h4>
+                        <ul>
+                            <li>Quick start guide</li>
+                            <li>Advanced configurations</li>
+                            <li>Troubleshooting guide</li>
+                            <li>API documentation</li>
+                            <li>Best practices</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🎯 Webinars</h4>
+                        <ul>
+                            <li>Setup completo de loja</li>
+                            <li>Estratégias de marketing</li>
+                            <li>Otimização de conversão</li>
+                            <li>Novidades da plataforma</li>
+                            <li>Q&A com especialistas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0;">
+                    <strong>💡 Dica:</strong> Para problemas urgentes, use o chat online. Para dúvidas sobre configuração, consulte primeiro nossa base de conhecimento - muitas respostas estão lá!
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Função de busca
+        function searchContent() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const sections = document.querySelectorAll('.section');
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (text.includes(filter) || filter === '') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // Smooth scroll para links da sidebar
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Highlight da seção ativa
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.sidebar a');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.background = '#3498db';
+                } else {
+                    link.style.background = 'transparent';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
