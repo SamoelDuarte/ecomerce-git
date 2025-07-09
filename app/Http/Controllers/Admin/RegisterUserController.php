@@ -84,7 +84,12 @@ class RegisterUserController extends Controller
         $term = $request->term;
         $users = User::when($term, function ($query, $term) {
             $query->where('username', 'like', '%' . $term . '%')->orWhere('email', 'like', '%' . $term . '%');
-        })->orderBy('id', 'DESC')->paginate(10);
+        })->leftJoin('user_categories', function($join) use ($language) {
+            $join->on('users.category_id', '=', 'user_categories.id')
+                 ->where('user_categories.language_id', '=', $language->id);
+        })
+        ->select('users.*', 'user_categories.name as category_name')
+        ->orderBy('users.id', 'DESC')->paginate(10);
 
         $online = PaymentGateway::query()->where('status', 1)->get();
         $offline = OfflineGateway::where('status', 1)->get();

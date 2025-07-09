@@ -10,3 +10,8 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 
+setup-database.bat
+setup-local.bat
+SETUP_LOCAL.md
+start-dev.bat
+README-DEV.md

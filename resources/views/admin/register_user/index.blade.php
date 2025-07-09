@@ -64,6 +64,7 @@
                         </th>
                         <th scope="col">{{ __('Username') }}</th>
                         <th scope="col">{{ __('Email') }}</th>
+                        <th scope="col">{{ __('Category') }}</th>
                         <th scope="col">{{ __('Featured') }}</th>
                         <th scope="col">{{ __('Preview Template') }}</th>
                         <th scope="col">{{ __('Email Status') }}</th>
@@ -79,6 +80,7 @@
                           </td>
                           <td>{{ $user->username }}</td>
                           <td>{{ $user->email }}</td>
+                          <td>{{ $user->category_name ?? __('N/A') }}</td>
 
                           <td>
                             <form id="userFrom{{ $user->id }}" class="d-inline-block"
