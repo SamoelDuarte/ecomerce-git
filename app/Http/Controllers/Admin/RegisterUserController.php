@@ -85,7 +85,7 @@ class RegisterUserController extends Controller
         $users = User::when($term, function ($query, $term) {
             $query->where('username', 'like', '%' . $term . '%')->orWhere('email', 'like', '%' . $term . '%');
         })->leftJoin('user_categories', function($join) use ($language) {
-            $join->on('users.category_id', '=', 'user_categories.id')
+            $join->on('users.category_id', '=', 'user_categories.unique_id')
                  ->where('user_categories.language_id', '=', $language->id);
         })
         ->select('users.*', 'user_categories.name as category_name')
@@ -118,7 +118,7 @@ class RegisterUserController extends Controller
         $online = PaymentGateway::query()->where('status', 1)->get();
         $offline = OfflineGateway::where('status', 1)->get();
         $gateways = $online->merge($offline);
-        $category =  UserCategory::query()->where([['language_id', $language->id], ['id', $user->category_id]])->pluck('name')->first();
+        $category =  UserCategory::query()->where([['language_id', $language->id], ['unique_id', $user->category_id]])->pluck('name')->first();
         return view('admin.register_user.details', compact('user', 'packages', 'gateways', 'category'));
     }
 
