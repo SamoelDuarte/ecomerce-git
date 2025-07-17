@@ -46,7 +46,7 @@
                 <div class="slider-thumbnails2">
 
                   @foreach ($product->item->sliders as $slide)
-                    <div class="thumbnail-img radius-md lazy-container ratio ratio-1-1">
+                    <div class="thumbnail-img radius-sm lazy-container ratio ratio-1-1">
                       <img class="lazyload"
                       src="{{ asset('assets/front/images/placeholder.png') }}"
                         data-src="{{ asset('assets/front/img/user/items/slider-images/' . $slide->image) }}"
@@ -58,7 +58,7 @@
                 <div class="product-single-slider2">
                   @foreach ($product->item->sliders as $slide)
                     <div class="product-single-single-item">
-                      <figure class="radius-lg lazy-container ratio ratio-1-1">
+                      <figure class="radius-sm lazy-container ratio ratio-1-1">
                         <a src="{{ asset('assets/front/img/user/items/slider-images/' . $slide->image) }}">
                           <img class="lazyload"
                           src="{{ asset('assets/front/images/placeholder.png') }}"
@@ -311,7 +311,7 @@
 
                   <input type="hidden" name="final-price" id="details_final-price" class="form-control final-price">
 
-                  <button class="btn btn-sm btn-primary radius-md" type="button" aria-label="Add to cart"
+                  <button class="btn btn-sm btn-primary radius-sm" type="button" aria-label="Add to cart"
                     data-bs-toggle="tooltip" data-placement="top"
                     title="{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}" onclick="addToCartDetails2()">
                     <i class="fas fa-cart-plus"></i><span>{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }} </span>
@@ -366,7 +366,7 @@
             </li>
           @endif
         </ul>
-        <div class="tab-content radius-lg">
+        <div class="tab-content radius-sm">
           <div class="tab-pane fade active show" id="desc">
             <div class="tab-description">
               <div class="row align-items-center">
@@ -465,7 +465,7 @@
                         </div>
                         <div class="form-group">
                           <button type="submit"
-                            class="btn btn-lg btn-primary radius-md">{{ $keywords['Submit'] ?? __('Submit') }}</button>
+                            class="btn btn-lg btn-primary radius-sm">{{ $keywords['Submit'] ?? __('Submit') }}</button>
                         </div>
                       </form>
                     </div>
@@ -610,7 +610,7 @@
                 @endforeach
               </div>
             @else
-              <h3 class="text-center">{{ $keywords['No related product found'] ?? __('No related product found') }}
+              <h3 class="text-center">Sem produtos relacionados disponíveis.
               </h3>
             @endif
           </div>
