@@ -198,11 +198,11 @@ class RegisterUserController extends Controller
             $currCount = UserCurrency::where('user_id', $user->id)->where('is_default', 1)->count();
             if ($currCount == 0) {
                 UserCurrency::create([
-                    'text' => 'USD',
-                    'symbol' => '$',
-                    'value' => '1',
+                    'text' => 'BRL',
+                    'symbol' => 'R$',
+                    'value' => '5.3',
                     'is_default' => 1,
-                    'text_position' => 'left',
+                    'text_position' => 'right',
                     'symbol_position' => 'left',
                     'user_id' => $user->id,
                 ]);

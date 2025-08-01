@@ -263,8 +263,6 @@
                                   value="{{ $variant_option_contents->option_content->option_name }}:{{ currency_converter($variant_content_option->price) }}:{{ $variant_content_option->stock }}:{{ $variant_content_option->id }}:{{ $product_variation->id }}">
                                 <label class="form-radio-label" for="radio_{{ $main_id }}"><span
                                     class="details_view_variants_price">{{ $variant_option_contents->option_content->option_name }}
-                                    (<i
-                                      class="fas fa-plus"></i>{{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, currency_converter($variant_content_option->price)) }})
                                   </span></label>
                               </li>
                             @endforeach

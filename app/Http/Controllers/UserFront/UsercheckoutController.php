@@ -39,6 +39,7 @@ class UsercheckoutController extends Controller
 {
     public function checkout($domain, Request $request)
     {
+       
         $prevUrl = session()->get('prevUrl', []);
         if (!empty($prevUrl) && is_string($prevUrl)) {
             if (onlyDigitalItemsInCart() && !Auth::check()) {
@@ -116,6 +117,7 @@ class UsercheckoutController extends Controller
         if (count($st_errors)) {
             return redirect()->back()->with('st_errors', $st_errors);
         }
+        
         $total = Common::orderTotal($request->shipping_charge, $user->id);
         $total = $total - session()->get('user_coupon');
 
@@ -129,7 +131,6 @@ class UsercheckoutController extends Controller
         if (Common::orderValidation($request, $mode, $user->id)) {
             return Common::orderValidation($request, $mode, $user->id);
         }
-
         $bs = BasicSetting::where('user_id', $user->id)->firstorFail();
         $input = $request->all();
         $request['status'] = 1;
@@ -384,6 +385,7 @@ class UsercheckoutController extends Controller
                 session()->flash('alert-type', 'error');
                 return redirect()->back()->withInput($request->all());
             }
+           
             $amount = $total;
             $email = $request->billing_email ?? 'cliente@email.com'; // ou outro campo que tenha o e-mail
             $success_url = route('customer.itemcheckout.pagSmile.success', getParam());

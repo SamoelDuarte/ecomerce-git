@@ -162,7 +162,7 @@ class Common
             'billing_fname' => 'required',
             'billing_lname' => 'required',
             'billing_number' => 'required',
-            'billing_email' => 'required',
+            'billing_email' => 'required|email',
             'billing_city' => 'required',
             'billing_country' => 'required',
             'billing_address' => 'required',
@@ -180,23 +180,54 @@ class Common
         ];
 
         if ($gtype == 'offline') {
-            $gateway = UserOfflineGateway::where([['name', $request->payment_method], ['user_id', $user_id]])->first();
+            $gateway = UserOfflineGateway::where([
+                ['name', $request->payment_method],
+                ['user_id', $user_id]
+            ])->first();
 
-            if ($gateway->is_receipt == 1) {
+            if ($gateway && $gateway->is_receipt == 1) {
                 $rules['receipt'] = [
                     'required',
                     function ($attribute, $value, $fail) use ($request) {
                         $ext = $request->file('receipt')->getClientOriginalExtension();
-                        if (!in_array($ext, array('jpg', 'png', 'jpeg'))) {
-                            return $fail("Only png, jpg, jpeg image is allowed");
+                        if (!in_array($ext, ['jpg', 'png', 'jpeg'])) {
+                            return $fail("Apenas imagens PNG, JPG ou JPEG são permitidas.");
                         }
                     },
                 ];
             }
         }
 
-        $request->validate($rules);
+        $messages = [
+            'required' => 'O campo :attribute é obrigatório.',
+            'email' => 'O campo :attribute deve ser um e-mail válido.',
+        ];
+
+        $attributes = [
+            'billing_fname' => 'nome',
+            'billing_lname' => 'sobrenome',
+            'billing_number' => 'telefone',
+            'billing_email' => 'e-mail',
+            'billing_city' => 'cidade',
+            'billing_country' => 'país',
+            'billing_address' => 'endereço',
+            'payment_method' => 'método de pagamento',
+
+            'shipping_fname' => 'nome de envio',
+            'shipping_lname' => 'sobrenome de envio',
+            'shipping_number' => 'telefone de envio',
+            'shipping_email' => 'e-mail de envio',
+            'shipping_city' => 'cidade de envio',
+            'shipping_country' => 'país de envio',
+            'shipping_address' => 'endereço de envio',
+            'identity_number' => 'número de identidade',
+            'zip_code' => 'código postal',
+            'receipt' => 'comprovante de pagamento',
+        ];
+
+        $request->validate($rules, $messages, $attributes);
     }
+    
 
     public static function saveOrder($request, $txnId, $chargeId, $paymentStatus = 'Pending', $gtype = 'online', $user_id)
     {
