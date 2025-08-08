@@ -2,8 +2,16 @@
 
 use App\Models\User;
 use App\Http\Controllers\GitWebhookController;
+use App\Http\Controllers\UserFront\CheckoutController;
+use App\Services\ViaCepService;
 
 Route::post('/git-webhook', [GitWebhookController::class, 'handle']);
+
+Route::get('/consulta-cep/{cep}', function ($cep, ViaCepService $viaCep) {
+    return response()->json($viaCep->consultar($cep));
+});
+
+Route::get('/calcular-entrega/{cep}', [CheckoutController::class, 'calcularEntrega']);
 
 $domain = env('WEBSITE_HOST');
 

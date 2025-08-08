@@ -135,30 +135,37 @@ class ShopController extends Controller
                     });
             })
             ->when($subcategory, function ($query, $subcategory) {
-                return $query->where('user_item_sub_categories.id', $subcategory)->where('user_item_sub_categories.status', '=', 1);
+                return $query->where('user_item_sub_categories.id', $subcategory)
+                    ->where('user_item_sub_categories.status', '=', 1);
             })
             ->when(($min && $max), function ($query) use ($min, $max) {
-                return $query->where('user_items.current_price', '>=', $min)->where('user_items.current_price', '<=', $max);
+                return $query->whereBetween('user_items.current_price', [$min, $max]);
             })
             ->when($keyword, function ($query, $keyword) {
                 return $query->where('user_item_contents.title', 'like', '%' . $keyword . '%');
             })
-            ->select('user_items.*', 'user_item_contents.*', 'user_item_categories.*', 'user_item_categories.name as category_name', 'user_item_categories.slug as category_slug', 'user_item_contents.slug as product_slug')
-            ->when($sort, function ($query, $sort) {
-                if ($sort == 'new') {
-                    return $query->orderBy('user_items.created_at', 'desc');
-                } else if ($sort == 'old') {
-                    return $query->orderBy('user_items.created_at', 'asc');
-                } elseif ($sort == 'ascending') {
-                    return $query->orderBy('user_items.current_price', 'asc');
-                } elseif ($sort == 'descending') {
-                    return $query->orderBy('user_items.current_price', 'desc');
-                }
+            ->select(
+                'user_items.*',
+                'user_item_contents.item_id as item_id',
+                'user_item_contents.slug as product_slug',
+                'user_item_contents.title as content_title',
+                'user_item_categories.name as category_name',
+                'user_item_categories.slug as category_slug',
+                'user_item_sub_categories.name as subcategory_name'
+            )->when($sort, function ($query, $sort) {
+                return match ($sort) {
+                    'new' => $query->orderBy('user_items.created_at', 'desc'),
+                    'old' => $query->orderBy('user_items.created_at', 'asc'),
+                    'ascending' => $query->orderBy('user_items.current_price', 'asc'),
+                    'descending' => $query->orderBy('user_items.current_price', 'desc'),
+                    default => $query
+                };
             }, function ($query) {
                 return $query->orderByDesc('user_items.id');
             })
             ->where('user_items.user_id', $user->id)
             ->paginate(12);
+
 
         $data['minPrice'] = UserItem::where([['status', 1], ['user_id', $user->id]])->min('current_price');
         $data['maxPrice'] = UserItem::where([['status', 1], ['user_id', $user->id]])->max('current_price');
@@ -493,9 +500,10 @@ class ShopController extends Controller
     public function productDetails($domain, $slug)
     {
         $user = getUser();
+
+        // Detecta idioma
         if (session()->has('user_lang')) {
             $userCurrentLang = UserLanguage::where('code', session()->get('user_lang'))->where('user_id', $user->id)->first();
-
             if (empty($userCurrentLang)) {
                 $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $user->id)->first();
                 session()->put('user_lang', $userCurrentLang->code);
@@ -503,36 +511,56 @@ class ShopController extends Controller
         } else {
             $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $user->id)->first();
         }
+
         $uLang = $userCurrentLang->id;
-        $itemId =  UserItemContent::where([['slug', $slug], ['user_id', $user->id]])->pluck('item_id')->firstOrFail();
+        $itemId = UserItemContent::where([['slug', $slug], ['user_id', $user->id]])->pluck('item_id')->firstOrFail();
 
-        $data['uLang'] = $userCurrentLang->id;
-
-        $data['product'] = UserItemContent::with('item', 'item.sliders', 'variations')
-            ->where('language_id', '=', $uLang)
+        $product = UserItemContent::with('item.digitalCodes', 'item.sliders', 'variations')
+            ->where('language_id', $uLang)
             ->where('item_id', $itemId)
-            ->first();
+            ->firstOrFail();
 
-        if (is_null($data['product'])) {
-            abort(404);
+        // Define se o produto é digital e se possui códigos
+        $isDigital = $product->item->type == 'digital';
+        $hasCodes = false;
+        $minCodePrice = 0;
+        $maxCodePrice = 0;
+
+        if ($isDigital) {
+            $codes  = $product->item->digitalCodes->where('is_used', false);
+            if ($codes->count()) {
+                $hasCodes = true;
+                $minCodePrice = $codes->min('price');
+                $maxCodePrice = $codes->max('price');
+            }
         }
 
-        $category_id = $data['product']->category_id;
+        $category_id = $product->category_id;
         $category = UserItemCategory::where([['id', $category_id], ['status', 1]])->select('slug')->first();
-        $data['category_slug'] = @$category->slug;
 
-        $data['related_product'] = UserItemContent::with('item', 'item.sliders', 'variations')
-            ->where('language_id', '=', $uLang)
-            ->where('category_id', '=', $category_id)
-            ->where('slug', '!=', $slug)
-            ->get();
-        $data['ubs'] = BasicSetting::where('user_id', $user->id)->firstOrFail();
+        return view('user-front.product_details', [
+            'uLang' => $uLang,
+            'product' => $product,
+            'category_slug' => optional($category)->slug,
+            'related_product' => UserItemContent::with('item', 'item.sliders', 'variations')
+                ->where('language_id', $uLang)
+                ->where('category_id', $category_id)
+                ->where('slug', '!=', $slug)
+                ->get(),
+            'ubs' => BasicSetting::where('user_id', $user->id)->firstOrFail(),
+            'reviews' => UserItemReview::where('item_id', $product->item_id)->get(),
+            'product_variations' => ProductVariation::where('item_id', $product->item_id)->get(),
+            'item_id' => $product->item_id,
 
-        $data['reviews'] = UserItemReview::where('item_id', $data['product']->item_id)->get();
-        $data['product_variations'] = ProductVariation::where('item_id', $data['product']->item_id)->get();
-        $data['item_id'] = $data['product']->item_id;
-        return view('user-front.product_details', $data);
+            // 👇 Variáveis para os preços dos códigos
+            'isDigital' => $isDigital,
+            'hasCodes' => $hasCodes,
+            'minCodePrice' => $minCodePrice,
+            'maxCodePrice' => $maxCodePrice,
+        ]);
     }
+
+
 
     public function productDetailsQuickview($domain, $slug)
     {

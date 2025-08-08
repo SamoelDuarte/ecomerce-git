@@ -164,8 +164,13 @@ class Common
             'billing_number' => 'required',
             'billing_email' => 'required|email',
             'billing_city' => 'required',
-            'billing_country' => 'required',
-            'billing_address' => 'required',
+            'billing_state' => 'required',
+            'billing_zip' => 'required',
+            'billing_street' => 'required',
+            'billing_number_home' => 'required',
+            'billing_neighborhood' => 'required',
+            'billing_reference' => 'nullable|string',
+
             'payment_method' => 'required',
 
             'shipping_fname' => $request->checkbox == 'on' ? 'required' : '',
@@ -173,10 +178,15 @@ class Common
             'shipping_number' => $request->checkbox == 'on' ? 'required' : '',
             'shipping_email' => $request->checkbox == 'on' ? 'required' : '',
             'shipping_city' => $request->checkbox == 'on' ? 'required' : '',
+            'shipping_state' => $request->checkbox == 'on' ? 'required' : '',
             'shipping_country' => $request->checkbox == 'on' ? 'required' : '',
-            'shipping_address' => $request->checkbox == 'on' ? 'required' : '',
+            'shipping_street' => $request->checkbox == 'on' ? 'required' : '',
+            'shipping_number_address' => $request->checkbox == 'on' ? 'required' : '',
+            'shipping_neighborhood' => $request->checkbox == 'on' ? 'required' : '',
+            'shipping_zip' => $request->checkbox == 'on' ? 'required' : '',
+            'shipping_reference' => $request->checkbox == 'on' ? 'nullable|string' : '',
+
             'identity_number' => $request->payment_method == 'Iyzico' ? 'required' : '',
-            'zip_code' => $request->payment_method == 'Iyzico' ? 'required' : '',
         ];
 
         if ($gtype == 'offline') {
@@ -209,8 +219,13 @@ class Common
             'billing_number' => 'telefone',
             'billing_email' => 'e-mail',
             'billing_city' => 'cidade',
-            'billing_country' => 'país',
-            'billing_address' => 'endereço',
+            'billing_state' => 'estado',
+            'billing_zip' => 'CEP',
+            'billing_street' => 'rua',
+            'billing_number_home' => 'número',
+            'billing_neighborhood' => 'bairro',
+            'billing_reference' => 'referência',
+
             'payment_method' => 'método de pagamento',
 
             'shipping_fname' => 'nome de envio',
@@ -218,16 +233,21 @@ class Common
             'shipping_number' => 'telefone de envio',
             'shipping_email' => 'e-mail de envio',
             'shipping_city' => 'cidade de envio',
+            'shipping_state' => 'estado de envio',
             'shipping_country' => 'país de envio',
-            'shipping_address' => 'endereço de envio',
+            'shipping_street' => 'rua de envio',
+            'shipping_number_address' => 'número de envio',
+            'shipping_neighborhood' => 'bairro de envio',
+            'shipping_zip' => 'CEP de envio',
+            'shipping_reference' => 'referência de envio',
+
             'identity_number' => 'número de identidade',
-            'zip_code' => 'código postal',
             'receipt' => 'comprovante de pagamento',
         ];
 
         $request->validate($rules, $messages, $attributes);
     }
-    
+
 
     public static function saveOrder($request, $txnId, $chargeId, $paymentStatus = 'Pending', $gtype = 'online', $user_id)
     {
@@ -237,6 +257,13 @@ class Common
         }
         $total = Common::orderTotal($shpp_chrg, $user_id);
 
+        // Valor do frete vindo do input (Frenet)
+        $shipping_service_price = floatval($request['shipping_service_price'] ?? 0);
+
+        // Soma o valor do frete no total
+        $total += $shipping_service_price;
+
+        
         $coupon_amount = session()->get('user_coupon');
         $total = $total - session()->get('user_coupon');
         if ($shpp_chrg != 0) {
@@ -269,24 +296,42 @@ class Common
         }
 
         $order = new UserOrder();
+
         $order->customer_id = Auth::guard('customer')->check() ? Auth::guard('customer')->user()->id : 9999999;
         $order->user_id = $user->id;
+
+        // Billing
         $order->billing_fname = $request['billing_fname'];
         $order->billing_lname = $request['billing_lname'];
         $order->billing_email = $request['billing_email'];
-        $order->billing_address = $request['billing_address'];
         $order->billing_city = $request['billing_city'];
         $order->billing_state = $request['billing_state'];
-        $order->billing_country = $request['billing_country'];
         $order->billing_number = $request['billing_number'];
-        $order->shipping_fname = !is_null($request['shipping_fname']) ? $request['shipping_fname'] : $request['billing_fname'];
-        $order->shipping_lname = !is_null($request['shipping_lname']) ? $request['shipping_lname'] : $request['billing_lname'];
-        $order->shipping_email = !is_null($request['shipping_email']) ? $request['shipping_email'] : $request['billing_email'];
-        $order->shipping_address = !is_null($request['shipping_address']) ? $request['shipping_address'] : $request['billing_address'];
-        $order->shipping_city = !is_null($request['shipping_city']) ? $request['shipping_city'] : $request['billing_city'];
-        $order->shipping_state = !is_null($request['shipping_state']) ? $request['shipping_state'] : $request['billing_state'];
-        $order->shipping_country = !is_null($request['shipping_country']) ? $request['shipping_country'] : $request['billing_country'];
-        $order->shipping_number = !is_null($request['shipping_number']) ? $request['shipping_number'] : $request['billing_number'];
+        $order->billing_street = $request['billing_street'];
+        $order->billing_number_home = $request['billing_number_home'];
+        $order->billing_neighborhood = $request['billing_neighborhood'];
+        $order->billing_zip = $request['billing_zip'];
+        $order->billing_reference = $request['billing_reference'] ?? null;
+
+        // Shipping (usa billing como fallback)
+        $order->shipping_fname = $request['shipping_fname'] ?? $request['billing_fname'];
+        $order->shipping_lname = $request['shipping_lname'] ?? $request['billing_lname'];
+        $order->shipping_email = $request['shipping_email'] ?? $request['billing_email'];
+        $order->shipping_city = $request['shipping_city'] ?? $request['billing_city'];
+        $order->shipping_state = $request['shipping_state'] ?? $request['billing_state'];
+        $order->shipping_number = $request['shipping_number'] ?? $request['billing_number'];
+        $order->shipping_street = $request['shipping_street'] ?? $request['billing_street'];
+        $order->shipping_number_address = $request['shipping_number_address'] ?? $request['billing_number_home'];
+        $order->shipping_neighborhood = $request['shipping_neighborhood'] ?? $request['billing_neighborhood'];
+        $order->shipping_zip = $request['shipping_zip'] ?? $request['billing_zip'];
+        $order->shipping_reference = $request['shipping_reference'] ?? $request['billing_reference'];
+
+        // Frete
+        $order->shipping_service = $request['shipping_service_name'];
+        $order->shipping_price = $request['shipping_service_price'];
+
+
+
         $order->order_status = $order_status;
         $order->gateway_type = $gtype;
         if (is_array($request)) {
@@ -496,9 +541,7 @@ class Common
 
         $mailBody = str_replace('{billing_fname}', $order->billing_fname, $mailBody);
         $mailBody = str_replace('{billing_lname}', $order->billing_lname, $mailBody);
-        $mailBody = str_replace('{billing_address}', $order->billing_address, $mailBody);
         $mailBody = str_replace('{billing_city}', $order->billing_city, $mailBody);
-        $mailBody = str_replace('{billing_country}', $order->billing_country, $mailBody);
         $mailBody = str_replace('{billing_number}', $order->billing_number, $mailBody);
         $mailBody = str_replace('{order_link}', $link, $mailBody);
         $mailBody = str_replace('{website_title}', $website_title, $mailBody);

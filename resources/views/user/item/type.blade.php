@@ -47,7 +47,7 @@
           <div class="row">
 
             <div class="col-lg-6">
-              <a href="{{ route('user.item.create') . '?language=' . $default->code . '&type=physical' }}"
+              <a href="{{ route('user.item.create') . '?language=' . $default->code . '&type=fisico' }}"
                 class="d-block text-decoration-none">
                 <div class="card card-stats card-round">
                   <div class="card-body ">

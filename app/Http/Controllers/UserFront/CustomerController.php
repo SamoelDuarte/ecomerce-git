@@ -525,6 +525,7 @@ class CustomerController extends Controller
 
     public function updateProfile(Request $request)
     {
+
         $user_id = getUser()->id;
         $keywords = Common::get_keywords($user_id);
         $img = $request->file('image');

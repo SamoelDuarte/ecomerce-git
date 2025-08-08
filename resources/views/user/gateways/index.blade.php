@@ -151,9 +151,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Paystack --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.paystack.update') }}" method="post">
                     @csrf
@@ -220,9 +219,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Mollie --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.mollie.update') }}" method="post">
                     @csrf
@@ -291,9 +289,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Yoco --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.yoco.update') }}" method="post">
                     @csrf
@@ -360,9 +357,8 @@
                 </form>
             </div>
         </div>
-
         {{-- xendit --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.xendit.update') }}" method="post">
                     @csrf
@@ -428,9 +424,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Perfect Money --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.perfect_money.update') }}" method="post">
                     @csrf
@@ -504,9 +499,8 @@
                 </form>
             </div>
         </div>
-
         {{-- MercadoPago --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.mercadopago.update') }}" method="post">
                     @csrf
@@ -586,9 +580,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Flutterwave --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.flutterwave.update') }}" method="post">
                     @csrf
@@ -663,9 +656,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Razorpay --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.razorpay.update') }}" method="post">
                     @csrf
@@ -742,9 +734,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Stripe --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.stripe.update') }}" method="post">
                     @csrf
@@ -819,9 +810,8 @@
                 </form>
             </div>
         </div>
-
         {{-- myfatoorah --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.myfatoorah.update') }}" method="post">
                     @csrf
@@ -909,9 +899,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Midtrans Information --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.midtrans.update') }}" method="post">
                     @csrf
@@ -1011,9 +1000,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Paypal --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.paypal.update') }}" method="post">
                     @csrf
@@ -1104,9 +1092,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Instamojo --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.instamojo.update') }}" method="post">
                     @csrf
@@ -1200,9 +1187,8 @@
                 </form>
             </div>
         </div>
-
         {{-- toyyibpay Information --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.toyyibpay.update') }}" method="post">
                     @csrf
@@ -1299,9 +1285,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Authorize.net --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.anet.update') }}" method="post">
                     @csrf
@@ -1407,9 +1392,8 @@
                 </form>
             </div>
         </div>
-
         {{-- Phonepe --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.phonepe.update') }}" method="post">
                     @csrf
@@ -1498,9 +1482,8 @@
                 </form>
             </div>
         </div>
-
         {{-- iyzico --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.iyzico.update') }}" method="post">
                     @csrf
@@ -1599,9 +1582,8 @@
                 </form>
             </div>
         </div>
-
         {{-- paytabs Information --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form action="{{ route('user.paytabs.update') }}" method="post">
                     @csrf
@@ -1715,9 +1697,8 @@
             </div>
         </div>
 
-
         {{-- Paytm --}}
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <form class="" action="{{ route('user.paytm.update') }}" method="post">
                     @csrf

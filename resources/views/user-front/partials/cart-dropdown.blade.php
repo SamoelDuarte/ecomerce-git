@@ -5,6 +5,7 @@
   <ul class="cart-dropdown-list">
     @php
       $cart = Session::get('cart');
+      // dd($cart);
       $user_id = getUser()->id;
       if (!is_null($cart) && is_array($cart)) {
           $cart = array_filter($cart, function ($item) use ($user_id) {
@@ -90,12 +91,10 @@
                 <table class="variation-table mb-1">
                   <tr>
                     <td class="">
-                      <span class="fw-medium me-1">{{ $variation_name }}:</span>
+                      <span class="fw-medium me-1">{{ $variation_name }}</span>
                     </td>
                     <td class="cart_variants_price">
                       <small>{{ $vOptionName }}</small>
-                      -(<i
-                        class="fas fa-plus"></i>{{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, $itm['price']) }})
                     </td>
                   </tr>
                 </table>

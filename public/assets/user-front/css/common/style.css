@@ -6670,3 +6670,13 @@ figure.product-img.skeleton.skeleton-big-img {
 h4.product-title.lc-2 {
     font-size: 15px;
 }
+
+.product-list-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 23px
+}
+
+.list-item{
+    padding: 3px;
+}

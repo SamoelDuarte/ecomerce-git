@@ -16,6 +16,9 @@
             @if (Session::has('stock_error'))
                 <p class="text-danger text-center my-3">{{ Session::get('stock_error') }}</p>
             @endif
+
+            <input type="hidden" name="shipping_service_price" id="shipping_service_price">
+            <input type="hidden" name="shipping_service_name" id="shipping_service_name">
             <div class="container">
                 @if (Session::has('st_errors'))
                     <div class="alert alert-warning">
@@ -33,9 +36,11 @@
                                 <div class="alert alert-danger" role="alert">{{ $error }}</div>
                             @endforeach
                         @endif
+
                         <div class="billing-details">
-                            <h3 class="mb-20">{{ $keywords['Billing Details'] ?? __('Billing Details') }} </h3>
+                            <h3 class="mb-20">{{ $keywords['Billing Details'] ?? __('Billing Details') }}</h3>
                             <div class="row">
+                                <!-- Nome -->
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <label for="firstName">{{ $keywords['First_Name'] ?? __('First Name') }} *</label>
@@ -48,6 +53,8 @@
                                         @enderror
                                     </div>
                                 </div>
+
+                                <!-- Sobrenome -->
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <label for="lastName">{{ $keywords['Last_Name'] ?? __('Last Name') }} *</label>
@@ -61,6 +68,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Telefone -->
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
                                         <label for="phone">{{ $keywords['Phone_Number'] ?? __('Phone Number') }}
@@ -74,8 +82,9 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-6">
 
+                                <!-- Email -->
+                                <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <label for="email">{{ $keywords['Email_Address'] ?? __('Email Address') }}
                                             *</label>
@@ -89,6 +98,60 @@
                                     </div>
                                 </div>
 
+                                <!-- CEP -->
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <label for="zipcode">CEP *</label>
+                                        <input id="billing_zip" type="text" class="form-control" placeholder="CEP"
+                                            name="billing_zip"
+                                            value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_zip) : old('billing_zip') }}">
+
+                                        @error('billing_zip')
+                                            <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Rua / Logradouro -->
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <label for="billing_street">Rua / Logradouro *</label>
+                                        <input id="billing_street" type="text" class="form-control"
+                                            placeholder="Rua / Avenida" name="billing_street"
+                                            value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_street) : old('billing_street') }}">
+                                        @error('billing_street')
+                                            <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Número da casa -->
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <label for="billing_number_home">Número *</label>
+                                        <input id="billing_number_home" type="text" class="form-control"
+                                            placeholder="Número da casa / prédio" name="billing_number_home"
+                                            value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_number_home) : old('billing_number_home') }}">
+                                        @error('billing_number_home')
+                                            <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Bairro -->
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <label for="billing_neighborhood">Bairro *</label>
+                                        <input id="billing_neighborhood" type="text" class="form-control"
+                                            placeholder="Bairro" name="billing_neighborhood"
+                                            value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_neighborhood) : old('billing_neighborhood') }}">
+                                        @error('billing_neighborhood')
+                                            <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Cidade -->
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <label for="city">{{ $keywords['City'] ?? __('City') }} *</label>
@@ -101,38 +164,34 @@
                                     </div>
                                 </div>
 
+                                <!-- Estado -->
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <label for="district">{{ $keywords['State'] ?? __('State') }} </label>
+                                        <label for="district">{{ $keywords['State'] ?? __('State') }} *</label>
                                         <input id="district" type="text" class="form-control"
                                             placeholder="{{ $keywords['State'] ?? __('State') }}" name="billing_state"
                                             value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_state) : old('billing_state') }}">
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <label for="country">{{ $keywords['Country'] ?? __('Country') }} *</label>
-                                        <input type="text" class="form-control"
-                                            placeholder="{{ $keywords['Country'] ?? __('Country') }}"
-                                            name="billing_country"
-                                            value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_country) : old('billing_country') }}">
-                                        @error('billing_country')
+                                        @error('billing_state')
                                             <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-12">
+
+                                <!-- Complemento / Referência -->
+                                <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <label for="country">{{ $keywords['Address'] ?? __('Address') }} *</label>
-                                        <textarea name="billing_address" class="form-control max_height_100"
-                                            placeholder="{{ $keywords['Address'] ?? __('Address') }}">{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_address) : old('billing_address') }}</textarea>
-                                        @error('billing_address')
+                                        <label for="reference">Referência / Complemento</label>
+                                        <input id="reference" type="text" class="form-control"
+                                            placeholder="referência / complemento" name="billing_reference"
+                                            value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->billing_reference) : old('billing_reference') }}">
+                                        @error('billing_reference')
                                             <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
                                         @enderror
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="ship-details">
                             <div class="form-group mb-20">
                                 <div class="custom-checkbox">
@@ -142,12 +201,14 @@
                                         data-target="#collapseAddress" href="#collapseAddress"
                                         aria-controls="collapseAddress"
                                         for="differentaddress"><span>{{ $keywords['Ship to a different address'] ?? __('Ship to a different address?') }}
-                                            * </span></label>
+                                            *</span></label>
                                 </div>
                             </div>
+
                             <div id="collapseAddress" class="collapse @if (old('checkbox')) show @endif">
-                                <h3 class="mb-20">{{ $keywords['Shipping Details'] ?? __('Shipping Details') }} </h3>
+                                <h3 class="mb-20">{{ $keywords['Shipping Details'] ?? __('Shipping Details') }}</h3>
                                 <div class="row">
+
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
                                             <label for="firstName">{{ $keywords['First_Name'] ?? __('First Name') }}
@@ -161,6 +222,7 @@
                                             @enderror
                                         </div>
                                     </div>
+
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
                                             <label for="lastName">{{ $keywords['Last_Name'] ?? __('Last Name') }}
@@ -174,6 +236,7 @@
                                             @enderror
                                         </div>
                                     </div>
+
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
                                             <label for="phone">{{ $keywords['Phone_Number'] ?? __('Phone Number') }}
@@ -187,6 +250,7 @@
                                             @enderror
                                         </div>
                                     </div>
+
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
                                             <label for="email">{{ $keywords['Email_Address'] ?? __('Email Address') }}
@@ -200,9 +264,65 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <!-- NOVO: Campo CEP -->
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <label for="shipping_city">{{ $keywords['City'] ?? __('City') }}* </label>
+                                            <label for="shipping_zip">CEP</label>
+                                            <input id="shipping_zip" type="text" class="form-control"
+                                                name="shipping_zip" placeholder="cep"
+                                                value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_zip) : old('shipping_zip') }}">
+                                            @error('shipping_zip')
+                                                <p class="text-danger mb-2">{{ convertUtf8($message) }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- ... tudo que já estava acima permanece igual -->
+
+                                    <!-- RUA -->
+                                    <div class="col-lg-6">
+                                        <div class="form-group mb-3">
+                                            <label for="shipping_street">Rua *</label>
+                                            <input id="shipping_street" type="text" class="form-control"
+                                                name="shipping_street" placeholder="Rua"
+                                                value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_street) : old('shipping_street') }}">
+                                            @error('shipping_street')
+                                                <p class="text-danger mb-2">{{ convertUtf8($message) }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- NÚMERO -->
+                                    <div class="col-lg-6">
+                                        <div class="form-group mb-3">
+                                            <label for="shipping_number_address">Número *</label>
+                                            <input id="shipping_number_address" type="text" class="form-control"
+                                                name="shipping_number_address" placeholder="Número"
+                                                value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_number_address) : old('shipping_number_address') }}">
+                                            @error('shipping_number_address')
+                                                <p class="text-danger mb-2">{{ convertUtf8($message) }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- BAIRRO -->
+                                    <div class="col-lg-6">
+                                        <div class="form-group mb-3">
+                                            <label for="shipping_neighborhood">Bairro *</label>
+                                            <input id="shipping_neighborhood" type="text" class="form-control"
+                                                name="shipping_neighborhood" placeholder="Bairro"
+                                                value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_neighborhood) : old('shipping_neighborhood') }}">
+                                            @error('shipping_neighborhood')
+                                                <p class="text-danger mb-2">{{ convertUtf8($message) }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group mb-3">
+                                            <label for="shipping_city">{{ $keywords['City'] ?? __('City') }} *</label>
                                             <input id="shipping_city" type="text" class="form-control"
                                                 name="shipping_city" placeholder="{{ $keywords['City'] ?? __('City') }}"
                                                 value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_city) : old('shipping_city') }}">
@@ -214,7 +334,7 @@
 
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <label for="shipping_state">{{ $keywords['State'] ?? __('State') }}* </label>
+                                            <label for="shipping_state">{{ $keywords['State'] ?? __('State') }} *</label>
                                             <input id="shipping_state" type="text" class="form-control"
                                                 name="shipping_state"
                                                 placeholder="{{ $keywords['State'] ?? __('State') }}"
@@ -225,27 +345,15 @@
                                         </div>
                                     </div>
 
+                                    <!-- NOVO: Campo de referência -->
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <label for="country">{{ $keywords['Country'] ?? __('Country') }} </label>
-                                            <input id="shipping_country" type="text" class="form-control"
-                                                name="shipping_country"
-                                                placeholder="{{ $keywords['Country'] ?? __('Country') }}"
-                                                value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_country) : old('shipping_country') }}">
-                                            @error('shipping_country')
+                                            <label for="shipping_reference">Referência / Complemento</label>
+                                            <input id="shipping_reference" type="text" class="form-control"
+                                                name="shipping_reference" placeholder="referência / complemento"
+                                                value="{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_reference) : old('shipping_reference') }}">
+                                            @error('shipping_reference')
                                                 <p class="text-danger mb-2">{{ convertUtf8($message) }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-12">
-                                        <div class="form-group mb-3">
-                                            <label for="shipping_address">{{ $keywords['Address'] ?? __('Address') }}
-                                                *</label>
-                                            <textarea name="shipping_address" class="form-control max_height_100"
-                                                placeholder="{{ $keywords['Address'] ?? __('Address') }}">{{ Auth::guard('customer')->user() ? convertUtf8(Auth::guard('customer')->user()->shipping_address) : old('shipping_address') }}</textarea>
-                                            @error('shipping_address')
-                                                <p class="text-danger mt-2">{{ convertUtf8($message) }}</p>
                                             @enderror
                                         </div>
                                     </div>
@@ -253,6 +361,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                     <div class="col-lg-4">
                         <div class="order-summery radius-md border mb-30">
@@ -263,6 +372,9 @@
                             <div class="order-summery-list-wrapper">
                                 @if ($cart)
                                     @foreach ($cart as $key => $item)
+                                        @php
+                                            $itemPrincipal = \App\Models\User\UserItem::find($item['id']);
+                                        @endphp
                                         @php
                                             $total += $item['product_price'] * $item['qty'];
                                             $prd = \App\Models\User\UserItem::with([
@@ -314,10 +426,11 @@
                                                         <span>{{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, $item['product_price']) }}</span>
                                                     </div>
 
-                                                    @if ($item['variations'])
+                                                    @if ($item['variations'] && !$itemPrincipal->hasCode())
                                                         <div class="variation-area">
                                                             <h5 class="text-dark fw-bold mb-0">
-                                                                {{ $keywords['Variations'] ?? __('Variations') }}:</h5>
+                                                                {{ $keywords['Variations'] ?? __('Variations') }}:
+                                                            </h5>
                                                             @foreach ($item['variations'] as $key => $variation)
                                                                 @php
                                                                     //show variations name
@@ -397,7 +510,8 @@
                                     <div class="order-summery form-block border radius-md">
                                         <div class="shop-title-box">
                                             <h3 class="pb-20 border-bottom">
-                                                {{ $keywords['Shipping Methods'] ?? __('Shipping Methods') }}</h3>
+                                                {{ $keywords['Shipping Methods'] ?? __('Shipping Methods') }}
+                                            </h3>
                                         </div>
                                         <table class=" w-100">
                                             <thead class="cart-header">
@@ -454,7 +568,8 @@
                         <div id="cartTotal">
                             <div class="order-summary form-block border radius-md mb-30">
                                 <h3 class="pb-10 mb-20 border-bottom">
-                                    {{ $keywords['Order Summary'] ?? __('Order Summary') }}</h3>
+                                    {{ $keywords['Order Summary'] ?? __('Order Summary') }}
+                                </h3>
                                 <div class="sub-total d-flex justify-content-between mb-2">
                                     <h5 class="mb-0">{{ $keywords['Cart Total'] ?? __('Cart Total') }}</h5>
                                     <span class="price"><span data="cartTotal() }}"
@@ -465,7 +580,7 @@
                                     <li class="d-flex justify-content-between">
 
                                         <h5 class="mb-0">{{ $keywords['Discount'] ?? __('Discount') }}</h5>
-                                        <span class="price"><span data="{{ $discount }}">
+                                        <span class="price"><span id="discount" data="{{ $discount }}">
                                                 {{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, $discount) }}</span>
                                         </span>
 
@@ -507,6 +622,8 @@
                                             $scharge = 0;
                                         @endphp
                                     @endif
+
+                                    <div id="shippingMethodsContainer"></div>
 
                                     @if ($userShop->tax != 0)
                                         <li class="d-flex justify-content-between">
@@ -618,6 +735,6 @@
         @endphp
         <script type="text/javascript" src="{{ $anetSrc }}" charset="utf-8"></script>
     @endif
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="{{ asset('assets/user-front/js/user-checkout.js') }}"></script>
 @endsection

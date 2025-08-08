@@ -423,7 +423,9 @@ $("body").on('click', '.quick-view-link', function (e) {
     $.ajax({
         url: url,
         method: 'POST',
-        data: { slug: slug },
+        data: {
+            slug: slug
+        },
         processData: false,
         contentType: false,
         cache: false,
@@ -449,7 +451,9 @@ $("body").on('click', '.quick-view-link', function (e) {
                     });
                 });
 
-                $('#quickViewModal').modal('show').animate({ opacity: 1 }, 500);
+                $('#quickViewModal').modal('show').animate({
+                    opacity: 1
+                }, 500);
                 $('.request-loader').removeClass('show');
 
                 $('[data-bs-toggle="tooltip"]').tooltip('dispose');
@@ -464,7 +468,7 @@ $("body").on('click', '.quick-view-link', function (e) {
 
             }, 500);
         },
-        error: function (error) { }
+        error: function (error) {}
     });
 });
 
@@ -485,51 +489,69 @@ $(document).ready(function () {
     }, 1000);
 });
 
-$('body').on('click', '.product-variant', function () {
-    var price = parseFloat($('#new-price').attr('data-base_price'));
-    if ($('#details_old-price').length > 0) {
-        var old_price = $('#details_old-price').attr('data-old_price');
+$('body').on('click', '.product-variant, .digital-code-variant', function () {
+
+    if ($('#details_max-price').length > 0) {
+
+        $('#details_max-price').prev('span.mx-1').remove(); // remove o traço "–"
+        $('#details_max-price').remove(); // remove o span do max price
     }
-    var quantity = $("input[name='cart-amount']").val();
-    let errorCount = 0;
-    let errMessage = [];
 
-    var $ul_parent = $('#variantListULDetails');
-    var $li_parent = $ul_parent.find('.list-item');
-    $li_parent.each(function () {
-        var $ul_child = $(this).find('.variantUL');
-        var $li_child_input = $ul_child.find('li input:checked');
+    var price = parseFloat($('#new-price').attr('data-base_price'));
+    var old_price = 0;
+    if ($('#details_old-price').length > 0) {
+        old_price = parseFloat($('#details_old-price').attr('data-old_price'));
+    }
+    var quantity = parseInt($("input[name='cart-amount']").val()) || 1;
 
-        $li_child_input.each(function () {
-            var value = $(this).val();
-            var values = value.split(":");
-            if (parseFloat(values[2]) < quantity) {
-                return false;
-            } else {
-                price = price + parseFloat(values[1]);
-                if ($('#details_old-price').length > 0) {
-                    old_price = parseFloat(old_price) + parseFloat(values[1]);
-                }
-            }
-        });
+    var variant_price = 0;
+    var variant_found = false;
+
+    // pega variações normais
+    $('#variantListULDetails').find('li input:checked.product-variant').each(function () {
+        var values = $(this).val().split(":");
+        if (parseFloat(values[2]) < quantity) {
+            alert('Estoque insuficiente para ' + values[0]);
+            variant_found = false;
+            return false;
+        }
+        variant_price += parseFloat(values[1]);
+        variant_found = true;
     });
 
-    var total_price = price * quantity;
-    total_price = total_price.toFixed(2);
-    $('#final-price').val(total_price);
+    // pega códigos digitais
+    $('#digitalCodeVariantULDetails').find('li input:checked.digital-code-variant').each(function () {
+        var values = $(this).val().split(":");
+        if (parseFloat(values[2]) < quantity) {
+            alert('Estoque insuficiente para ' + values[0]);
+            variant_found = false;
+            return false;
+        }
+        variant_price += parseFloat(values[1]);
+        variant_found = true;
+    });
 
-    //show total price in as price
-    if ($('#new-price').length > 0) {
-        $('#new-price').text(total_price);
+    if (!variant_found) {
+        // Nenhum selecionado, volta ao preço base
+        var total_price = price * quantity;
+        $('#final-price').val(total_price.toFixed(2));
+        $('#new-price').text(total_price.toFixed(2));
+        if ($('#details_old-price').length > 0) {
+            var total_old_price = old_price * quantity;
+            $('#details_old-price').text(total_old_price.toFixed(2));
+        }
+        return;
     }
 
-    //show total old price
-
+    var total_price = (price + variant_price) * quantity;
+    $('#final-price').val(total_price.toFixed(2));
+    $('#new-price').text(total_price.toFixed(2));
     if ($('#details_old-price').length > 0) {
-        var total_old_price = old_price * quantity;
+        var total_old_price = (old_price + variant_price) * quantity;
         $('#details_old-price').text(total_old_price.toFixed(2));
     }
 });
+
 
 
 function totalPriceDetails(qty) {
@@ -734,18 +756,22 @@ $(document).on('click', '.shopping-area .shopping-table .quantity-up', function 
     let newval = currval + 1;
     $input.val(newval);
 })
+var $product = $('#productDetails');
+var isDigital = $product.data('is-digital') == 1;
+var hasCodes = $product.data('has-codes') == 1;
+var old_price = parseFloat($product.data('old-price'));
 
-//function for product details page
 function totalPriceDetails2(qty) {
-    var previous_price = 0;
     qty = qty.toString().length > 0 ? qty : 0;
+
     var variant_price = [];
-    var variant_flag = 0;
-    stErr = 0;
-    stErrMsg = []
+    var stErr = 0;
+    var stErrMsg = [];
 
     var $ul_parent = $('#variantListULDetails');
     var $li_parent = $ul_parent.find('.list-item');
+
+    variant = {};
 
     $li_parent.each(function (i, li) {
         var variant_name = $(this).data('variant_name');
@@ -754,60 +780,83 @@ function totalPriceDetails2(qty) {
 
         $li_child_input.each(function (j, li) {
             var selected_variant = $(this).val();
-            /*user data-variant_name price to avoid split.*/
-
             var v = selected_variant.split(":");
 
-            variant[variant_name] = {
-                'name': v[0],
-                'price': parseFloat(v[1]),
-                'stock': parseFloat(v[2]),
-                'option_id': parseInt(v[3]),
-                'variation_id': parseInt(v[4]),
-            };
+            if (v.length >= 3) {
+                variant[variant_name] = {
+                    'name': v[0],
+                    'price': parseFloat(v[1]),
+                    'stock': parseFloat(v[2]),
+                    'option_id': parseInt(v[3]) || 0,
+                    'variation_id': parseInt(v[4]) || 0,
+                };
 
-            variant_price.push(parseFloat(v[1]));
-            if (parseFloat(v[2]) < qty) {
-                stErrMsg.push(variant_name + ' : ' + v[0] + " ; " + stock_unavailable);
-                stErr = 1;
-                return false;
+                variant_price.push(parseFloat(v[1]));
+
+                if (parseFloat(v[2]) < qty) {
+                    stErrMsg.push(`${variant_name} : ${v[0]} ; ${stock_unavailable}`);
+                    stErr = 1;
+                }
             }
-            return false;
+            return false; // só o primeiro checked por variante
         });
-        variant_flag++;
     });
 
-    var total = detail_new_price;
-    var old_total = detail_old_price;
-    for (var i = 0; i < variant_price.length; i++) {
-        total += variant_price[i];
-        old_total += variant_price[i];
+    console.log("Preços capturados das variantes:", variant_price);
+    console.log("isDigital:", isDigital);
+    console.log("hasCodes:", hasCodes);
+    console.log("qty:", qty);
+    console.log("variant_price array:", variant_price);
+    console.log("detail_new_price:", detail_new_price);
+    console.log("detail_old_price:", detail_old_price);
+    var total = parseFloat(detail_new_price) || 0;
+    var old_total = parseFloat(detail_old_price) || 0;
+
+    if (isDigital && hasCodes) {
+        // Se produto digital com códigos, usar só o preço da variante selecionada
+        if (variant_price.length > 0) {
+            total = variant_price[0] * qty;
+            old_total = variant_price[0] * qty; // se quiser aplicar aqui também
+        } else {
+            total = total * qty;
+            old_total = old_total * qty;
+        }
+    } else {
+        // Produto normal: soma base + todas variantes
+        for (var i = 0; i < variant_price.length; i++) {
+            total += variant_price[i];
+            old_total += variant_price[i];
+        }
+        total = total * qty;
+        old_total = old_total * qty;
     }
-    total = total.toFixed(2) * parseInt(qty);
+
+
+
     total = total.toFixed(2);
     $('#details_final-price').val(total);
 
-    //show total price in as price
     if ($('#details_new-price').length > 0) {
         $('#details_new-price').text(total);
     }
 
-    //show total old price
     if ($('#details_old-price').length > 0) {
-        var total_old_price = old_total * parseInt(qty);
-
-        $('#details_old-price').text(total_old_price.toFixed(2));
+        $('#details_old-price').text(old_total.toFixed(2));
     }
 
+    console.log("TOTAL FINAL:", total);
     return total;
 }
 
 
-$(document).on("click", $("input[type=radio]"), function () {
+
+// Atualiza o preço quando uma variação (radio) for alterada
+$(document).on("change", "input[type=radio]", function () {
     let $input = $(".item_quantity_details input");
-    let currval = parseInt($input.val());
+    let currval = parseInt($input.val()) || 1;
     totalPriceDetails2(currval);
 });
+
 /*************************************
  * for product details end
  *************************************/
@@ -831,8 +880,7 @@ function cartDropdown() {
             $("#cart-dropdown-header").append(data);
 
         },
-        error: function (error) {
-        }
+        error: function (error) {}
     });
 
 
@@ -852,8 +900,7 @@ function cartDropdownCount() {
         success: function (data) {
             $(".cart-dropdown-count").text(data);
         },
-        error: function (error) {
-        }
+        error: function (error) {}
     });
 }
 
@@ -871,8 +918,7 @@ function compareCount() {
         success: function (data) {
             $("#compare-count").text(data);
         },
-        error: function (error) {
-        }
+        error: function (error) {}
     });
 }
 
@@ -889,8 +935,7 @@ function wishlistCount() {
         success: function (data) {
             $(".wishlist-count").text(data);
         },
-        error: function (error) {
-        }
+        error: function (error) {}
     });
 }
 

@@ -30,8 +30,10 @@ use App\Models\User\UserMenu;
 use App\Models\User\UserPaymentGeteway;
 use App\Models\User\UserPermission;
 use App\Models\User\UserShopSetting;
+use App\Services\FrenetService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 
 class CheckoutController extends Controller
 {
@@ -253,6 +255,48 @@ class CheckoutController extends Controller
         }
     }
 
+    public function calcularEntrega(Request $request)
+    {
+        $cepDestino = preg_replace('/\D/', '', $request->cep);
+        $cepOrigem = '01002020'; // Pode deixar fixo ou puxar da loja
+        $valorNota = 0;
+        $produtos = [];
+
+        foreach (session('cart') as $item) {
+            $userItem = \App\Models\User\UserItem::find($item['id']);
+
+            // Se for produto digital (hasCode == true), pula
+            if ($userItem && $userItem->hasCode()) {
+                continue;
+            }
+
+            $produtos[] = [
+                'weight'   => $item['weight'],
+                'length'   => $item['length'],
+                'height'   => $item['height'],
+                'width'    => $item['width'],
+                'quantity' => $item['qty'],
+            ];
+
+            $valorNota += $item['product_price'] * $item['qty'];
+        }
+
+        // Se não tem produtos físicos, não calcula frete
+        if (empty($produtos)) {
+            return response()->json([
+                'ShippingSevicesArray' => [],
+                'message' => 'Nenhum frete necessário (somente produtos digitais)'
+            ]);
+        }
+
+        $frenet = new FrenetService();
+        $frete = $frenet->calcularFrete($produtos, $cepOrigem, $cepDestino, $valorNota);
+
+        return response()->json($frete);
+    }
+
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -275,7 +319,7 @@ class CheckoutController extends Controller
 
         if ($user->count() == 0) {
             $user = User::create([
-                'shop_name'=> $request['shop_name'],
+                'shop_name' => $request['shop_name'],
                 'email' => $request['email'],
                 'phone' => $request['phone'],
                 'username' => $request['username'],

@@ -31,32 +31,41 @@ class Customer extends Authenticatable
         'email_verified_at',
         'password',
         'contact_number',
-        'address',
-        'city',
-        'state',
-        'country',
         'status',
         'verification_token',
-        'remember_token',
         'verification_link',
+        'remember_token',
         'user_id',
+
+        // Shipping
         'shipping_fname',
         'shipping_lname',
         'shipping_email',
         'shipping_number',
         'shipping_city',
         'shipping_state',
-        'shipping_address',
+        'shipping_zip',
+        'shipping_street',
+        'shipping_number_address',
+        'shipping_neighborhood',
+        'shipping_reference',
         'shipping_country',
+
+        // Billing
         'billing_fname',
         'billing_lname',
         'billing_email',
         'billing_number',
         'billing_city',
         'billing_state',
-        'billing_address',
+        'billing_zip',
+        'billing_street',
+        'billing_number_home',
+        'billing_neighborhood',
+        'billing_reference',
         'billing_country',
     ];
+
 
     use Notifiable;
 

@@ -324,8 +324,8 @@
             value = this.getAttribute('data-off');
         }
         $.post(user_status, {
-            value: value
-        },
+                value: value
+            },
             function (data) {
                 history.go(0);
             });
@@ -347,22 +347,60 @@
 
     $("select[name='file_type']").on('change', function () {
         let type = $(this).val();
+
         if (type == 'link') {
+            // Mostrar campo link
             $("#downloadFile input").attr('disabled', true);
             $("#downloadFile").addClass('d-none');
             $("#downloadLink").removeClass('d-none');
             $("#downloadLink input").removeAttr('disabled');
+
+            // Esconder input planilha
+            $("#codeUploadSection").addClass('d-none');
+
+            // Mostrar preços
+            $(".price-group").removeClass('d-none');
+            $(".price-group input").removeAttr('disabled');
+
+        } else if (type == 'code') {
+            // Mostrar input planilha
+            $("#codeUploadSection").removeClass('d-none');
+
+            // Esconder upload e link
+            $("#downloadFile input").attr('disabled', true);
+            $("#downloadFile").addClass('d-none');
+            $("#downloadLink input").attr('disabled', true);
+            $("#downloadLink").addClass('d-none');
+
+            // Esconder preços
+            $(".price-group").addClass('d-none');
+            $(".price-group input").attr('disabled', true);
+
         } else {
+            // Mostrar upload
             $("#downloadLink input").attr('disabled', true);
             $("#downloadLink").addClass('d-none');
             $("#downloadFile").removeClass('d-none');
             $("#downloadFile input").removeAttr('disabled');
+
+            // Esconder input planilha
+            $("#codeUploadSection").addClass('d-none');
+
+            // Mostrar preços
+            $(".price-group").removeClass('d-none');
+            $(".price-group input").removeAttr('disabled');
         }
     });
 
+
     WebFont.load({
-        google: { "families": ["Lato:300,400,700,900"] },
-        custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: [mainurl + '/assets/admin/css/fonts.min.css'] },
+        google: {
+            "families": ["Lato:300,400,700,900"]
+        },
+        custom: {
+            "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+            urls: [mainurl + '/assets/admin/css/fonts.min.css']
+        },
         active: function () {
             sessionStorage.fonts = true;
         }

@@ -489,6 +489,11 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
             Route::post('/special-offer', 'User\ItemController@specialOffer')->name('user.item.specialOffer');
             Route::post('/delete', 'User\ItemController@delete')->name('user.item.delete');
             Route::get('/{id}/variations', 'User\ItemController@variations')->name('user.item.variations');
+            Route::get('/{id}/codigos', 'User\ItemController@codes')->name('user.item.codes');
+            Route::get('/add', 'User\ItemController@add')->name('user.item.code.add');
+            Route::post('user/item/{id}/code/store', 'User\ItemController@storeCode')->name('user.item.code.store');
+            Route::delete('user/item/code/delete/{id}', 'User\ItemController@deleteCode')->name('user.item.code.delete');
+            Route::post('user/item/code/import', 'User\ItemController@importCodes')->name('user.item.code.import');
             Route::get('/variations/get', 'User\ItemController@getVariation')->name('user.item.variations.get_variation');
             Route::post('/variation/store', 'User\ItemController@variationStore')->name('user.item.variation.store')->middleware('limitCheck:items,update');
             Route::get('/variation/delete/{id}', 'User\ItemController@variationDelete')->name('user.item.variation.delete');

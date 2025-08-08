@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\User\Payment\PagSmileController;
+use App\Http\Controllers\UserFront\CheckoutController;
 
 $domain = env('WEBSITE_HOST');
 
@@ -148,6 +149,8 @@ Route::group(['domain' => $domain, 'prefix' => $prefix, 'middleware' => ['userVi
     Route::get('/checkout/guest', 'UserFront\ItemController@checkoutGuest')->name('front.user.checkout.guest');
 
     Route::post('/item/payment/submit', 'UserFront\UsercheckoutController@checkout')->name('item.payment.submit')->middleware('Demo');
+    Route::get('/calcular-entrega/{cep}', [CheckoutController::class, 'calcularEntrega']);
+
 
 
 

@@ -28,6 +28,13 @@ class UserItem extends Model
     {
         return $this->belongsTo(UserCurrency::class);
     }
+    public function digitalCodes()
+    {
+        return $this->hasMany(DigitalProductCode::class, 'user_item_id', 'id');
+    }
 
-
+    public function hasCode(): bool
+    {
+        return $this->digitalCodes()->exists();
+    }
 }

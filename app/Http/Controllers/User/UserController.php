@@ -32,14 +32,15 @@ class UserController extends Controller
 
     public function index()
     {
+      
         $user = Auth::guard('web')->user();
         $data['user'] = $user;
         $data['blogs'] = $user->blogs()->count();
         $data['memberships'] = Membership::query()->where('user_id', Auth::guard('web')->user()->id)
             ->orderBy('id', 'DESC')
             ->limit(10)->get();
-
         $data['users'] = [];
+       
 
         $nextPackageCount = Membership::query()->where([
             ['user_id', $user->id],

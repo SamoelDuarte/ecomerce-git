@@ -92,6 +92,7 @@ class ItemController extends Controller
 
 
         $item = UserItem::findOrFail($id);
+
         if ($item->type != 'digital') {
             // validations
             if ($qty < 1) {
@@ -100,7 +101,7 @@ class ItemController extends Controller
 
             $totalVari = check_variation($id);
 
-           if ($totalVari != 0 && ($totalVari > count((array) $variant))) {
+            if ($totalVari != 0 && ($totalVari > count((array) $variant))) {
                 return response()->json(['error' => $keywords['You must select a variant'] ?? __('You must select a variant')]);
             }
             if (!$item) {
@@ -109,8 +110,21 @@ class ItemController extends Controller
         }
         $ckey = uniqid();
         //check product flash amount
-        $flash_info = flashAmountStatus($item->id, $item->current_price);
-        $product_current_price = $flash_info['amount'];
+        // Verifica se o item é digital com códigos
+        $hasCodes = $item->type === 'digital' && $item->digitalCodes()->where('is_used', false)->count() > 0;
+
+        if ($hasCodes && !empty($variant)) {
+            // Pega o menor preço entre os códigos digitais selecionados
+            $prices = array_map(function ($v) {
+                return floatval($v['price']);
+            }, $variant);
+
+            $product_current_price = min($prices); // usa o menor preço entre os códigos
+        } else {
+            // Se não for digital com códigos, aplica lógica do flash
+            $flash_info = flashAmountStatus($item->id, $item->current_price);
+            $product_current_price = $flash_info['amount'];
+        }
         //check product flash amount end
         // if cart is empty then this the first product
 
@@ -135,10 +149,15 @@ class ItemController extends Controller
                     "user_id" => $user_id,
                     "qty" => (int)$qty,
                     "variations" => $variant,
-                    "product_price" => (float) (currency_converter($product_current_price, $item->id)),
+                    "product_price" => (float)(currency_converter($product_current_price, $item->id)),
                     "total" => $total,
+                    "weight" => (float) $item->weight,
+                    "length" => (float) $item->length,
+                    "height" => (float) $item->height,
+                    "width"  => (float) $item->width,
                 ]
             ];
+
             Session::put('cart', $cart);
             return response()->json(['message' => $keywords['Item added to your cart successfully'] ?? __('Item added to your cart successfully')]);
         }
@@ -277,7 +296,13 @@ class ItemController extends Controller
             }
 
             if ($stErr == 0) {
-
+                if (!isset($cart[$cartKey]['weight'])) {
+                    $item = UserItem::find($cart[$cartKey]['id']);
+                    $cart[$cartKey]['weight'] = (float) ($item->weight ?? 0.5);
+                    $cart[$cartKey]['length'] = (float) ($item->length ?? 12);
+                    $cart[$cartKey]['height'] = (float) ($item->height ?? 12);
+                    $cart[$cartKey]['width']  = (float) ($item->width ?? 12);
+                }
                 $total += (float)$cartItem["product_price"];
                 $total = $total * $qtys[$i];
                 $cart[$cartKey]["qty"] = (int)$qtys[$i];

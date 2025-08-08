@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Helpers\BasicMailer;
 use App\Http\Helpers\Common;
 use App\Models\User;
+use App\Models\User\DigitalProductCode;
 use App\Models\User\ProductVariantOption;
 use App\Models\User\ProductVariantOptionContent;
 use App\Models\User\ProductVariation;
@@ -35,6 +36,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ItemController extends Controller
 {
@@ -46,14 +48,27 @@ class ItemController extends Controller
         $data['item_limit'] = $current_package->product_limit;
         $data['total_item'] = UserItemContent::where('language_id', $lang->id)->where('user_id', Auth::guard('web')->user()->id)->count();
 
-        $data['items'] = DB::table('user_items')->where('user_items.user_id', Auth::guard('web')->user()->id)
-            ->Join('user_item_contents', 'user_items.id', '=', 'user_item_contents.item_id')
+
+
+        $data['items'] = DB::table('user_items')
+            ->where('user_items.user_id', Auth::guard('web')->user()->id)
+            ->join('user_item_contents', 'user_items.id', '=', 'user_item_contents.item_id')
             ->join('user_item_categories', 'user_item_contents.category_id', '=', 'user_item_categories.id')
-            ->select('user_items.*', 'user_items.id AS item_id', 'user_item_contents.*', 'user_item_categories.name AS category')
-            ->orderBy('user_items.id', 'DESC')
+            ->select(
+                'user_items.*',
+                'user_items.id AS item_id',
+                'user_item_contents.*',
+                'user_item_categories.name AS category',
+                DB::raw("EXISTS (
+            SELECT 1 FROM digital_product_codes 
+            WHERE digital_product_codes.user_item_id = user_items.id
+        ) AS has_codes")
+            )
             ->where('user_item_contents.language_id', '=', $lang_id)
             ->where('user_item_categories.language_id', '=', $lang_id)
+            ->orderBy('user_items.id', 'DESC')
             ->get();
+
         $data['lang_id'] = $lang_id;
         $data['currency'] = UserCurrency::where('user_id', Auth::guard('web')->user()->id)->where('is_default', 1)->first();
         return view('user.item.index', $data);
@@ -119,26 +134,30 @@ class ItemController extends Controller
         return $category;
     }
 
+
     public function store(Request $request)
     {
-        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
+        // 1. Verifica limite do pacote do usuário
+        $current_package = UserPermissionHelper::currentPackagePermission(Auth::id());
         $item_limit = $current_package->product_limit;
-
-        $total_item = UserItem::where('user_id', Auth::guard('web')->user()->id)->count();
-        $total_item = $total_item + 1;
+        $total_item = UserItem::where('user_id', Auth::id())->count() + 1;
 
         if ($item_limit < $total_item) {
             Session::flash('warning', __('Item Limit Exceeded'));
             return 'success';
         }
 
-        $languages = Language::where('user_id', Auth::guard('web')->user()->id)->get();
-        $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
+        // 2. Buscar linguagens do usuário para validação multilíngue
+        $languages = Language::where('user_id', Auth::id())->get();
+        $defaulLang = Language::where([['user_id', Auth::id()], ['is_default', 1]])->first();
+
+        // 3. Regras e mensagens base para validação
         $messages = [];
         $rules = [];
         $sliderImgURLs = $request->has('image') ? $request->image : [];
-        $allowedExtensions = array('jpg', 'jpeg', 'png', 'svg');
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'svg'];
         $sliderImgExts = [];
+
         $rules['image'] = [
             'required',
             function ($attribute, $value, $fail) use ($allowedExtensions, $sliderImgExts) {
@@ -153,18 +172,45 @@ class ItemController extends Controller
             }
         ];
         $rules['thumbnail'] = 'required';
-        // if product type is 'physical'
+
+        // 4. Regras específicas para tipo físico
         if ($request->type == 'physical') {
             $rules['stock'] = 'required';
             $rules['sku'] = 'required|unique:user_items';
+            $rules['weight'] = 'required|numeric|min:0.01';
+            $rules['length'] = 'required|numeric|min:0.01';
+            $rules['width'] = 'required|numeric|min:0.01';
+            $rules['height'] = 'required|numeric|min:0.01';
         }
-        $rules['status'] = 'required';
-        // pplimorp
-        $rules['current_price'] = 'required|numeric|min:0.01';
-        $rules['previous_price'] = 'nullable|numeric|min:0.01';
-        $rules['category'] = 'required';
-        $messages['image.required'] = __('The slider Image is required') . '.';
 
+        $rules['status'] = 'required';
+        $rules['category'] = 'required';
+
+        // 5. Ajuste regras para preço: se digital+code, preços não são obrigatórios
+        if (!($request->type == 'digital' && $request->file_type == 'code')) {
+            // Para demais casos, preços obrigatórios
+            $rules['current_price'] = 'required|numeric|min:0.01';
+            $rules['previous_price'] = 'nullable|numeric|min:0.01';
+        } else {
+            // Para digital + code, preços opcionais, mas pode deixar nullable
+            $rules['current_price'] = 'nullable|numeric|min:0.01';
+            $rules['previous_price'] = 'nullable|numeric|min:0.01';
+        }
+
+        // 6. Regras para tipo digital
+        if ($request->type == 'digital') {
+            $rules['file_type'] = 'required';
+
+            if ($request->file_type == 'upload') {
+                $rules['download_file'] = 'required|mimes:zip';
+            } elseif ($request->file_type == 'link') {
+                $rules['download_link'] = 'required';
+            } elseif ($request->file_type == 'code') {
+                $rules['codeExcelInput'] = 'required|file|mimes:xlsx,csv';
+            }
+        }
+
+        // 7. Regras multilíngues
         foreach ($languages as $language) {
             $code = $language->code;
             if (
@@ -181,8 +227,10 @@ class ItemController extends Controller
                     'max:255',
                     function ($attribute, $value, $fail) use ($language, $request, $code) {
                         $slug = make_slug($request[$code . '_title']);
-                        $ics = UserItemContent::where('language_id', $language->id)->where('user_id', Auth::guard('web')->user()->id)->get();
-                        foreach ($ics as $key => $ic) {
+                        $ics = UserItemContent::where('language_id', $language->id)
+                            ->where('user_id', Auth::id())
+                            ->get();
+                        foreach ($ics as $ic) {
                             if (strtolower($slug) == strtolower($ic->slug)) {
                                 $fail(__('The title field must be unique for') . ' ' . $language->name . ' ' . __('language'));
                             }
@@ -192,23 +240,15 @@ class ItemController extends Controller
                 $rules[$code . '_summary'] = 'required';
                 $rules[$code . '_description'] = 'required';
             }
+
             $messages[$language->code . '_title.required'] = __('The title field is required for') . ' ' . $language->name . ' ' . __('language');
             $messages[$language->code . '_summary.required'] = __('The summary field is required for') . ' ' . $language->name . ' ' . __('language');
             $messages[$language->code . '_description.required'] = __('The description field is required for') . ' ' . $language->name . ' ' . __('language');
         }
 
-        // if product type is 'digital'
-        if ($request->type == 'digital') {
-            $rules['file_type'] = 'required';
-            // if 'file upload' is chosen
-            if ($request->has('file_type') && $request->file_type == 'upload') {
-                $rules['download_file'] = 'required|mimes:zip';
-            } elseif ($request->has('file_type') && $request->file_type == 'link') {
-                $rules['download_link'] = 'required';
-            }
-        }
-
+        // 8. Validação
         $validator = Validator::make($request->all(), $rules, $messages);
+
         if (!empty($sliderImgURLs)) {
             foreach ($sliderImgURLs as $sliderImgURL) {
                 $n = strrpos($sliderImgURL, ".");
@@ -223,7 +263,8 @@ class ItemController extends Controller
             ], 400);
         }
 
-        // if the type is digital && 'upload file' method is selected, then store the downloadable file
+        // 9. Se for digital + upload de arquivo normal
+        $filename = null;
         if ($request->type == 'digital' && $request->file_type == 'upload') {
             if ($request->hasFile('download_file')) {
                 $digitalFile = $request->file('download_file');
@@ -234,10 +275,12 @@ class ItemController extends Controller
             }
         }
 
-        $user_currency = UserCurrency::where('is_default', 1)->where('user_id', Auth::guard('web')->user()->id)->first();
+        // 10. Salvar produto - digital + code ou outros
+        $user_currency = UserCurrency::where('is_default', 1)->where('user_id', Auth::id())->first();
         $currency_id = $user_currency->id;
 
         $item = new UserItem();
+        $thumbnail_name = null;
         $thumbnail = $request->file('thumbnail');
         if ($request->hasFile('thumbnail')) {
             $dir = public_path('assets/front/img/user/items/thumbnail/');
@@ -252,25 +295,63 @@ class ItemController extends Controller
 
         $sliderDir = public_path('assets/front/img/user/items/slider-images/');
         @mkdir($sliderDir, 0775, true);
-        $item->user_id = Auth::guard('web')->user()->id;
-        $item->stock = $request->stock;
-        $item->sku = $request->sku;
+
+        $item->user_id = Auth::id();
+        $item->stock = $request->stock ?? null;
+        $item->sku = $request->sku ?? null;
         $item->thumbnail = $thumbnail_name;
         $item->status = $request->status;
-        $item->current_price = $request->current_price;
-        $item->previous_price = $request->previous_price;
+        $item->current_price = $request->current_price ?? '0.00';
+        $item->previous_price = $request->previous_price ?? null;
         $item->currency_id = $currency_id;
         $item->type = $request->type;
-        $item->download_file = $filename ?? null;
-        $item->download_link = $request->download_link;
+        $item->type = $request->type ?? null;
+        $item->download_file = $filename;
+        $item->download_link = $request->download_link ?? null;
+        $item->weight = $request->weight ?? null;
+        $item->length = $request->length ?? null;
+        $item->width = $request->width ?? null;
+        $item->height = $request->height ?? null;
         $item->save();
-        foreach ($request->image as $value) {
-            UserItemImage::create([
-                'item_id' => $item->id,
-                'image' => $value,
-            ]);
+
+        // 11. Se for digital + code, ler planilha e salvar códigos na tabela user_item_codes
+        if ($request->type == 'digital' && $request->file_type == 'code' && $request->hasFile('codeExcelInput')) {
+
+            $codeFile = $request->file('codeExcelInput');
+            $path = $codeFile->getRealPath();
+
+            $spreadsheet = IOFactory::load($path);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+            foreach ($rows as $row) {
+                // Ajuste conforme suas colunas, ex: col 1 descrição, col 2 código, col 3 valor
+                $name = $row[0] ?? null;
+                $code = $row[1] ?? null;
+                $value = isset($row[2]) ? floatval($row[2]) : null;
+                if ($code) {
+                    DB::table('digital_product_codes')->insert([
+                        'user_item_id' => $item->id,
+                        'name' =>  $name,
+                        'code' => $code,
+                        'price' => $value,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
         }
-        // store varations as json
+
+        // 12. Salvar imagens slider
+        if ($request->has('image')) {
+            foreach ($request->image as $value) {
+                UserItemImage::create([
+                    'item_id' => $item->id,
+                    'image' => $value,
+                ]);
+            }
+        }
+
+        // 13. Salvar conteúdo multilíngue
         $catUnique_id = UserItemCategory::where('id', $request->category)
             ->pluck('unique_id')->first();
         $subcatUnique_id = UserItemSubCategory::where('id', $request->subcategory)
@@ -292,23 +373,25 @@ class ItemController extends Controller
 
                 $adContent = new UserItemContent();
                 $adContent->item_id = $item->id;
-                $adContent->user_id = Auth::guard('web')->user()->id;
+                $adContent->user_id = Auth::id();
                 $adContent->language_id = $language->id;
                 $adContent->category_id = $categoryId;
                 $adContent->subcategory_id = $subcategoryId;
-                $adContent->label_id = $request[$code . '_label_id'];
-                $adContent->title = $request[$code . '_title'];
-                $adContent->slug = make_slug($request[$code . '_title']);
-                $adContent->summary = Purifier::clean($request[$code . '_summary'], 'youtube');
-                $adContent->description = Purifier::clean($request[$code . '_description'], 'youtube');
-                $adContent->meta_keywords = $request[$code . '_meta_keywords'];
-                $adContent->meta_description = $request[$code . '_meta_description'];
+                $adContent->label_id = $request[$code . '_label_id'] ?? null;
+                $adContent->title = $request[$code . '_title'] ?? null;
+                $adContent->slug = make_slug($request[$code . '_title'] ?? '');
+                $adContent->summary = Purifier::clean($request[$code . '_summary'] ?? '', 'youtube');
+                $adContent->description = Purifier::clean($request[$code . '_description'] ?? '', 'youtube');
+                $adContent->meta_keywords = $request[$code . '_meta_keywords'] ?? null;
+                $adContent->meta_description = $request[$code . '_meta_description'] ?? null;
                 $adContent->save();
             }
         }
+
         Session::flash('success', __('Created successfully'));
         return 'success';
     }
+
     public function edit(Request $request, $id)
     {
         $currentLang = Language::where('code', $request->language)->pluck('id')->firstOrFail();
@@ -337,9 +420,13 @@ class ItemController extends Controller
     {
         $item = UserItem::findOrFail($request->item_id);
         // if product type is 'physical'
-        if ($item->type == 'physical') {
+        if ($item->type == 'fisico') {
             $rules['stock'] = 'required';
             $rules['sku'] = 'required|unique:user_items,sku,' . $item->id;
+            $rules['weight'] = 'required|numeric|min:0.01';
+            $rules['length'] = 'required|numeric|min:0.01';
+            $rules['width'] = 'required|numeric|min:0.01';
+            $rules['height'] = 'required|numeric|min:0.01';
         }
         $allowedExtensions = array('jpg', 'jpeg', 'png', 'svg');
         $sliderImgURLs = array_key_exists("image", $request->all()) && count($request->image) > 0 ? $request->image : [];
@@ -478,6 +565,12 @@ class ItemController extends Controller
         $item->type = $request->type;
         $item->download_file = $filename ?? null;
         $item->download_link = $request->download_link;
+        if ($item->type == 'fisico') {
+            $item->weight = $request->weight;
+            $item->length = $request->length;
+            $item->width = $request->width;
+            $item->height = $request->height;
+        }
         $item->save();
         if ($request->image) {
             foreach ($request->image as $value) {
@@ -690,6 +783,27 @@ class ItemController extends Controller
         $data['title'] = UserItemContent::where([['item_id', $id], ['language_id', $currentLang]])->pluck('title')->first();
 
         return view('user.item.variation', $data);
+    }
+
+    public function codes($id, Request $request)
+    {
+        $currentLang = Language::where('code', $request->language)->pluck('id')->firstOrFail();
+        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
+        $item_limit = $current_package->product_limit;
+        $total_item = UserItem::where('user_id', Auth::guard('web')->user()->id)->count();
+        if ($item_limit < $total_item) {
+            Session::flash('warning', __('Item limit exceeded'));
+            return back();
+        }
+
+        $id = (int)$id;
+        $data['item_id'] = $id;
+        $data['codes'] = DigitalProductCode::where('user_item_id', $id)->get();
+
+        $data['title'] = UserItemContent::where([['item_id', $id]])->pluck('title')->first();
+
+
+        return view('user.item.code', $data);
     }
 
     public function getVariation(Request $request)
@@ -1051,5 +1165,59 @@ class ItemController extends Controller
         $item->save();
         Session::flash('success', __('Updated Successfully'));
         return 'success';
+    }
+
+    public function storeCode(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        DigitalProductCode::create([
+            'user_item_id' => $id,
+            'name' => $request->name,
+            'code' => $request->code,
+            'price' => $request->price,
+            'is_used' => false,
+        ]);
+
+        return redirect()->back()->with('success', 'Código adicionado com sucesso!');
+    }
+
+    public function deleteCode($id)
+    {
+        $code = DigitalProductCode::findOrFail($id);
+
+        if ($code->is_used) {
+            return redirect()->back()->with('warning', 'Este código já foi usado e não pode ser deletado.');
+        }
+
+        $code->delete();
+
+        return redirect()->back()->with('success', 'Código excluído com sucesso.');
+    }
+    public function importCodes(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required|exists:user_items,id',
+            'codes' => 'required|array',
+            'codes.*.variation' => 'required|string',
+            'codes.*.code' => 'required|string',
+            'codes.*.price' => 'required|numeric',
+        ]);
+
+        foreach ($request->codes as $code) {
+            DigitalProductCode::create([
+                'user_item_id' => $request->item_id,
+                'name' => $code['variation'],
+                'code' => $code['code'],
+                'price' => $code['price'],
+                'is_used' => 0,
+            ]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }
