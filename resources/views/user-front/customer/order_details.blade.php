@@ -465,11 +465,23 @@
                                                                 {{ userSymbolPrice($order->price, $data->currency_position, $data->currency_sign) }}
                                                             </p>
                                                         </td>
+                                                        @php
+    $codesList = json_decode($order->codes, true);
+    $codesTotal = 0;
+    if (!empty($codesList)) {
+        foreach ($codesList as $codeItem) {
+            $codesTotal += floatval($codeItem['price']);
+        }
+    }
+@endphp
                                                         <td class="text-center">
                                                             <p class="mb-0">
-                                                                {{ userSymbolPrice($order->price * $order->qty + @$variant_total * $order->qty, $data->currency_position, $data->currency_sign) }}
+                                                                @if (!empty($codesList))
+                                                                    {{ userSymbolPrice($codesTotal, $data->currency_position, $data->currency_sign) }}
+                                                                @else
+                                                                    {{ userSymbolPrice($order->price * $order->qty + @$variant_total * $order->qty, $data->currency_position, $data->currency_sign) }}
+                                                                @endif
                                                             </p>
-                                                            {{-- {{ dd( $data )}} --}}
                                                             @if (!empty($order->codes) && strtolower($data->payment_status) == 'pagamento aprovado')
                                                                 <!-- Botão para abrir modal -->
                                                                 <button type="button" class="btn btn-info btn-sm mt-2"
