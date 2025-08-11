@@ -295,9 +295,6 @@ class CheckoutController extends Controller
         return response()->json($frete);
     }
 
-
-
-
     /**
      * Store a newly created resource in storage.
      *

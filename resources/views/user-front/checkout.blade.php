@@ -655,7 +655,7 @@
                                         <span
                                             data="{{ cartSubTotal() + ($sh_id > 0 ? currency_converter_shipping($scharge, $shippings[0]->id) : 0) + tax() }}"
                                             class="grandTotal">
-                                            {{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, cartSubTotal() + ($sh_id > 0 ? currency_converter_shipping($scharge, $shippings[0]->id) : 0) + tax()) }}
+                                            {{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, cartSubTotal() + tax()) }}
                                         </span>
                                     </span>
                                 </div>

@@ -17,11 +17,13 @@ use App\Models\User\UserItemContent;
 use App\Models\User\UserOrderItem;
 use Carbon\Carbon;
 use App\Models\User\BasicSetting;
+use App\Models\User\DigitalProductCode;
 use App\Models\User\UserEmailTemplate;
 use App\Models\User\UserShopSetting;
 use DB;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Omnipay\Common\Item;
 
 class Common
 {
@@ -263,7 +265,7 @@ class Common
         // Soma o valor do frete no total
         $total += $shipping_service_price;
 
-        
+
         $coupon_amount = session()->get('user_coupon');
         $total = $total - session()->get('user_coupon');
         if ($shpp_chrg != 0) {
@@ -285,13 +287,13 @@ class Common
         $timeZone = DB::table('user_basic_settings')->where('user_id', $user->id)->value('timezone');
         $now = Carbon::now($timeZone);
 
-        $order_status = 'pending';
+        $order_status = 'Pedido Realizado';
         $cart = session()->get('cart', []);
         if (count($cart) == 1) {
             foreach ($cart as $itemCart)
                 $itemType = UserItem::where([['user_id', $user->id], ['id', $itemCart['id']]])->pluck('type')->first();
             if ($itemType == 'digital') {
-                $order_status = 'completed';
+                $order_status = 'Pedido Realizado';
             }
         }
 
@@ -388,75 +390,128 @@ class Common
         $items = [];
         $qty = [];
         $variations = [];
+        $codesList = [];
+
         foreach ($cart as $id => $item) {
             $qty[] = $item['qty'];
-            $variations[] = json_encode($item['variations']);
-            $items[] = UserItem::findOrFail($item['id']);
-        }
-        if (Session::has('myfatoorah_user')) {
-            $user = Session::get('myfatoorah_user');
-        } else {
-            $user = getUser();
-        }
-        if (session()->has('user_lang')) {
-            $userCurrentLang = UserLanguage::where('code', session()->get('user_lang'))->where('user_id', $user->id)->firstOrFail();
-            if (empty($userCurrentLang)) {
-                $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $user->id)->firstOrFail();
-                session()->put('user_lang', $userCurrentLang->code);
+            $itemPrincipal = UserItem::findOrFail($item['id']);
+
+            if ($itemPrincipal->hasCode()) {
+                // Nome da variação (chave do array)
+                $nomeV = key($item['variations']);
+                // Buscar códigos digitais disponíveis
+                $codigos = DigitalProductCode::where('user_item_id', $itemPrincipal->id)
+                    ->where('name', $nomeV)
+                    ->where('is_used', 0)
+                    ->limit($item['qty'])
+                    ->get();
+
+
+                $codesArray = [];
+
+                foreach ($codigos as $codigo) {
+                    $codesArray[] = [
+                        'name'  => $codigo->name,
+                        'code'  => $codigo->code,
+                        'price' => $codigo->price
+                    ];
+
+                    // Atualiza como usado
+                    $codigo->update([
+                        'is_used'  => 1,
+                        'order_id' => $orderId,
+                        'used_at'  => now(),
+                    ]);
+                }
+
+                $codesList[] = json_encode($codesArray);
+                $variations[] = null; // sem variação para produto com code
+            } else {
+                $variations[] = json_encode($item['variations']);
+                $codesList[] = null;
             }
+
+            $items[] = $itemPrincipal;
+        }
+
+        // Busca usuário
+        $user = Session::has('myfatoorah_user') ? Session::get('myfatoorah_user') : getUser();
+
+        // Idioma do usuário
+        if (session()->has('user_lang')) {
+            $userCurrentLang = UserLanguage::where('code', session()->get('user_lang'))
+                ->where('user_id', $user->id)
+                ->firstOrFail();
         } else {
-            $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $user->id)->firstOrFail();
+            $userCurrentLang = UserLanguage::where('is_default', 1)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
         }
 
         foreach ($items as $key => $item) {
-            if (!empty($item->category)) {
-                $category = $item->category->name;
-            } else {
-                $category = '';
-            }
-            $itemcontent = UserItemContent::where('item_id', $item->id)->where('language_id', $userCurrentLang->id)->first();
-            $item_price = currency_converter(($item->flash == 1 ?  ($item->current_price - ($item->current_price * ($item->flash_amount / 100))) : $item->current_price), $item->id);
+            $isDigital = method_exists($item, 'hasCode') && $item->hasCode();
 
+            $itemcontent = UserItemContent::where('item_id', $item->id)
+                ->where('language_id', $userCurrentLang->id)
+                ->first();
+
+            if ($isDigital && !empty($codesList[$key])) {
+                // Somar os preços dos códigos digitais
+                $codesDecoded = json_decode($codesList[$key], true);
+                $item_price = 0;
+                foreach ($codesDecoded as $codeData) {
+                    $item_price += currency_converter($codeData['price'], $item->id);
+                }
+            } else {
+                // Preço físico normal
+                $item_price = currency_converter(
+                    ($item->flash == 1
+                        ? ($item->current_price - ($item->current_price * ($item->flash_amount / 100)))
+                        : $item->current_price),
+                    $item->id
+                );
+            }
+
+            // Atualiza estoque físico
             $orderderd_variations = json_decode($variations[$key]);
             if ($orderderd_variations) {
                 foreach ($orderderd_variations as $vkey => $value) {
-                    $option = ProductVariantOption::where('id', intval($value->option_id))->first();
+                    $option = ProductVariantOption::find(intval($value->option_id));
                     if ($option) {
-                        $option->stock = $option->stock - $qty[$key];
+                        $option->stock -= $qty[$key];
                         $option->save();
                     }
                 }
-            } else {
-                foreach ($cart as $id => $proId) {
-                    $product = UserItem::findOrFail($proId['id']);
-                    $stock = $product->stock - $proId['qty'];
-                    UserItem::where('id', $proId['id'])->update([
-                        'stock' => $stock
-                    ]);
-                }
             }
 
-            $timeZone = DB::table('user_basic_settings')->where('user_id', $user->id)->value('timezone');
+            $timeZone = DB::table('user_basic_settings')
+                ->where('user_id', $user->id)
+                ->value('timezone');
 
             UserOrderItem::insert([
-                'user_order_id' => $orderId,
-                'customer_id' => Auth::guard('customer')->check() ? Auth::guard('customer')->user()->id : 9999999,
-                'user_id' => $user->id,
-                'item_id' => $item->id,
-                'title' => $itemcontent->title,
-                'sku' => $item->sku,
-                'qty' => $qty[$key],
-                'variations' => $variations[$key] != 'null' ? $variations[$key] : null,
-                'category' => $itemcontent->category_id,
-                'price' => $item_price,
-                'previous_price' => $item->previous_price,
-                'image' => $item->thumbnail,
-                'summary' => $itemcontent->summary ?? '',
-                'description' => $itemcontent->description ?? '',
-                'created_at' => Carbon::now($timeZone),
+                'user_order_id'   => $orderId,
+                'customer_id'     => Auth::guard('customer')->check()
+                    ? Auth::guard('customer')->user()->id
+                    : 9999999,
+                'user_id'         => $user->id,
+                'item_id'         => $item->id,
+                'title'           => $itemcontent->title,
+                'sku'             => $item->sku,
+                'qty'             => $qty[$key],
+                'variations'      => $variations[$key],
+                'codes'           => $codesList[$key],
+                'category'        => $itemcontent->category_id,
+                'price'           => $item_price,
+                'previous_price'  => $item->previous_price,
+                'image'           => $item->thumbnail,
+                'summary'         => $itemcontent->summary ?? '',
+                'description'     => $itemcontent->description ?? '',
+                'created_at'      => Carbon::now($timeZone),
             ]);
         }
     }
+
+
 
     public static function sendMails($order)
     {

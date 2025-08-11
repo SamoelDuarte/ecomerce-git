@@ -36,23 +36,37 @@
                               {{ userSymbolPrice($order->total, $order->currency_position, $order->currency_sign) }}
                             </td>
                             <td>
-                              @if ($order->order_status == 'pending')
-                                <span class="pending">
-                                  {{ $keywords[ucfirst($order->order_status)] ?? __('Pending') }}
-                                </span>
-                              @elseif ($order->order_status == 'rejected')
-                                <span class="rejected">
-                                  {{ $keywords[ucfirst($order->order_status)] ?? __('Rejected') }}
-                                </span>
-                              @elseif ($order->order_status == 'processing')
-                                <span class="processing">
-                                  {{ $keywords[ucfirst($order->order_status)] ?? __('Processing') }}
-                                </span>
-                              @elseif ($order->order_status == 'completed')
-                                <span class="completed">
-                                  {{ $keywords[ucfirst($order->order_status)] ?? __('Completed') }}
-                                </span>
-                              @endif
+                              @php
+                              $statusClass = '';
+                              switch ($order->order_status) {
+                                case 'Pedido Realizado':
+                                $statusClass = 'pending';
+                                break;
+                                case 'Pagamento Aprovado':
+                                $statusClass = 'processing';
+                                break;
+                                case 'Pedido Separação':
+                                $statusClass = 'processing';
+                                break;
+                                case 'Pedido Faturado':
+                                $statusClass = 'processing';
+                                break;
+                                case 'Pedido em transporte':
+                                $statusClass = 'processing';
+                                break;
+                                case 'Pedido Entregue':
+                                $statusClass = 'completed';
+                                break;
+                                case 'Pedido Cancelado':
+                                $statusClass = 'rejected';
+                                break;
+                                default:
+                                $statusClass = 'pending';
+                              }
+                              @endphp
+                              <span class="{{ $statusClass }}">
+                              {{ $order->order_status }}
+                              </span>
                             </td>
                             <td><a target="_blank"
                                 href="{{ route('customer.orders-details', ['id' => $order->id, getParam()]) }}"

@@ -95,7 +95,7 @@ class CronJobController extends Controller
             $paymentMethod = PaymentGateway::where('keyword', 'iyzico')->first();
             $paydata = $paymentMethod->convertAutoData();
         } else {
-            $paymentMethod = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'iyzico']])->first();
+            $'paymentMethod' = UserPaymentGeteway::where([['user_id', $user_id], ['keyword', 'iyzico']])->first();
             $paydata = json_decode($paymentMethod->information, true);
         }
 
