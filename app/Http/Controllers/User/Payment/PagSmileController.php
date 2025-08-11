@@ -47,7 +47,7 @@ class PagSmileController extends Controller
         $order = Common::saveOrder($request->all(), $txnId, $chargeId, 'Pending', 'online', $user->id);
         $order_id = $order->id;
         Common::saveOrderedItems($order->id);
-        if(0){
+        if(1){
             $notifyUrl = route('customer.itemcheckout.pagSmile.notify', getParam());
             $successUrl = $successUrl;
             $cancelUrl = $cancelUrl;
