@@ -47,28 +47,22 @@ class PagSmileController extends Controller
         $order = Common::saveOrder($request->all(), $txnId, $chargeId, 'Pending', 'online', $user->id);
         $order_id = $order->id;
         Common::saveOrderedItems($order->id);
-        if(1){
-            $notifyUrl = route('customer.itemcheckout.pagSmile.notify', getParam());
-            $successUrl = $successUrl;
-            $cancelUrl = $cancelUrl;
-        }else{
-            $notifyUrl = 'https://lightgrey-horse-872687.hostingersite.com/receber.php';
-            $successUrl = 'https://lightgrey-horse-872687.hostingersite.com/receber.php';
-            $cancelUrl = 'https://lightgrey-horse-872687.hostingersite.com/receber.php';
-        }
         // Payload para PagSmile
         $payload = [
             'app_id'            => $app_id,
-            'out_trade_no'      => $order_id."-12",
+            'out_trade_no'      => $order_id,
             'timestamp'         => $timestamp,
-            'notify_url'        => $notifyUrl,
+            // 'notify_url'        => route('customer.itemcheckout.pagSmile.notify',getParam()),
+            'notify_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
             'subject'           => $title,
             'body'              => $description,
             'order_amount'      => number_format($amount, 2, '.', ''),
             'order_currency'    => 'BRL',
             'trade_type'        => 'WEB',
-            'return_url'        => $successUrl,
-            'cancel_url'        => $cancelUrl,
+            // 'return_url'        => $successUrl,
+            'return_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
+            // 'cancel_url'        => $cancelUrl,
+            'cancel_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
             'version'           => '2.0',
             'buyer_id'          => $email,
             'customer.email'    => $email,
@@ -82,10 +76,10 @@ class PagSmileController extends Controller
             'Authorization' => $authorization,
         ])->post('https://gateway-test.pagsmile.com/trade/create', $payload);
 
-    //quero ver a resposta em um dd
-   
+        //quero ver a respost em um dd
         if ($response->successful()) {
             $data = $response->json();
+
             if (isset($data['web_url'])) {
                 Session::forget('cart');
                 Session::forget('user_request');
@@ -127,7 +121,7 @@ class PagSmileController extends Controller
         // Mapeamento dos status possíveis para seu sistema
         switch ($status) {
             case 'SUCCESS':
-                $order->payment_status = 'Pagamento Aprovado';
+                $order->payment_status = 'Completed';
                 break;
 
             case 'CANCEL':
