@@ -62,7 +62,7 @@ class FrontendController extends Controller
 
     public function index()
     {
-        return redirect('/admin');
+        return redirect('/login');
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();
         } else {

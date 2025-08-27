@@ -115,11 +115,11 @@
     <!--====== End Preloader ======-->
   @endif
 
-  @includeIf('front.partials.header')
+  {{-- @includeIf('front.partials.header') --}}
 
   @if (!request()->routeIs('front.index'))
     <!-- Page Title Start-->
-    <div class="page-title-area">
+    {{-- <div class="page-title-area">
       <div class="container">
         <div class="row">
           <div class="col-lg-10">
@@ -137,22 +137,22 @@
         </div>
 
       </div>
-    </div>
+    </div> --}}
     <!-- Page Title End-->
   @endif
 
   @yield('content')
 
   {{-- footer section --}}
-  @includeIf('front.partials.footer')
+  {{-- @includeIf('front.partials.footer') --}}
   @if ($be->cookie_alert_status == 1)
-    <div class="cookie">
+    {{-- <div class="cookie">
       @include('cookie-consent::index')
-    </div>
+    </div> --}}
   @endif
 
   {{-- Popups start --}}
-  @includeIf('front.partials.popups')
+  {{-- @includeIf('front.partials.popups') --}}
   {{-- Popups end --}}
 
   {{-- WhatsApp Chat Button --}}
