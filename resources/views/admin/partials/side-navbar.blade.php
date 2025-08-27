@@ -142,7 +142,7 @@ $permissions = json_decode($permissions, true);
 
         {{-- Package Management --}}
         @if (empty($admin->role) || (!empty($permissions) && in_array('Package Management', $permissions)))
-        <li style="display: none;"
+        <li style=""
           class="nav-item
                     @if (request()->routeIs('admin.package.settings')) active
                     @elseif(request()->routeIs('admin.package.index')) active
