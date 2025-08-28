@@ -142,7 +142,7 @@ $permissions = json_decode($permissions, true);
 
         {{-- Package Management --}}
         @if (empty($admin->role) || (!empty($permissions) && in_array('Package Management', $permissions)))
-       <li style="display: none;"
+       <li 
           class="nav-item
                     @if (request()->routeIs('admin.package.settings')) active
                     @elseif(request()->routeIs('admin.package.index')) active
@@ -184,7 +184,7 @@ $permissions = json_decode($permissions, true);
         @endif
 
         @if (empty($admin->role) || (!empty($permissions) && in_array('Payment Logs', $permissions)))
-        <li style="display: none;" class="nav-item
+        <li  class="nav-item
                         @if (request()->path() == 'admin/payment-log') active @endif">
           <a href="{{ route('admin.payment-log.index') }}">
             <i class="fas fa-file-invoice-dollar"></i>
@@ -273,7 +273,7 @@ $permissions = json_decode($permissions, true);
 
         @if (empty($admin->role) || (!empty($permissions) && in_array('Menu Builder', $permissions)))
         {{-- Menu Builder --}}
-        <li style="display: none;" class="nav-item
+        <li  class="nav-item
             @if (request()->path() == 'admin/menu-builder') active @endif">
           <a href="{{ route('admin.menu_builder.index') . '?language=' . $default->code }}">
             <i class="fas fa-bars"></i>
@@ -284,7 +284,7 @@ $permissions = json_decode($permissions, true);
 
         @if (empty($admin->role) || (!empty($permissions) && in_array('Pages', $permissions)))
         {{-- Pages --}}
-        <li style="display: none;"
+        <li 
           class="nav-item
               @if (request()->routeIs('admin.page.create')) active
               @elseif(request()->routeIs('admin.page.index')) active
@@ -780,7 +780,7 @@ $permissions = json_decode($permissions, true);
 
     {{-- Announcement Popup --}}
     @if (empty($admin->role) || (!empty($permissions) && in_array('Announcement Popup', $permissions)))
-    <li style="display: none;"
+    <li 
       class="nav-item
                     @if (request()->path() == 'admin/popup/create') active
                     @elseif(request()->path() == 'admin/popup/types') active
@@ -821,7 +821,7 @@ $permissions = json_decode($permissions, true);
 
     @if (empty($admin->role) || (!empty($permissions) && in_array('Push Notification', $permissions)))
     {{-- Push Notification --}}
-    <li style="display: none;"
+    <li 
       class="nav-item
                   @if (request()->path() == 'admin/pushnotification/settings') active
                   @elseif(request()->path() == 'admin/pushnotification/send') active @endif">
@@ -948,7 +948,7 @@ $permissions = json_decode($permissions, true);
             </div>
           </li>
 
-          <li style="display: none;"
+          <li 
             class="submenu
                     @if (request()->path() == 'admin/gateways') selected
                     @elseif(request()->path() == 'admin/offline/gateways') selected @endif
@@ -1069,7 +1069,7 @@ $permissions = json_decode($permissions, true);
 
     @if (empty($admin->role) || (!empty($permissions) && in_array('Sitemaps', $permissions)))
     {{-- Sitemap --}}
-    <li style="display: none;" class="nav-item
+    <li  class="nav-item
             @if (request()->path() == 'admin/sitemap') active @endif">
       <a href="{{ route('admin.sitemap.index') . '?language=' . $default->code }}">
         <i class="fa fa-sitemap"></i>
