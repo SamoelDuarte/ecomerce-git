@@ -1,3 +1,19 @@
+<style>
+  .container-header{
+    width: 100%;
+    padding-right: var(--bs-gutter-x, .75rem);
+    padding-left: var(--bs-gutter-x, .75rem);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  @media (min-width: 1440px) {
+     .container-header{
+        max-width: 1583px;
+    }
+}
+</style>
+
 <!-- Header Start -->
 <header class="header header-fixed">
   <!-- Mobile Navbar -->
@@ -120,7 +136,7 @@
   </div>
   <div class="header-middle sticky-header-2">
 
-    <div class="container">
+    <div class="container-header">
       <div class="header-left">
         <div class="brand-logo">
           <a href="{{ route('front.user.detail.view', getParam()) }}" title="" target="_self">
@@ -129,6 +145,14 @@
               alt="">
           </a>
         </div>
+      </div>
+      <div class="header-search">
+        <form action="{{ route('front.user.shop', getParam()) }}" method="GET" class="search-form">
+          <div class="input-group">
+            <input type="text" class="form-control" name="search" placeholder="{{ $keywords['Search_Products'] ?? 'Search Products' }}" value="{{ request()->input('search') }}">
+            <button type="submit" class="btn"><i class="fal fa-search"></i></button>
+          </div>
+        </form>
       </div>
       <div class="header-center">
         <nav class="menu mobile-nav">

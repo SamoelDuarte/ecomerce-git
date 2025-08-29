@@ -141,8 +141,11 @@ class ShopController extends Controller
             ->when(($min && $max), function ($query) use ($min, $max) {
                 return $query->whereBetween('user_items.current_price', [$min, $max]);
             })
-            ->when($keyword, function ($query, $keyword) {
-                return $query->where('user_item_contents.title', 'like', '%' . $keyword . '%');
+            ->when($request->search, function ($query) use ($request) {
+                return $query->where(function($q) use ($request) {
+                    $q->where('user_item_contents.title', 'like', '%' . $request->search . '%')
+                      ->orWhere('user_item_contents.summary', 'like', '%' . $request->search . '%');
+                });
             })
             ->select(
                 'user_items.*',
