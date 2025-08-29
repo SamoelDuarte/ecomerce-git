@@ -22,7 +22,9 @@ Route::domain($domain)->group(function () {
         Route::group(['middleware' => 'checkpermission:Dashboard'], function () {
             // Admin Dashboard Routes
             Route::get('/dashboard', 'Admin\DashboardController@dashboard')->name('admin.dashboard');
+            Route::get('/dashboard/export', 'Admin\DashboardController@exportData')->name('admin.dashboard.export');
             Route::get('/ecommerce', 'Admin\DashboardController@ecommerce')->name('admin.ecommerce');
+            Route::get('/ecommerce/export', 'Admin\DashboardController@exportEcommerceData')->name('admin.ecommerce.export');
         });
 
 

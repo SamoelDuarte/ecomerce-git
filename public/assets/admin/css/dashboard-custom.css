@@ -1,0 +1,346 @@
+/* Dashboard Custom Styles */
+
+/* Cards de Estatísticas */
+.stats-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1f8ef1 0%, #2196F3 100%);
+}
+
+.stats-card.revenue::before {
+  background: linear-gradient(90deg, #59d05d 0%, #4CAF50 100%);
+}
+
+.stats-card.users::before {
+  background: linear-gradient(90deg, #ff9500 0%, #FF9800 100%);
+}
+
+.stats-card.overdue::before {
+  background: linear-gradient(90deg, #ff4757 0%, #f44336 100%);
+}
+
+/* Filtros */
+.filter-section {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  padding: 0;
+  margin-bottom: 25px;
+}
+
+.filter-section h5 {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.quick-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.quick-filter-btn {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  color: #495057;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-filter-btn:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+/* Botões Compactos */
+.btn-group-sm .btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.form-group-sm .form-control {
+  height: 32px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.form-group-sm label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* Botões de Exportação */
+.export-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.export-btn.csv {
+  background: #28a745;
+  color: white;
+}
+
+.export-btn.csv:hover {
+  background: #218838;
+  color: white;
+}
+
+.export-btn.excel {
+  background: #17a2b8;
+  color: white;
+}
+
+.export-btn.excel:hover {
+  background: #138496;
+  color: white;
+}
+
+/* Tabela de Usuários */
+.users-table-section {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.users-table-section .card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border: none;
+}
+
+.users-table-section .card-header h5 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.table-responsive {
+  padding: 0;
+}
+
+.custom-table {
+  margin: 0;
+}
+
+.custom-table th {
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 15px 12px;
+  border: none;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.custom-table td {
+  padding: 15px 12px;
+  border: none;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 14px;
+}
+
+.custom-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.overdue {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Gráficos */
+.chart-section {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin-top: 20px;
+}
+
+.chart-container canvas {
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+/* Gráfico de planos - maior altura */
+#packageRevenueChart {
+  height: 350px !important;
+}
+
+/* Cores personalizadas para os planos */
+.package-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.package-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.package-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .quick-filters {
+    justify-content: center;
+  }
+  
+  .export-buttons {
+    justify-content: center;
+  }
+  
+  .stats-card {
+    margin-bottom: 15px;
+  }
+  
+  .custom-table th,
+  .custom-table td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .filter-section {
+    padding: 15px;
+  }
+  
+  .export-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+}
+
+/* Animações */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.filter-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.users-table-section {
+  animation: fadeInUp 0.7s ease-out;
+}
+
+/* Loading States */
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #1f8ef1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
