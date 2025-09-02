@@ -14,6 +14,30 @@
         <h2 class="pb-2">{{ __('Welcome back') }},
             {{ Auth::guard('web')->user()->shop_name ?? Auth::guard('web')->user()->username }}!</h2>
     </div>
+
+    <!-- Filtro por Período -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form id="filterForm" method="GET" class="row align-items-center">
+                        <div class="col-lg-3">
+                            <label>{{ __('Data Inicial') }}</label>
+                            <input type="date" class="form-control" name="start_date" value="{{ request('start_date') }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label>{{ __('Data Final') }}</label>
+                            <input type="date" class="form-control" name="end_date" value="{{ request('end_date') }}">
+                        </div>
+                        <div class="col-lg-2 mt-3">
+                            <button type="submit" class="btn btn-primary">{{ __('Filtrar') }}</button>
+                            <a href="{{ route('user-dashboard') }}" class="btn btn-secondary">{{ __('Limpar') }}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     @if (is_null($package))
         @php
             $pendingMemb = \App\Models\Membership::query()
@@ -225,6 +249,20 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-lg-12 text-right">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download mr-1"></i>{{ __('Export') }}
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#" onclick="exportTable('orders-table', 'xlsx')">Excel</a>
+                                            <a class="dropdown-item" href="#" onclick="exportTable('orders-table', 'csv')">CSV</a>
+                                            <a class="dropdown-item" href="#" onclick="exportTable('orders-table', 'pdf')">PDF</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-lg-12">
                                     @if (count($orders) == 0)
@@ -232,7 +270,7 @@
                                         </h3>
                                     @else
                                         <div class="table-responsive">
-                                            <table class="table table-striped mt-3">
+                                            <table class="table table-striped mt-3" id="orders-table">
                                                 <thead>
                                                     <tr>
                                                         <th scope="col">{{ __('Order Number') }}</th>
@@ -410,13 +448,27 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-lg-12 text-right">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download mr-1"></i>{{ __('Export') }}
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#" onclick="exportTable('payments-table', 'xlsx')">Excel</a>
+                                            <a class="dropdown-item" href="#" onclick="exportTable('payments-table', 'csv')">CSV</a>
+                                            <a class="dropdown-item" href="#" onclick="exportTable('payments-table', 'pdf')">PDF</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-lg-12">
                                     @if (count($memberships) == 0)
                                         <h3 class="text-center">{{ __('NO PAYMENT LOG FOUND') }}</h3>
                                     @else
                                         <div class="table-responsive">
-                                            <table class="table table-striped mt-3">
+                                            <table class="table table-striped mt-3" id="payments-table">
                                                 <thead>
                                                     <tr>
                                                         <th scope="col">{{ __('Transaction Id') }}</th>
@@ -555,4 +607,26 @@
             </div>
         </div>
     </div>
+
+    @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.0/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        function exportTable(tableId, type) {
+            const table = document.getElementById(tableId);
+            
+            if (type === 'xlsx' || type === 'csv') {
+                const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet 1"});
+                XLSX.writeFile(wb, `export.${type}`);
+            } 
+            else if (type === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.autoTable({html: table});
+                doc.save('export.pdf');
+            }
+        }
+    </script>
+    @endsection
 @endsection

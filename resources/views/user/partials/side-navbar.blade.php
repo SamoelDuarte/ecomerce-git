@@ -322,7 +322,7 @@
         <li class="nav-item @if (request()->routeIs('user.shipping.index')) active @endif">
           <a href="{{ route('user.shipping.index') . '?language=' . $defaultLang }}">
             <i class="fas fa-shipping-fast"></i>
-            <p class="sub-item">{{ __('Shipping Charges') }}</p>
+            <p class="sub-item">Frenet</p>
           </a>
         </li>
         <li class="nav-item @if (request()->routeIs('user-currency-index')) active @endif">

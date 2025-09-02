@@ -9,10 +9,10 @@ class FrenetService
     protected $token;
     protected $url = 'https://api.frenet.com.br/shipping/quote';
 
-    public function __construct()
+    public function __construct($token = null)
     {
         $this->client = new Client();
-        $this->token = env('FRENET_API_TOKEN');
+        $this->token = $token ?? env('FRENET_API_TOKEN');
     }
 
     public function calcularFrete(array $produtos, string $cepOrigem, string $cepDestino, float $valorNota)

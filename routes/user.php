@@ -415,8 +415,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
     Route::prefix('shipping-charges')->middleware('checkpermission:Shipping Charges')->group(function () {
         Route::get('', 'User\ShopSettingController@index')->name('user.shipping.index');
         Route::post('/store', 'User\ShopSettingController@store')->name('user.shipping.store')->middleware('limitCheck:items,update');
-        Route::post('/update', 'User\ShopSettingController@update')->name('user.shipping.update')->middleware('limitCheck:items,update');
-        Route::post('/delete', 'User\ShopSettingController@delete')->name('user.shipping.delete');
+        Route::get('/consulta-cep', 'User\ShopSettingController@consultaCep')->name('user.shipping.consulta-cep');
     });
 
 

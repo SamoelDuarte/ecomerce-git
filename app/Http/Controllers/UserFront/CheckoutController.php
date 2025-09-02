@@ -23,6 +23,7 @@ use App\Models\OfflineGateway;
 use App\Models\Package;
 use App\Models\User;
 use App\Models\User\BasicSetting;
+use App\Models\User\UserAddress;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserEmailTemplate;
 use App\Models\User\UserFooter;
@@ -32,6 +33,7 @@ use App\Models\User\UserPermission;
 use App\Models\User\UserShopSetting;
 use App\Services\FrenetService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
@@ -257,11 +259,21 @@ class CheckoutController extends Controller
 
     public function calcularEntrega(Request $request)
     {
+        $user = Auth::guard('web')->user();
+        $session = Session::all();
+
+        $userId = collect($session['cart'])->first()['user_id'];
+
+        $userAddress = UserAddress::where('user_id', $userId)->first();
+        // dd($userAddress);
+        if (!$userAddress) {
+            return response()->json(['error' => 'Configure seu endereço nas configurações da loja primeiro'], 400);
+        }
+
         $cepDestino = preg_replace('/\D/', '', $request->cep);
-        $cepOrigem = '01002020'; // Pode deixar fixo ou puxar da loja
+        $cepOrigem = preg_replace('/\D/', '', $userAddress->cep);
         $valorNota = 0;
         $produtos = [];
-
         foreach (session('cart') as $item) {
             $userItem = \App\Models\User\UserItem::find($item['id']);
 
@@ -289,7 +301,7 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $frenet = new FrenetService();
+        $frenet = new FrenetService($userAddress->token_frenet);
         $frete = $frenet->calcularFrete($produtos, $cepOrigem, $cepDestino, $valorNota);
 
         return response()->json($frete);
