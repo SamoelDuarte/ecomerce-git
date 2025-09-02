@@ -155,8 +155,26 @@ class RegisterCustomerController extends Controller
 
     public function secret_login($id)
     {
-        $customer = Customer::where('id', $id)->first();
+        // Verifica se o cliente pertence ao usuário web logado
+        $user_id = Auth::guard('web')->user()->id; 
+        $customer = Customer::where([
+            ['id', $id],
+            ['user_id', $user_id]
+        ])->firstOrFail();
+
+        // Faz logout do guard admin se estiver logado
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+        }
+        
+        // Faz logout de qualquer sessão existente do guard customer
+        if (Auth::guard('customer')->check()) {
+            Auth::guard('customer')->logout();
+        }
+
+        // Faz login com o cliente
         Auth::guard('customer')->login($customer);
+        
         $user = User::where('id', $customer->user_id)->first();
         return redirect()->route('customer.dashboard', $user->username);
     }

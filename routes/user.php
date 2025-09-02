@@ -162,7 +162,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
     Route::post('register/user/bulk-delete', 'User\RegisterCustomerController@bulkDelete')->name('user.register.user.bulk.delete');
     Route::get('register/user/{id}/changePassword', 'User\RegisterCustomerController@changePass')->name('user.register.user.changePass');
     Route::post('register/user/updatePassword', 'User\RegisterCustomerController@updatePassword')->name('user.register.user.updatePassword')->middleware('limitCheck:items,update,without_ajax');
-    Route::get('register/user/secret-login/{id}', 'User\RegisterCustomerController@secret_login')->name('user.register.user.secret_login');
+    Route::get('register/user/secret-login/{id}', 'User\RegisterCustomerController@secret_login')->name('user.register.user.secret_login')->middleware('auth:web');
 
     // home page banner-section route start
 

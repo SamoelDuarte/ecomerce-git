@@ -1546,11 +1546,21 @@ class RegisterUserController extends Controller
 
     public function secret_login($id, Request $request)
     {
+        // Primeiro faz logout do admin se estiver logado
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+        }
+
+        // Faz logout de qualquer usuário web atual  
+        if (Auth::guard('web')->check()) {
+            Auth::guard('web')->logout();
+        }
+
+        // Faz login com o usuário solicitado
         $user = \App\Models\User::findOrFail($id);
         Auth::guard('web')->login($user);
 
         $redirect = $request->query('redirect');
-
 
         if ($redirect) {
             return redirect($redirect);
@@ -1558,8 +1568,6 @@ class RegisterUserController extends Controller
 
         return redirect()->route('user-dashboard');
     }
-
-
     public function category(Request $request)
     {
         $lang = Language::where('code', $request->language)->firstOrFail();

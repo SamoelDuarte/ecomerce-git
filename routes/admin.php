@@ -260,7 +260,7 @@ Route::domain($domain)->group(function () {
             Route::post('register/user/delete', 'Admin\RegisterUserController@delete')->name('register.user.delete');
             Route::post('register/user/bulk-delete', 'Admin\RegisterUserController@bulkDelete')->name('register.user.bulk.delete');
             Route::post('register/user/updatePassword', 'Admin\RegisterUserController@updatePassword')->name('register.user.updatePassword');
-            Route::get('register/users/secret-login/{id}', 'Admin\RegisterUserController@secret_login')->name('register.user.secret_login');
+            Route::get('register/users/secret-login/{id}', 'Admin\RegisterUserController@secret_login')->name('register.user.secret_login')->middleware('auth:admin');
 
 
 
