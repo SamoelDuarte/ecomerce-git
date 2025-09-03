@@ -47,22 +47,26 @@ class PagSmileController extends Controller
         $order = Common::saveOrder($request->all(), $txnId, $chargeId, 'Pending', 'online', $user->id);
         $order_id = $order->id;
         Common::saveOrderedItems($order->id);
+        // Gera um número único para o pedido combinando o ID com timestamp
+        $uniqueOrderId = $order_id . '-' . time();
+        
+        // Atualiza o pedido com o número único
+        $order->unique_payment_id = $uniqueOrderId;
+        $order->save();
+        
         // Payload para PagSmile
         $payload = [
             'app_id'            => $app_id,
-            'out_trade_no'      => $order_id,
+            'out_trade_no'      => $uniqueOrderId, // Usa o número único do pedido
             'timestamp'         => $timestamp,
             'notify_url'        => route('customer.itemcheckout.pagSmile.notify',getParam()),
-            // 'notify_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
             'subject'           => $title,
             'body'              => $description,
             'order_amount'      => number_format($amount, 2, '.', ''),
             'order_currency'    => 'BRL',
             'trade_type'        => 'WEB',
             'return_url'        => $successUrl,
-            // 'return_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
             'cancel_url'        => $cancelUrl,
-            // 'cancel_url'        => 'https://lightgrey-horse-872687.hostingersite.com/receber.php',
             'version'           => '2.0',
             'buyer_id'          => $email,
             'customer.email'    => $email,
@@ -113,19 +117,19 @@ class PagSmileController extends Controller
         $payload = $request->all();
         \Log::info('Webhook PagSmile recebido:', $payload);
 
-        $orderId = $payload['out_trade_no'] ?? null;
+        $uniqueOrderId = $payload['out_trade_no'] ?? null;
         $status = $payload['trade_status'] ?? null;
         $transactionId = $payload['trade_no'] ?? null;
 
-        if (!$orderId || !$status) {
+        if (!$uniqueOrderId || !$status) {
             \Log::warning('Webhook PagSmile com dados incompletos.', $payload);
             return response('success', 200); // Mesmo se estiver inválido, responde "success"
         }
 
-        $order = UserOrder::where('id', $orderId)->first();
+        $order = UserOrder::where('unique_payment_id', $uniqueOrderId)->first();
 
         if (!$order) {
-            \Log::warning("Pedido não encontrado para out_trade_no: {$orderId}");
+            \Log::warning("Pedido não encontrado para out_trade_no: {$uniqueOrderId}");
             return response('success', 200);
         }
 
