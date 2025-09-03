@@ -87,9 +87,20 @@ class PagSmileController extends Controller
                 return redirect()->away($data['web_url']);
             }
 
+            \Log::error('PagSmile - URL de checkout não encontrada:', [
+                'response' => $data,
+                'payload' => $payload,
+                'order_id' => $order_id
+            ]);
             return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
         }
 
+        \Log::error('PagSmile - Erro na comunicação:', [
+            'status_code' => $response->status(),
+            'response' => $response->json(),
+            'payload' => $payload,
+            'order_id' => $order_id
+        ]);
         return redirect()->back()->with('error', 'Erro ao comunicar com o gateway PagSmile.')->withInput();
     }
 
