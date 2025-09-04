@@ -57,6 +57,7 @@ use App\Models\User\UserSection;
 use App\Models\User\UserShippingCharge;
 use App\Models\User\UserShopSetting;
 use App\Models\User\UserUlink;
+use App\Models\User\UserAddress;
 use App\Models\Variant;
 use App\Models\VariantContent;
 use App\Models\VariantOption;
@@ -161,6 +162,22 @@ class RegisterUserController extends Controller
         }
 
         if ($user) {
+            // Salvar dados de endereço se fornecidos
+            if ($request->filled('cep') && $request->filled('rua') && $request->filled('numero') && $request->filled('bairro') && $request->filled('cidade') && $request->filled('estado')) {
+                UserAddress::create([
+                    'user_id' => $user->id,
+                    'token_frenet' => $request->token_frenet,
+                    'cnpj' => $request->cnpj ? preg_replace('/\D/', '', $request->cnpj) : null,
+                    'cep' => preg_replace('/\D/', '', $request->cep),
+                    'rua' => $request->rua,
+                    'numero' => $request->numero,
+                    'complemento' => $request->complemento,
+                    'bairro' => $request->bairro,
+                    'cidade' => $request->cidade,
+                    'estado' => $request->estado,
+                ]);
+            }
+
             $langCount = User\Language::where('user_id', $user->id)->where('is_default', 1)->count();
             $adminLangs = Language::get();
             if ($langCount == 0) {

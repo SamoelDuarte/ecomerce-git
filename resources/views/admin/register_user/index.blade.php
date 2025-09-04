@@ -246,7 +246,7 @@
   <!-- Modal -->
   <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalTitle"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">{{ __('Add User') }}</h5>
@@ -254,7 +254,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
           <form action="{{ route('register.user.store') }}" method="POST" id="ajaxForm">
             @csrf
             <div class="form-group">
@@ -314,12 +314,85 @@
               <p id="errpayment_gateway" class="text-danger mb-0 em"></p>
             </div>
             <div class="form-group">
-              <label for="">{{ __('Publicly Hidden') }} <span class="text-danger">**</span></label>
+              <label for="">{{ __('Status Público') }} <span class="text-danger">**</span></label>
               <select name="online_status" class="form-control">
-                <option value="1">{{ __('No') }}</option>
-                <option value="0">{{ __('Yes') }}</option>
+                <option value="1">{{ __('Não') }}</option>
+                <option value="0">{{ __('Sim') }}</option>
               </select>
               <p id="erronline_status" class="text-danger mb-0 em"></p>
+            </div>
+            
+            <!-- Address Fields -->
+            <h6 class="mt-4 mb-3">{{ __('Informações de Endereço') }} <small class="text-muted">({{ __('Opcional') }})</small></h6>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="">{{ __('Token Frenet') }}</label>
+                  <input class="form-control" type="text" name="token_frenet" id="token_frenet" placeholder="Token da API Frenet">
+                  <p id="errtoken_frenet" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="">{{ __('CNPJ') }}</label>
+                  <input class="form-control" type="text" name="cnpj" id="cnpj" maxlength="18" placeholder="00.000.000/0000-00">
+                  <p id="errcnpj" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="">{{ __('CEP') }}</label>
+                  <input class="form-control" type="text" name="cep" id="cep" maxlength="8" placeholder="Apenas números">
+                  <p id="errcep" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="">{{ __('Rua') }}</label>
+              <input class="form-control" type="text" name="rua" id="rua">
+              <p id="errrua" class="text-danger mb-0 em"></p>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="">{{ __('Número') }}</label>
+                  <input class="form-control" type="text" name="numero" id="numero">
+                  <p id="errnumero" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label for="">{{ __('Complemento') }}</label>
+                  <input class="form-control" type="text" name="complemento" id="complemento">
+                  <p id="errcomplemento" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="">{{ __('Bairro') }}</label>
+              <input class="form-control" type="text" name="bairro" id="bairro">
+              <p id="errbairro" class="text-danger mb-0 em"></p>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label for="">{{ __('Cidade') }}</label>
+                  <input class="form-control" type="text" name="cidade" id="cidade">
+                  <p id="errcidade" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="">{{ __('Estado') }}</label>
+                  <input class="form-control" type="text" name="estado" id="estado" maxlength="2" placeholder="Ex: SP">
+                  <p id="errestado" class="text-danger mb-0 em"></p>
+                </div>
+              </div>
             </div>
           </form>
         </div>
@@ -329,4 +402,78 @@
       </div>
     </div>
   </div>
+@endsection
+
+@section('scripts')
+<script>
+// Aguardar jQuery estar disponível
+if (typeof $ === 'undefined') {
+    console.error('jQuery não está carregado!');
+} else {
+    $(document).ready(function() {
+    // Máscara para CNPJ (igual ao shop_settings)
+    $("#cnpj").on('input', function() {
+        var cnpj = $(this).val().replace(/\D/g, '');
+        if (cnpj.length > 14) {
+            cnpj = cnpj.substr(0, 14);
+        }
+        if (cnpj.length >= 14) {
+            cnpj = cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+        }
+        $(this).val(cnpj);
+    });
+    
+    // ViaCEP - usando a mesma rota que funciona no shop_settings
+    $("#cep").on('blur', function() {
+        var cep = $(this).val().replace(/\D/g, '');
+        if (cep.length == 8) {
+            $.get("{{ route('user.shipping.consulta-cep') }}?cep=" + cep, function(data) {
+                $("#rua").val(data.rua);
+                $("#bairro").val(data.bairro);
+                $("#cidade").val(data.cidade);
+                $("#estado").val(data.estado);
+                $("#numero").focus();
+            }).fail(function() {
+                alert("CEP não encontrado");
+            });
+        }
+    });
+    
+    // Limpar campos de endereço quando CEP for alterado
+    $('#cep').on('input', function() {
+        // Apenas permitir números
+        var value = $(this).val().replace(/\D/g, '');
+        $(this).val(value);
+        
+        // Limpar outros campos
+        $('#rua, #bairro, #cidade, #estado').val('');
+    });
+    
+    // Interceptar o submit para remover máscaras antes de enviar
+    $('#submitBtn').on('click', function(e) {
+        // Remover máscara do CNPJ antes de enviar
+        var cnpjField = $('#cnpj');
+        if (cnpjField.val()) {
+            cnpjField.val(cnpjField.val().replace(/\D/g, ''));
+        }
+        
+        // Remover máscara do CEP antes de enviar  
+        var cepField = $('#cep');
+        if (cepField.val()) {
+            cepField.val(cepField.val().replace(/\D/g, ''));
+        }
+        
+        // Permitir que o script do custom.js continue executando
+        // Depois de um pequeno delay, restaurar as máscaras para o usuário
+        setTimeout(function() {
+            // Restaurar máscara do CNPJ
+            if (cnpjField.val() && cnpjField.val().length >= 14) {
+                var cnpj = cnpjField.val();
+                cnpjField.val(cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"));
+            }
+        }, 100);
+    });
+    }); // Fim do document ready
+} // Fim do check jQuery
+</script>
 @endsection
