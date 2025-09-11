@@ -185,8 +185,13 @@ class CustomerController extends Controller
         if (Auth::guard('customer')->attempt($credentials)) {
             $authUser = Auth::guard('customer')->user();
             // first, check whether the user's email address verified or not
+            \Log::info('Checking login for user: ' . $authUser->email);
+            \Log::info('Email verification status: ' . ($authUser->email_verified ? 'Verified' : 'Not Verified'));
+            \Log::info('Email verified at: ' . ($authUser->email_verified_at ?? 'null'));
+            \Log::info('Account status: ' . $authUser->status);
 
             if ($authUser->email_verified_at == null) {
+                \Log::info('Login blocked: Email not verified');
                 Session::flash('error', $keywords['Please, verify your email address'] ?? __('Please, verify your email address'));
                 // logout auth user as condition not satisfied
                 Auth::guard('customer')->logout();
@@ -481,19 +486,29 @@ class CustomerController extends Controller
         $user_id = getUser()->id;
         $keywords = Common::get_keywords($user_id);
         try {
+            \Log::info('Attempting to verify user with token: ' . $token);
             $user = Customer::where('verification_token', $token)->firstOrFail();
+            \Log::info('Found user: ' . $user->email);
             // after verify user email, put "null" in the "verification token"
             $user->update([
                 'email_verified_at' => date('Y-m-d H:i:s'),
+                'email_verified' => 1,
                 'status' => 1,
                 'verification_token' => null
             ]);
+            \Log::info('User verification updated successfully for: ' . $user->email);
             Session::flash('success', $keywords['Your email has verified'] ?? __('Your email has verified'));
             // after email verification, authenticate this user
             Auth::guard('customer')->login($user);
             return redirect()->route('customer.dashboard', getParam());
         } catch (ModelNotFoundException $e) {
+            \Log::error('Email verification failed. Token not found: ' . $token);
+            \Log::error('Error details: ' . $e->getMessage());
             Session::flash('error', $keywords['Could not verify your email'] ?? __('Could not verify your email'));
+            return redirect()->route('customer.signup', getParam());
+        } catch (\Exception $e) {
+            \Log::error('Unexpected error during email verification: ' . $e->getMessage());
+            Session::flash('error', 'An unexpected error occurred during verification');
             return redirect()->route('customer.signup', getParam());
         }
     }
