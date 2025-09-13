@@ -232,7 +232,8 @@ class CronJobController extends Controller
             'membership_invoice' => $filename,
             'website_title' => $bs->website_title,
             'templateType' => $mailTemplate,
-            'type' => $mailType
+            'type' => $mailType,
+            'user_id' => $user->id
         ];
         $mailer->mailFromAdmin($data);
         $membership->update(['status' => $status]);

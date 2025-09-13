@@ -80,7 +80,8 @@ class CheckoutController extends Controller
                 'membership_invoice' => $file_name,
                 'website_title' => $bs->website_title,
                 'templateType' => 'registration_with_trial_package',
-                'type' => 'registrationWithTrialPackage'
+                'type' => 'registrationWithTrialPackage',
+                'user_id' => $user->id
             ];
             $mailer->mailFromAdmin($data);
 
@@ -269,6 +270,10 @@ class CheckoutController extends Controller
         if (!$userAddress) {
             return response()->json(['error' => 'Configure seu endereço nas configurações da loja primeiro'], 400);
         }
+        
+        // Incluir dias de despacho na resposta
+        $dias_despacho = $userAddress->dias_despacho ?? 0;
+        
 
         $cepDestino = preg_replace('/\D/', '', $request->cep);
         $cepOrigem = preg_replace('/\D/', '', $userAddress->cep);
@@ -276,18 +281,25 @@ class CheckoutController extends Controller
         $produtos = [];
         foreach (session('cart') as $item) {
             $userItem = \App\Models\User\UserItem::find($item['id']);
-
-            // Se for produto digital (hasCode == true), pula
+            // Pula produtos digitais e produtos sem dimensões completas
             if ($userItem && $userItem->hasCode()) {
                 continue;
             }
 
+            // Verifica se todas as dimensões e peso estão presentes e são maiores que zero
+            if (empty($item['weight']) || empty($item['length']) || 
+                empty($item['height']) || empty($item['width']) ||
+                (float)$item['weight'] <= 0 || (int)$item['length'] <= 0 ||
+                (int)$item['height'] <= 0 || (int)$item['width'] <= 0) {
+                continue;
+            }
+
             $produtos[] = [
-                'weight'   => $item['weight'],
-                'length'   => $item['length'],
-                'height'   => $item['height'],
-                'width'    => $item['width'],
-                'quantity' => $item['qty'],
+                'weight'   => (float)$item['weight'],
+                'length'   => (int)$item['length'],
+                'height'   => (int)$item['height'],
+                'width'    => (int)$item['width'],
+                'quantity' => (int)$item['qty'],
             ];
 
             $valorNota += $item['product_price'] * $item['qty'];
@@ -304,6 +316,8 @@ class CheckoutController extends Controller
         $frenet = new FrenetService($userAddress->token_frenet);
         $frete = $frenet->calcularFrete($produtos, $cepOrigem, $cepDestino, $valorNota);
 
+        // Adicionar dias de despacho à resposta do frete
+        $frete['dias_despacho'] = $dias_despacho;
         return response()->json($frete);
     }
 
@@ -398,7 +412,8 @@ class CheckoutController extends Controller
                 'verification_link' => $verification_link,
                 'website_title' => $bs->website_title,
                 'templateType' => 'email_verification',
-                'type' => 'emailVerification'
+                'type' => 'emailVerification',
+                'user_id' => $user->id
             ];
             $mailer->mailFromAdmin($data);
 

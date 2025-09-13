@@ -153,22 +153,41 @@
                                         </div>
                                     @endif
                                     @if ($item->type == 'digital')
-                                        <div class="col-lg-4">
-                                            <div class="form-group">
-                                                <label for="">{{ __('Type') }} <span
-                                                        class="text-danger">**</span></label>
-                                                <select name="file_type" class="form-control" id="fileType"
-                                                    onchange="toggleFileUpload();">
-                                                    <option value="upload"
-                                                        {{ !empty($item->download_file) ? 'selected' : '' }}>
-                                                        {{ __('File Upload') }}
-                                                    </option>
-                                                    <option value="link"
-                                                        {{ !empty($item->download_link) ? 'selected' : '' }}>
-                                                        {{ __('File Download Link') }}</option>
-                                                </select>
+                                        @php
+                                            $hasCodes = \App\Models\User\DigitalProductCode::where('user_item_id', $item->id)->count() > 0;
+                                        @endphp
+                                        
+                                        @if (!$hasCodes)
+                                            <div class="col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="">{{ __('Type') }} <span
+                                                            class="text-danger">**</span></label>
+                                                    <select name="file_type" class="form-control" id="fileType"
+                                                        onchange="toggleFileUpload();">
+                                                        <option value="upload"
+                                                            {{ !empty($item->download_file) ? 'selected' : '' }}>
+                                                            {{ __('File Upload') }}
+                                                        </option>
+                                                        <option value="link"
+                                                            {{ !empty($item->download_link) ? 'selected' : '' }}>
+                                                            {{ __('File Download Link') }}</option>
+                                                        <option value="code">{{ __('Códigos') }}</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
+                                        @else
+                                            <div class="col-lg-4">
+                                                <div class="form-group">
+                                                    <label>{{ __('Gerenciamento de Códigos') }}</label>
+                                                    <div>
+                                                        <a class="btn btn-secondary btn-sm"
+                                                           href="{{ route('user.item.codes', $item->id) . '?language=' . request()->input('language') }}">
+                                                            <span class="btn-label">Gerenciar Código</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @endif
                                     <div class="col-lg-4">
                                         <div class="form-group">
@@ -188,16 +207,24 @@
                                     </div>
 
                                     @if ($item->type == 'digital')
-                                        <div class="col-lg-4">
-                                            <div id="downloadFile"
-                                                class="form-group {{ !empty($item->download_link) ? 'd-none' : '' }}">
-                                                <label for="">{{ __('Downloadable File') }} <span
-                                                        class="text-danger">**</span></label>
-                                                <br>
+                                        @php
+                                            $hasCodes = \App\Models\User\DigitalProductCode::where('user_item_id', $item->id)->count() > 0;
+                                        @endphp
+                                        
+                                        @if (!$hasCodes)
+                                            <div class="col-lg-4">
+                                                <div id="downloadFile"
+                                                    class="form-group {{ !empty($item->download_link) ? 'd-none' : '' }}">
+                                                    <label for="">{{ __('Downloadable File') }} <span
+                                                            class="text-danger">**</span></label>
+                                                    <br>
 
-                                                <input name="download_file" type="file" class="form-control">
-                                                <p class="mb-0 text-warning">
-                                                    {{ __('Only zip file is allowed.') }}</p>
+                                                    <input name="download_file" type="file" class="form-control">
+                                                    <p class="mb-0 text-warning">
+                                                        {{ __('Only zip file is allowed.') }}</p>
+                                                </div>
+                                            </div>
+                                        @endif
                                             </div>
 
                                             <div id="downloadLink"

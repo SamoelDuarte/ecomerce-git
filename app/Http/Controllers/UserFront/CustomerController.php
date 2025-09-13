@@ -9,6 +9,7 @@ use App\Http\Helpers\Uploader;
 use App\Http\Helpers\UserPermissionHelper;
 use App\Models\Customer;
 use App\Models\CustomerWishList;
+use App\Models\User;
 use App\Models\User\BasicSetting;
 use App\Models\User\Language;
 use App\Models\User\SEO;
@@ -280,10 +281,8 @@ class CustomerController extends Controller
         $mailSubject = $mailTemplate->email_subject;
         $mailBody = $mailTemplate->email_body;
 
-        // second, send a password reset link to user via email
-        $info = DB::table('basic_extendeds')
-            ->select('is_smtp', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
-            ->first();
+        // Get SMTP settings from parent user (the root user who owns this front-end)
+        $parentUser = User::findOrFail($rootUser->id);
 
         $name = $user->first_name . ' ' . $user->last_name;
         $token = uniqid();
@@ -293,20 +292,22 @@ class CustomerController extends Controller
         $mailBody = str_replace('{website_title}', $website_title, $mailBody);
 
         $data = [];
-        $data['smtp_status'] = $info->is_smtp;
-        $data['smtp_host'] = $info->smtp_host;
-        $data['smtp_port'] = $info->smtp_port;
-        $data['encryption'] = $info->encryption;
-        $data['smtp_username'] = $info->smtp_username;
-        $data['smtp_password'] = $info->smtp_password;
+        $data['smtp_status'] = $parentUser->smtp_status ?? 0;
+        $data['smtp_host'] = $parentUser->smtp_host;
+        $data['smtp_port'] = $parentUser->smtp_port;
+        $data['encryption'] = $parentUser->encryption;
+        $data['smtp_username'] = $parentUser->smtp_username;
+        $data['smtp_password'] = $parentUser->smtp_password;
+        $data['from_mail'] = $parentUser->from_mail;
+        $data['from_name'] = $parentUser->from_name;
 
         //mail info in array
-        $data['from_mail'] = $info->from_mail;
         $data['recipient'] = $request->email;
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
-        // Send Mail
-        if ($info->is_smtp == 1) {
+
+        // Send Mail only if SMTP is enabled for parent user
+        if ($parentUser->smtp_status == 1) {
             BasicMailer::sendMail($data);
             // store user email in session to use it later
             $user->verification_token = $token;
@@ -440,15 +441,14 @@ class CustomerController extends Controller
 
     public function sendVerificationMail(Request $request, $token, $user_id, $website_title)
     {
-        // first get the mail template information from db
+        // Get parent user settings since this is a front-end user
+        $parentUser = User::findOrFail($user_id);
+        
+        // Get mail template information from db
         $mailTemplate = UserEmailTemplate::where([['email_type', 'email_verification'], ['user_id', $user_id]])->first();
 
         $mailSubject = !is_null($mailTemplate->email_subject) ? $mailTemplate->email_subject : "Verify your email address.";
         $mailBody = $mailTemplate->email_body;
-        // second get the website title & mail's smtp information from db
-        $info = DB::table('basic_extendeds')
-            ->select('is_smtp', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
-            ->first();
 
         $link = '<a href=' . route('customer.signup.verify', ['token' => $token, getParam()]) . '>Click Here</a>';
         if (!is_null($mailBody)) {
@@ -464,21 +464,25 @@ class CustomerController extends Controller
             ";
         }
 
-        /******** Send mail  ********/
+        // Get SMTP settings from parent user
         $data = [];
-        $data['smtp_status'] = $info->is_smtp;
-        $data['smtp_host'] = $info->smtp_host;
-        $data['smtp_port'] = $info->smtp_port;
-        $data['encryption'] = $info->encryption;
-        $data['smtp_username'] = $info->smtp_username;
-        $data['smtp_password'] = $info->smtp_password;
+        $data['smtp_status'] = $parentUser->smtp_status ?? 0;
+        $data['smtp_host'] = $parentUser->smtp_host;
+        $data['smtp_port'] = $parentUser->smtp_port;
+        $data['encryption'] = $parentUser->encryption;
+        $data['smtp_username'] = $parentUser->smtp_username;
+        $data['smtp_password'] = $parentUser->smtp_password;
+        $data['from_mail'] = $parentUser->from_mail;
+        $data['from_name'] = $parentUser->from_name;
 
         //mail info in array
-        $data['from_mail'] = $info->from_mail;
         $data['recipient'] = $request->email;
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
-        BasicMailer::sendMail($data);
+
+        if ($parentUser->smtp_status == 1) {
+            BasicMailer::sendMail($data);
+        }
         return;
     }
     public function signupVerify(Request $request, $domain, $token)

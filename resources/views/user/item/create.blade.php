@@ -120,12 +120,15 @@
                                             <div class="form-group">
                                                 <label for="">{{ __('Type') }} <span
                                                         class="text-danger">**</span></label>
-                                                <select name="file_type" class="form-control" id="fileType">
+                                                <select name="file_type" class="form-control" id="fileType" onchange="toggleFileUpload()">
                                                     <option value="upload" selected>{{ __('File Upload') }}</option>
                                                     <option value="link">{{ __('File Download Link') }}</option>
                                                     <option value="code">Código</option>
                                                 </select>
                                             </div>
+                                            <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none" onclick="downloadCodeTemplate()">
+                                                <i class="fa fa-download"></i> Modelo de Planilha de Códigos
+                                            </button>
                                         </div>
                                         <div class="col-md-4">
                                             <div id="downloadFile" class="form-group">
@@ -148,8 +151,8 @@
                                                         {{ __('Importar Planilha de Códigos') }}
                                                         <span class="text-danger">**</span>
                                                     </label>
-                                                    <input type="file" class="form-control" name="codeExcelInput" id="codeExcelInput"
-                                                        accept=".xlsx,.csv">
+                                                    <input type="file" class="form-control" name="codeExcelInput"
+                                                        id="codeExcelInput" accept=".xlsx,.csv">
 
                                                     <div id="codeImportResult" class="mt-3 d-none">
                                                         <div class="alert alert-info">

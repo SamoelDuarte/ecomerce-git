@@ -20,7 +20,6 @@ class MegaMailer
     public function mailFromAdmin($data)
     {
         $temp = EmailTemplate::where('email_type', '=', $data['templateType'])->first();
-
         $body = $temp->email_body;
         if (array_key_exists('username', $data)) {
             $body = preg_replace("/{username}/", $data['username'], $body);
@@ -71,6 +70,9 @@ class MegaMailer
             $body = preg_replace("/{website_title}/", $data['website_title'], $body);
         }
 
+
+
+        // Fallback to system SMTP
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();
         } else {
@@ -81,7 +83,6 @@ class MegaMailer
 
         if ($be->is_smtp == 1) {
             try {
-                //config smtp
                 $smtp = [
                     'transport' => 'smtp',
                     'host' => $be->smtp_host,
@@ -93,41 +94,30 @@ class MegaMailer
                     'auth_mode' => null,
                 ];
                 Config::set('mail.mailers.smtp', $smtp);
-                //set data to for pass in te mail array
-                $mailData = [];
-                $mailData['from_mail'] = $be->from_mail;
-                $mailData['toMail'] = $data['toMail'];
-                $mailData['subject'] = $temp->email_subject;
-                $mailData['body'] = $body;
-                if (array_key_exists('membership_invoice', $data)) {
-                    $mailData['membership_invoice'] = $data['membership_invoice'];
-                }
-                //send mail
-                Mail::send([], [], function (Message $message) use ($mailData) {
-                    $message->to($mailData['toMail'])
-                        ->from($mailData['from_mail'])
-                        ->subject($mailData['subject'])
-                        ->html($mailData['body'], 'text/html');
 
-                    if (array_key_exists('membership_invoice', $mailData)) {
-                        $filePath = public_path('assets/front/invoices/') . $mailData['membership_invoice'];
+                Mail::send([], [], function (Message $message) use ($data, $be, $body, $temp) {
+                    $message->to($data['toMail'])
+                        ->from($be->from_mail, $be->from_name)
+                        ->subject($temp->email_subject)
+                        ->html($body, 'text/html');
 
+                    if (array_key_exists('membership_invoice', $data)) {
+                        $filePath = public_path('assets/front/invoices/') . $data['membership_invoice'];
                         if (file_exists($filePath)) {
                             $message->attach($filePath);
                         }
                     }
                 });
-                // Attachments
-                if (array_key_exists('membership_invoice', $mailData)) {
-                    @unlink(public_path('assets/front/invoices/') . $mailData['membership_invoice']);
+
+                // Cleanup invoice if needed
+                if (array_key_exists('membership_invoice', $data)) {
+                    @unlink(public_path('assets/front/invoices/') . $data['membership_invoice']);
                 }
-            } catch (TransportException $e) {
-                // Attachments
-                if (array_key_exists('membership_invoice', $mailData)) {
-                    @unlink(public_path('assets/front/invoices/') . $mailData['membership_invoice']);
+            } catch (\Exception $e) {
+                if (array_key_exists('membership_invoice', $data)) {
+                    @unlink(public_path('assets/front/invoices/') . $data['membership_invoice']);
                 }
-                Session::flash('error', 'Mail could not be sent.');
-                return;
+                Session::flash('error', 'Mail could not be sent: ' . $e->getMessage());
             }
         }
     }
@@ -150,55 +140,43 @@ class MegaMailer
             if (array_key_exists('order_link', $data)) {
                 $body = preg_replace("/{order_link}/", $data['order_link'], $body);
             }
-
             if (array_key_exists('website_title', $data)) {
                 $body = preg_replace("/{website_title}/", $data['website_title'], $body);
             }
 
-            if (session()->has('lang')) {
-                $currentLang = Language::where('code', session()->get('lang'))->first();
-            } else {
-                $currentLang = Language::where('is_default', 1)->first();
-            }
-
-            $be = $currentLang->basic_extended;
-
-            $mail = new PHPMailer(true);
-            $mail->CharSet = 'UTF-8';
-
-
-            if ($be->is_smtp == 1) {
+            if ($user->smtp_status == 1) {
                 try {
+                    // Configure SMTP with user settings
+                    $smtp = [
+                        'transport' => 'smtp',
+                        'host' => $user->smtp_host,
+                        'port' => $user->smtp_port,
+                        'encryption' => $user->encryption,
+                        'username' => $user->smtp_username,
+                        'password' => $user->smtp_password,
+                        'timeout' => null,
+                        'auth_mode' => null,
+                    ];
+                    Config::set('mail.mailers.smtp', $smtp);
 
-                    $mail->isSMTP();
-                    $mail->Host       = $be->smtp_host;
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = $be->smtp_username;
-                    $mail->Password   = $be->smtp_password;
-                    $mail->SMTPSecure = $be->encryption;
-                    $mail->Port       = $be->smtp_port;
-                } catch (Exception $e) {
+                    // Send mail using Laravel's Mail facade
+                    Mail::send([], [], function (Message $message) use ($data, $user, $body, $temp) {
+                        $message->to($data['toMail'], $data['toName'])
+                            ->from($user->email, $user->from_name)
+                            ->subject($temp->email_subject)
+                            ->html($body, 'text/html');
+
+                        // Add attachments if any
+                        if (array_key_exists('order_number', $data)) {
+                            $message->attach(public_path('assets/front/invoices/' . $data['attachment']));
+                        }
+                    });
+
+                } catch (\Exception $e) {
+                    Session::flash('error', 'Mail could not be sent: ' . $e->getMessage());
                 }
-            }
-
-            try {
-
-                //Recipients
-                $mail->setFrom($be->from_mail, $be->from_name);
-                $mail->addAddress($data['toMail'], $data['toName']);
-
-                // Attachments
-                if (array_key_exists('order_number', $data)) {
-                    $mail->addAttachment('assets/front/invoices/' . $data['attachment']);
-                }
-
-                // Content
-                $mail->isHTML(true);
-                $mail->Subject = $temp->email_subject;
-                $mail->Body    = $body;
-
-                $mail->send();
-            } catch (Exception $e) {
+            } else {
+                Session::flash('error', 'SMTP is not configured for this user.');
             }
         }
     }

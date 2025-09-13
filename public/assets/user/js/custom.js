@@ -1,5 +1,48 @@
 "use strict";
 
+function toggleFileUpload() {
+    let fileType = document.getElementById('fileType').value;
+    let downloadFile = document.getElementById('downloadFile');
+    let downloadLink = document.getElementById('downloadLink');
+    let codeUploadSection = document.getElementById('codeUploadSection');
+    let templateBtn = document.getElementById('downloadTemplateBtn');
+
+    if (fileType === 'upload') {
+        downloadFile.classList.remove('d-none');
+        downloadLink.classList.add('d-none');
+        codeUploadSection.classList.add('d-none');
+        if (templateBtn) templateBtn.classList.add('d-none');
+    } else if (fileType === 'link') {
+        downloadFile.classList.add('d-none');
+        downloadLink.classList.remove('d-none');
+        codeUploadSection.classList.add('d-none');
+        if (templateBtn) templateBtn.classList.add('d-none');
+    } else if (fileType === 'code') {
+        downloadFile.classList.add('d-none');
+        downloadLink.classList.add('d-none');
+        codeUploadSection.classList.remove('d-none');
+        if (templateBtn) templateBtn.classList.remove('d-none');
+    }
+}
+
+function downloadCodeTemplate() {
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const ws_data = [
+        ['Nome', 'Código/Key', 'Valor'], // Header
+        ['GOOGLE Vale PRESENTE 30', 'ABC123FEFEWWE84894', '30.00'],      // Example row
+        ['GOOGLE Vale PRESENTE 50', 'XYZ789WEFSD4848488', '50.00']       // Example row
+    ];
+    
+    const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Códigos');
+    
+    // Generate file and trigger download
+    XLSX.writeFile(workbook, 'modelo_codigos.xlsx');
+}
+
 WebFont.load({
     google: { "families": ["Lato:300,400,700,900"] },
     custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: [mainurl + '/assets/admin/css/fonts.min.css'] },

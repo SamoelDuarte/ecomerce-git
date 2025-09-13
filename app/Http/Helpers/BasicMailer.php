@@ -10,6 +10,41 @@ use Str;
 
 class BasicMailer
 {
+  public static function sendMailFromUser($user, $data)
+  {
+    if ($user->smtp_status == 1) {
+      $smtp = [
+        'transport' => 'smtp',
+        'host' => $user->smtp_host,
+        'port' => $user->smtp_port,
+        'encryption' => $user->encryption,
+        'username' => $user->smtp_username,
+        'password' => $user->smtp_password,
+        'timeout' => null,
+        'auth_mode' => null,
+      ];
+      Config::set('mail.mailers.smtp', $smtp);
+
+      try {
+        Mail::send([], [], function (Message $message) use ($data, $user) {
+          $message->to($data['recipient'])
+            ->from($user->email, $user->from_name)
+            ->subject($data['subject'])
+            ->html($data['body'], 'text/html');
+
+          if (array_key_exists('invoice', $data)) {
+            $message->attach($data['invoice']);
+          }
+        });
+        return true;
+      } catch (\Exception $e) {
+        Session::flash('warning', 'Mail could not be sent. Mailer Error: ' . Str::limit($e->getMessage(), 120));
+        return false;
+      }
+    }
+    return false;
+  }
+
   public static function sendMail($data)
   {
     if ($data['smtp_status'] == 1) {

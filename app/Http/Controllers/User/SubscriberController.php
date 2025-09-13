@@ -72,27 +72,45 @@ class SubscriberController extends Controller
 
     public function getMailInformation()
     {
-        $data['info'] = BasicSetting::where('user_id', Auth::guard('web')->user()->id)->select('email', 'from_name')->first();
+        $data['user'] = Auth::guard('web')->user();
         return view('user.subscribers.mail-information', $data);
     }
 
     public function storeMailInformation(Request $request)
     {
-        $request->validate([
+        $rules = [
             'email' => 'required',
-            'from_name' => 'required'
-        ], [
-            'email.required' => __('The email field is required'),
-            'from_name.required' => __('The from name field is required')
+            'from_name' => 'required',
+            'smtp_host' => 'required_if:smtp_status,1',
+            'smtp_port' => 'required_if:smtp_status,1',
+            'smtp_username' => 'required_if:smtp_status,1',
+            'smtp_password' => 'required_if:smtp_status,1'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $errmsgs = $validator->getMessageBag()->add('error', 'true');
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $user = Auth::guard('web')->user();
+
+        $user->update([
+            'smtp_status' => $request->filled('smtp_status') ? 1 : 0,
+            'smtp_host' => $request->smtp_host,
+            'smtp_port' => $request->smtp_port,
+            'encryption' => $request->encryption ?? 'tls',
+            'smtp_username' => $request->smtp_username,
+            'smtp_password' => $request->smtp_password,
+            'email' => $request->email,
+            'from_name' => $request->from_name,
+            'from_mail' => $request->email
         ]);
-        $info = \App\Models\User\BasicSetting::where('user_id', Auth::guard('web')->user()->id)->first();
-        $info->email = $request->email;
-        $info->from_name = $request->from_name;
-        $info->save();
-        Session::flash('success', __('Updated Successfully'));
+          
+
+        Session::flash('success', $keywords['Successfully updated email information!'] ?? __('Successfully updated email information!'));
         return back();
     }
-
     public function subscsendmail(Request $request)
     {
         $request->validate([

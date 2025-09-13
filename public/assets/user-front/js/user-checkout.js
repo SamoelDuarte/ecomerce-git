@@ -366,8 +366,18 @@ function paymentFormUpdate(opaqueData) {
 }
 
 
-$(document).ready(function () {
+// Função para atualizar mensagem de dias de despacho
+function updateDispatchMessage(dias) {
+    let message = `<li class="d-flex justify-content-between dispatch-info">
+        <h5 class="mb-0" style="color: #28a745;">
+            <i class="fas fa-clock mr-2"></i>
+            ${dias > 0 ? 'Seu pedido será despachado em ' + dias + ' dias úteis' : 'Despacho no mesmo dia'}
+        </h5>
+    </li>`;
+    $('#shippingMethodsContainer').html(message);
+}
 
+$(document).ready(function () {
     let carregandoCEP = false;
 
     function carregarEntregaPorCep() {
@@ -394,7 +404,28 @@ $(document).ready(function () {
                 }
 
                 if (res && res.ShippingSevicesArray) {
-                    let html = `<h5 class="mt-3">Escolha a Entrega</h5>`;
+                    let html = '';
+                    
+                    // Mostrar dias de despacho primeiro
+                    if (res.dias_despacho !== undefined) {
+                        html += `
+                            <div class="alert alert-success mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    ${res.dias_despacho > 0 
+                                        ? `Seu pedido será despachado em ${res.dias_despacho} dias úteis` 
+                                        : 'Despacho no mesmo dia'}
+                                </h5>
+                            </div>
+                        `;
+                    }
+
+                    html += `<h5 class="mt-3">Escolha a Entrega</h5>`;
+
+                    // Mostrar dias de despacho se disponível
+                    if (typeof res.dias_despacho !== 'undefined') {
+                        updateDispatchMessage(res.dias_despacho);
+                    }
 
                     res.ShippingSevicesArray.forEach((servico, index) => {
                         if (!servico.Error) {

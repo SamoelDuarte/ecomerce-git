@@ -20,13 +20,20 @@ class FrenetService
         $itens = [];
 
         foreach ($produtos as $produto) {
-            $itens[] = [
-                "Weight"   => (float) $produto['weight'],
-                "Length"   => (int) $produto['length'],
-                "Height"   => (int) $produto['height'],
-                "Width"    => (int) $produto['width'],
-                "Quantity" => (int) $produto['quantity'],
-            ];
+            // Verifica se todas as dimensões e peso estão presentes e são maiores que zero
+            if (!empty($produto['weight']) && !empty($produto['length']) && 
+                !empty($produto['height']) && !empty($produto['width']) &&
+                (float)$produto['weight'] > 0 && (int)$produto['length'] > 0 &&
+                (int)$produto['height'] > 0 && (int)$produto['width'] > 0) {
+                
+                $itens[] = [
+                    "Weight"   => (float) $produto['weight'],
+                    "Length"   => (int) $produto['length'],
+                    "Height"   => (int) $produto['height'],
+                    "Width"    => (int) $produto['width'],
+                    "Quantity" => (int) ($produto['quantity'] ?? 1),
+                ];
+            }
         }
 
         $body = [

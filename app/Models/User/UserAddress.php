@@ -12,6 +12,7 @@ class UserAddress extends Model
         'cep',
         'token_frenet',
         'rua',
+        'dias_despacho',
         'numero',
         'complemento',
         'bairro',

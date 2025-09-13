@@ -123,7 +123,8 @@ class MidtransController extends Controller
                     'membership_invoice' => $file_name,
                     'website_title' => $bs->website_title,
                     'templateType' => 'registration_with_premium_package',
-                    'type' => 'registrationWithPremiumPackage'
+                    'type' => 'registrationWithPremiumPackage',
+                    'user_id' => $user->id
                 ];
                 $mailer->mailFromAdmin($data);
 

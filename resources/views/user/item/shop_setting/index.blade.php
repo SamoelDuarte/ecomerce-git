@@ -90,6 +90,13 @@
                                 <p id="errestado" class="mb-0 text-danger em"></p>
                             </div>
                         </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="">{{ __('Dias para Despacho') }} *</label>
+                                <input type="number" class="form-control" name="dias_despacho" id="dias_despacho" value="{{ $address->dias_despacho ?? 0 }}" min="0">
+                                <p id="errdias_despacho" class="mb-0 text-danger em"></p>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -45,7 +45,8 @@ class SubscriptionExpiredMail implements ShouldQueue
             'login_link' => "<a href='" . route('user.login') . "'>" . route('user.login') . "</a>",
             'website_title' => $this->bs->website_title,
             'templateType' => 'membership_expired',
-            'type' => 'membershipExpired'
+            'type' => 'membershipExpired',
+            'user_id' => $this->user->id
         ];
         $mailer->mailFromAdmin($data);
     }

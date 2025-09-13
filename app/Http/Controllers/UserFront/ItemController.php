@@ -76,7 +76,6 @@ class ItemController extends Controller
             $userCurrentLang = Language::where('is_default', 1)->where('user_id', $user->id)->first();
         }
         $cart = Session::get('cart');
-
         $user_id = $user->id;
         if (!is_null($cart) && is_array($cart)) {
             $cart = array_filter($cart, function ($item) use ($user_id) {
@@ -143,20 +142,34 @@ class ItemController extends Controller
             }
             //check stock if not exist cart end
 
-            $cart = [
-                $ckey => [
+            $cartItem = [
                     "id" => $id,
                     "user_id" => $user_id,
                     "qty" => (int)$qty,
                     "variations" => $variant,
                     "product_price" => (float)(currency_converter($product_current_price, $item->id)),
                     "total" => $total,
-                    "weight" => (float) $item->weight,
-                    "length" => (float) $item->length,
-                    "height" => (float) $item->height,
-                    "width"  => (float) $item->width,
-                ]
-            ];
+                ];
+
+                // Adiciona dimensões apenas se não for produto digital
+                if ($item->type != 'digital') {
+                    // Verifica se todas as dimensões estão preenchidas
+                    if (empty($item->weight) || empty($item->length) || 
+                        empty($item->height) || empty($item->width) ||
+                        (float)$item->weight <= 0 || (float)$item->length <= 0 ||
+                        (float)$item->height <= 0 || (float)$item->width <= 0) {
+                        return response()->json(['error' => $keywords['Product dimensions are incomplete'] ?? __('Product dimensions are incomplete')]);
+                    }
+
+                    $cartItem["weight"] = (float) $item->weight;
+                    $cartItem["length"] = (float) $item->length;
+                    $cartItem["height"] = (float) $item->height;
+                    $cartItem["width"]  = (float) $item->width;
+                }
+
+                $cart = [
+                    $ckey => $cartItem
+                ];
 
             Session::put('cart', $cart);
             return response()->json(['message' => $keywords['Item added to your cart successfully'] ?? __('Item added to your cart successfully')]);
@@ -188,7 +201,7 @@ class ItemController extends Controller
         }
 
         // if item not exist in cart then add to cart with quantity = 1
-        $cart[$ckey] = [
+        $cartItem = [
             "id" => $id,
             "user_id" => $user_id,
             "qty" => (int)$qty,
@@ -196,6 +209,24 @@ class ItemController extends Controller
             "product_price" => (float)(currency_converter($product_current_price, $item->id)),
             "total" => $total,
         ];
+
+        // Adiciona dimensões apenas se não for produto digital
+        if ($item->type != 'digital') {
+            // Verifica se todas as dimensões estão preenchidas
+            if (empty($item->weight) || empty($item->length) || 
+                empty($item->height) || empty($item->width) ||
+                (float)$item->weight <= 0 || (float)$item->length <= 0 ||
+                (float)$item->height <= 0 || (float)$item->width <= 0) {
+                return response()->json(['error' => $keywords['Product dimensions are incomplete'] ?? __('Product dimensions are incomplete')]);
+            }
+
+            $cartItem["weight"] = (float) $item->weight;
+            $cartItem["length"] = (float) $item->length;
+            $cartItem["height"] = (float) $item->height;
+            $cartItem["width"]  = (float) $item->width;
+        }
+
+        $cart[$ckey] = $cartItem;
         Session::put('cart', $cart);
         return response()->json(['message' => $keywords['Item added to your cart successfully'] ?? __('Item added to your cart successfully')]);
     }
