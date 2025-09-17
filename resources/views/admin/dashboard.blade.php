@@ -218,7 +218,7 @@ $permissions = json_decode($permissions, true);
 <!-- Estatísticas Gerais -->
 <div class="row mb-4">
   <div class="col-md-3">
-    <div class="card card-stats card-info card-round stats-card">
+    <div class="card card-stats card-default card-round">
       <div class="card-body">
         <div class="row">
           <div class="col-5">
@@ -237,7 +237,7 @@ $permissions = json_decode($permissions, true);
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card card-stats card-success card-round stats-card">
+    <div class="card card-stats card-default card-round">
       <div class="card-body">
         <div class="row">
           <div class="col-5">
@@ -256,7 +256,7 @@ $permissions = json_decode($permissions, true);
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card card-stats card-warning card-round stats-card">
+    <div class="card card-stats card-default card-round">
       <div class="card-body">
         <div class="row">
           <div class="col-5">
@@ -275,7 +275,7 @@ $permissions = json_decode($permissions, true);
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card card-stats card-danger card-round stats-card">
+    <div class="card card-stats card-default card-round">
       <div class="card-body">
         <div class="row">
           <div class="col-5">

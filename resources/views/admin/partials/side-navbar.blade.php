@@ -420,25 +420,6 @@ $permissions = json_decode($permissions, true);
             </a>
           </li>
 
-          <li class="@if (request()->path() == 'admin/maintainance') active @endif">
-            <a href="{{ route('admin.maintainance') }}">
-              <span class="sub-item">{{ __('Maintenance Mode') }}</span>
-            </a>
-          </li>
-          <li class="@if (request()->path() == 'admin/cookie-alert') active @endif">
-            <a href="{{ route('admin.cookie.alert') . '?language=' . $default->code }}">
-              <span class="sub-item">{{ __('Cookie Alert') }}</span>
-            </a>
-          </li>
-
-          <li
-            class="@if (request()->path() == 'admin/social') active
-                                @elseif(request()->is('admin/social/*')) active @endif">
-            <a href="{{ route('admin.social.index') }}">
-              <span class="sub-item">{{ __('Social Links') }}</span>
-            </a>
-          </li>
-
         </ul>
       </div>
     </li>
@@ -484,17 +465,6 @@ $permissions = json_decode($permissions, true);
           </li>
         </ul>
       </div>
-    </li>
-    @endif
-
-    @if (empty($admin->role) || (!empty($permissions) && in_array('Sitemaps', $permissions)))
-    {{-- Sitemap --}}
-    <li class="nav-item
-            @if (request()->path() == 'admin/sitemap') active @endif">
-      <a href="{{ route('admin.sitemap.index') . '?language=' . $default->code }}">
-        <i class="fa fa-sitemap"></i>
-        <p>{{ __('Sitemaps') }}</p>
-      </a>
     </li>
     @endif
 
