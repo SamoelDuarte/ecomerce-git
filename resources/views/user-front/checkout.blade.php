@@ -600,8 +600,6 @@ $user_currency = user_currency(Session::get('user_curr'));
                                 {{-- Fretes dinâmicos via Frenet --}}
                                 <div id="shippingMethodsContainer"></div>
 
-                                <div id="shippingMethodsContainer"></div>
-
                                 @if ($userShop->tax != 0)
                                 <li class="d-flex justify-content-between">
                                     <h5 class="mb-0">{{ $keywords['Tax'] ?? __('Tax') }}
