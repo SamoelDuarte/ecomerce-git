@@ -30,3 +30,6 @@ setup-local.bat
 SETUP_LOCAL.md
 start-dev.bat
 README-DEV.md
+composer.json
+package-lock.json
+package.json

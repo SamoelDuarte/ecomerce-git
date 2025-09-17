@@ -88,7 +88,7 @@
                           </td>
                           <td>
                             <button class="btn btn-secondary btn-sm editBtn" data-toggle="modal" data-target="#mailModal"
-                              data-email="{{ $subdomain->email }}">{{ __('Mail') }}</button>
+                              data-email="{{ $subdomain->email }}">Enviar mensagem</button>
                           </td>
                         </tr>
                       @endforeach
