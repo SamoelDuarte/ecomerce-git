@@ -164,7 +164,7 @@
                                   href="{{ route('register.user.view', $user->id) }}">{{ __('Details') }}</a>
                                 <a class="dropdown-item"
                                   href="{{ route('register.user.changePass', $user->id) }}">{{ __('Change Password') }}</a>
-                                <button class="editbtn editBtn" data-toggle="modal" data-target="#mailModal"
+                                <button class="editbtn editBtn" style="display: none;" data-toggle="modal" data-target="#mailModal"
                                   data-email="{{ $user->email }}">{{ __('Mail') }}</button>
 
                                 <form class="deleteform d-block" action="{{ route('register.user.delete') }}"
