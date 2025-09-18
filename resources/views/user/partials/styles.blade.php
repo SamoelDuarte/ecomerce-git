@@ -1,6 +1,10 @@
 <!-- CSS Files -->
 {{-- fontawesome css --}}
 <link rel="stylesheet" href="{{ asset('assets/front/css/all.min.css') }}">
+
+<!-- Anti-aliasing CSS para melhor qualidade visual -->
+<link rel="stylesheet" href="{{ asset('assets/css/anti-aliasing.css') }}">
+
 {{-- fontawesome icon picker css --}}
 <link rel="stylesheet" href="{{ asset('assets/admin/css/fontawesome-iconpicker.min.css') }}">
 {{-- bootstrap css --}}

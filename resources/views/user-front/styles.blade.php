@@ -5,6 +5,13 @@
 
 <link rel="stylesheet" href="{{ asset('assets/user-front/css/plugins.css') }}">
 
+<!-- Anti-aliasing CSS para melhor qualidade visual -->
+<link rel="stylesheet" href="{{ asset('assets/css/anti-aliasing.css') }}">
+<!-- Melhorias visuais específicas para e-commerce -->
+<link rel="stylesheet" href="{{ asset('assets/css/ecommerce-enhancements.css') }}">
+<!-- Correção específica de serrilhas -->
+<link rel="stylesheet" href="{{ asset('assets/css/serrated-fix.css') }}">
+
 <link rel="stylesheet" href="{{ asset('assets/user-front/fonts/fontawesome/css/all.min.css') }}">
 <!-- Main Style CSS -->
 <link rel="stylesheet" href="{{ asset('assets/user-front/css/common/style.css') }}">

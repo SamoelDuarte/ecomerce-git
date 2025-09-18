@@ -1,0 +1,304 @@
+/*
+==========================================
+  MELHORIAS VISUAIS ESPECÍFICAS PARA E-COMMERCE
+==========================================
+*/
+
+/* PRODUTOS - Imagens de produto com melhor qualidade */
+.product-img, 
+.product-image, 
+.product-thumbnail,
+.product-photo,
+.product-gallery img,
+.product-slider img,
+.cart-item img,
+.order-item img {
+    /* Suavização otimizada para fotos de produtos */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    image-rendering: optimizeQuality;
+    -ms-interpolation-mode: bicubic;
+    
+    /* Transições suaves para hover */
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    
+    /* Aceleração de hardware */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* CARDS DE PRODUTO - Melhoria visual geral */
+.product-card,
+.product-item,
+.product-box,
+.shop-item,
+.item-card {
+    /* Sombras suavizadas */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    /* Bordas suavizadas */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    
+    /* Transições suaves */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    -webkit-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.product-card:hover,
+.product-item:hover,
+.product-box:hover,
+.shop-item:hover,
+.item-card:hover {
+    /* Hover suavizado */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    -webkit-transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px) translateZ(0);
+}
+
+/* PREÇOS - Texto de preços com melhor legibilidade */
+.price,
+.product-price,
+.item-price,
+.cart-price,
+.total-price,
+.original-price,
+.discounted-price {
+    /* Suavização específica para números */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "tnum" 1; /* Números tabulares */
+    font-variant-numeric: tabular-nums;
+}
+
+/* BOTÕES DE AÇÃO - Carrinho, comprar, etc. */
+.btn-cart,
+.btn-buy,
+.btn-checkout,
+.btn-add-cart,
+.add-to-cart,
+.buy-now,
+.checkout-btn {
+    /* Suavização para botões importantes */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    
+    /* Transições suaves */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    -webkit-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* Aceleração de hardware */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* ÍCONES DE E-COMMERCE */
+.cart-icon,
+.wishlist-icon,
+.search-icon,
+.user-icon,
+.compare-icon,
+.filter-icon,
+.sort-icon {
+    /* Renderização otimizada para ícones */
+    shape-rendering: geometricPrecision;
+    text-rendering: geometricPrecision;
+    image-rendering: optimizeQuality;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* BADGES E LABELS - Desconto, novo, etc. */
+.badge,
+.label,
+.discount-badge,
+.sale-badge,
+.new-badge,
+.hot-badge,
+.out-of-stock {
+    /* Suavização para badges */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    
+    /* Bordas suavizadas */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* RATING/AVALIAÇÕES - Estrelas e notas */
+.rating,
+.stars,
+.review-rating,
+.product-rating,
+.star-rating {
+    /* Suavização para ícones de estrelas */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* CARROSSEL/SLIDER DE PRODUTOS */
+.product-slider,
+.product-carousel,
+.banner-slider,
+.hero-slider {
+    /* Otimização para sliders */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+}
+
+.product-slider .slide,
+.product-carousel .item,
+.banner-slider .slide,
+.hero-slider .slide {
+    /* Slides suavizados */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* FILTROS E CATEGORIAS */
+.filter-group,
+.category-list,
+.product-categories,
+.sidebar-filter,
+.price-filter {
+    /* Suavização para elementos de filtro */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* CHECKOUT E FORMULÁRIOS */
+.checkout-form,
+.billing-form,
+.shipping-form,
+.payment-form {
+    /* Suavização para formulários */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* THUMBNAILS E GALLERY */
+.thumbnail,
+.gallery-thumb,
+.product-gallery,
+.image-gallery {
+    /* Qualidade otimizada para miniaturas */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimizeQuality;
+    -ms-interpolation-mode: bicubic;
+    
+    /* Transições suaves */
+    transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+}
+
+/* MODAL DE PRODUTO */
+.product-modal,
+.quickview-modal,
+.cart-modal,
+.checkout-modal {
+    /* Suavização para modais */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* TABELAS DE PRODUTOS */
+.product-table,
+.cart-table,
+.order-table,
+.comparison-table {
+    /* Suavização para tabelas */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* BREADCRUMBS E NAVEGAÇÃO */
+.breadcrumb,
+.product-nav,
+.category-nav,
+.pagination {
+    /* Suavização para navegação */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* CONFIGURAÇÕES ESPECÍFICAS PARA MOBILE */
+@media (max-width: 768px) {
+    .product-img,
+    .product-image,
+    .product-thumbnail {
+        /* Otimização para mobile */
+        image-rendering: auto;
+        image-rendering: optimizeQuality;
+    }
+    
+    .product-card,
+    .product-item {
+        /* Transições mais rápidas no mobile */
+        transition: all 0.2s ease;
+        -webkit-transition: all 0.2s ease;
+    }
+}
+
+/* CONFIGURAÇÕES PARA ALTA DENSIDADE DE PIXELS (Retina) */
+@media (-webkit-min-device-pixel-ratio: 2), 
+       (min-resolution: 192dpi),
+       (min-resolution: 2dppx) {
+    
+    .product-img,
+    .product-image,
+    .product-thumbnail,
+    .logo,
+    .brand-logo {
+        /* Otimização específica para telas Retina */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimizeQuality;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
+
+/* ANIMAÇÕES SUAVES PARA INTERAÇÕES */
+.add-to-cart.loading,
+.btn-cart.loading,
+.checkout-btn.loading {
+    /* Animações suaves para estados de loading */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* MELHORIA PARA CORES E GRADIENTES */
+.gradient-bg,
+.price-gradient,
+.discount-gradient,
+.button-gradient {
+    /* Suavização para gradientes */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}

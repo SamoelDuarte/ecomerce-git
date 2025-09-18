@@ -1,0 +1,181 @@
+/*
+==========================================
+  CORREÇÃO ESPECÍFICA DE SERRILHAS
+==========================================
+*/
+
+/* Configuração global mais agressiva para anti-aliasing */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Suavização específica para elementos com serrilhas comuns */
+.serrated-fix,
+.smooth-edges,
+.anti-alias {
+    /* Força suavização máxima */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+    
+    /* Aceleração de hardware para suavizar */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    
+    /* Força renderização de qualidade */
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: optimizeQuality !important;
+}
+
+/* Correção para bordas serrilhadas */
+.border,
+.rounded,
+.card,
+.btn,
+[class*="border-"],
+[class*="rounded-"] {
+    /* Suavização de bordas */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    outline: 1px solid transparent;
+    
+    /* Melhoria adicional para bordas circulares */
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+}
+
+/* Correção específica para texto pequeno serrilhado */
+.small,
+.text-sm,
+.text-xs,
+.caption,
+font[size="1"],
+font[size="2"] {
+    /* Suavização menos agressiva para texto pequeno */
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    text-rendering: optimizeSpeed;
+}
+
+/* Correção para ícones serrilhados */
+i[class*="fa-"],
+.fa,
+.fas,
+.far,
+.fab,
+.icon,
+[class*="icon-"] {
+    /* Renderização otimizada para ícones */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: geometricPrecision !important;
+    shape-rendering: geometricPrecision !important;
+    
+    /* Transform para suavizar */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Correção para linhas e divisores serrilhados */
+hr,
+.divider,
+.separator,
+.border-top,
+.border-bottom,
+.border-left,
+.border-right {
+    /* Suavização de linhas */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    outline: 1px solid transparent;
+}
+
+/* Correção para sombras serrilhadas */
+.shadow,
+.shadow-sm,
+.shadow-lg,
+[class*="shadow-"] {
+    /* Melhoria de sombras */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Suavização para elementos posicionados (que costumam ter serrilhas) */
+.position-relative,
+.position-absolute,
+.position-fixed,
+.position-sticky {
+    /* Correção para elementos posicionados */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Correção específica para WebKit (Chrome, Safari) */
+@supports (-webkit-appearance: none) {
+    * {
+        -webkit-font-smoothing: antialiased;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
+
+/* Correção específica para Firefox */
+@-moz-document url-prefix() {
+    * {
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Configurações específicas para diferentes níveis de zoom */
+@media screen and (min-resolution: 1.25dppx) {
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+@media screen and (min-resolution: 1.5dppx) {
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+}
+
+/* Força suavização em elementos problemáticos comuns */
+nav, header, footer, main, section, article, aside,
+.navbar, .header, .footer, .main, .content, .sidebar {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Classes utilitárias para aplicação manual */
+.smooth-text {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+}
+
+.smooth-image {
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: optimizeQuality !important;
+    -ms-interpolation-mode: bicubic !important;
+}
+
+.smooth-element {
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+}

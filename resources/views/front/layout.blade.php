@@ -20,6 +20,14 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="{{ asset('assets/front/css/bootstrap.min.css') }}">
+  
+  <!-- Anti-aliasing CSS para melhor qualidade visual -->
+  <link rel="stylesheet" href="{{ asset('assets/css/anti-aliasing.css') }}">
+  <!-- Melhorias visuais específicas para e-commerce -->
+  <link rel="stylesheet" href="{{ asset('assets/css/ecommerce-enhancements.css') }}">
+  <!-- Correção específica de serrilhas -->
+  <link rel="stylesheet" href="{{ asset('assets/css/serrated-fix.css') }}">
+  
   <!-- Fontawesome Icon CSS -->
   <link rel="stylesheet" href="{{ asset('assets/front/fonts/fontawesome/css/all.min.css') }}">
   <!-- Kreativ Icon -->

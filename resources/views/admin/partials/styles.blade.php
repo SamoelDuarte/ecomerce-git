@@ -1,5 +1,11 @@
 <!-- CSS Files -->
 <link href="{{ asset('assets/front/css/all.min.css') }}" rel="stylesheet">
+
+<!-- Anti-aliasing CSS para melhor qualidade visual -->
+<link rel="stylesheet" href="{{ asset('assets/css/anti-aliasing.css') }}">
+<!-- Correção específica de serrilhas -->
+<link rel="stylesheet" href="{{ asset('assets/css/serrated-fix.css') }}">
+
 <link rel="stylesheet" href="{{ asset('assets/admin/css/fontawesome-iconpicker.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/admin/css/dropzone.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/admin/css/bootstrap.min.css') }}">

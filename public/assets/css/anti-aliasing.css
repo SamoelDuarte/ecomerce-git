@@ -1,0 +1,206 @@
+/*
+==========================================
+  MELHORIAS DE RENDERIZAÇÃO - ANTI-ALIASING
+==========================================
+*/
+
+/* CONFIGURAÇÕES GLOBAIS DE ANTI-ALIASING */
+*, *::before, *::after {
+    /* Suavização de texto para WebKit (Chrome, Safari) */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* Otimização de renderização de texto */
+    text-rendering: optimizeLegibility;
+    
+    /* Suavização de elementos */
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
+    transform: translateZ(0);
+    
+    /* Aceleração de hardware */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+}
+
+/* CONFIGURAÇÕES ESPECÍFICAS PARA TEXTO */
+body, h1, h2, h3, h4, h5, h6, p, span, div, a, li, button, input, textarea, select, label {
+    /* Suavização avançada de texto */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-kerning: auto;
+    font-variant-ligatures: common-ligatures;
+    
+    /* Melhoria na qualidade do texto */
+    -webkit-text-stroke: 0.01em transparent;
+}
+
+/* CONFIGURAÇÕES PARA IMAGENS */
+img, picture, svg, video, canvas {
+    /* Suavização de imagens */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: optimizeQuality;
+    
+    /* Para imagens que devem ser suavizadas */
+    -ms-interpolation-mode: bicubic;
+    
+    /* Aceleração de hardware para imagens */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* CONFIGURAÇÕES ESPECÍFICAS PARA IMAGENS QUE PRECISAM DE SUAVIZAÇÃO */
+.smooth-image,
+.product-image,
+.hero-image,
+.banner-image,
+.avatar,
+.profile-image,
+.logo {
+    image-rendering: auto;
+    image-rendering: optimizeQuality;
+    image-rendering: -webkit-optimize-contrast;
+}
+
+/* CONFIGURAÇÕES PARA ÍCONES SVG */
+svg, .icon, .fa, [class*="fa-"], [class*="icon-"] {
+    /* Renderização otimizada para ícones */
+    shape-rendering: geometricPrecision;
+    text-rendering: geometricPrecision;
+    image-rendering: optimizeQuality;
+    
+    /* Suavização específica para ícones */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* CONFIGURAÇÕES PARA BORDAS E ELEMENTOS GRÁFICOS */
+.card, .btn, .border, .rounded, [class*="border"], [class*="rounded"] {
+    /* Suavização de bordas */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    
+    /* Melhoria na renderização de bordas */
+    outline: 1px solid transparent;
+}
+
+/* CONFIGURAÇÕES PARA ANIMAÇÕES SUAVES */
+.transition, .animate, [class*="transition"], [class*="animate"] {
+    /* Otimização para animações */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+    
+    /* Suavização de transições */
+    will-change: transform, opacity;
+}
+
+/* CONFIGURAÇÕES ESPECÍFICAS PARA BOTÕES */
+button, .btn, input[type="button"], input[type="submit"], .button {
+    /* Suavização de texto em botões */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    
+    /* Melhor renderização de bordas em botões */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* CONFIGURAÇÕES PARA DROPDOWNS E MODAIS */
+.dropdown-menu, .modal, .tooltip, .popover, .alert {
+    /* Suavização para elementos flutuantes */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* CONFIGURAÇÕES RESPONSIVAS PARA ALTA DENSIDADE DE PIXELS */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+    /* Otimizações específicas para telas Retina/High-DPI */
+    * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    img, picture, svg {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimizeQuality;
+    }
+}
+
+/* CONFIGURAÇÕES PARA WEBKIT (Chrome, Safari) */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    body, input, textarea, select, button {
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+/* CONFIGURAÇÕES PARA FIREFOX */
+@-moz-document url-prefix() {
+    body, input, textarea, select, button {
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* OTIMIZAÇÕES PARA PERFORMANCE */
+.gpu-accelerated {
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
+    transform: translateZ(0);
+    
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    backface-visibility: hidden;
+    
+    -webkit-perspective: 1000;
+    -moz-perspective: 1000;
+    -ms-perspective: 1000;
+    perspective: 1000;
+}
+
+/* MELHORIAS ESPECÍFICAS PARA TEXTO PEQUENO */
+.small-text, .caption, .footnote, .text-xs, .text-sm {
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    text-rendering: optimizeSpeed;
+}
+
+/* CONFIGURAÇÕES PARA ELEMENTOS DE FORMULÁRIO */
+input, textarea, select {
+    /* Suavização para campos de formulário */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* CONFIGURAÇÕES PARA TABELAS */
+table, th, td {
+    /* Melhoria na renderização de tabelas */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* CONFIGURAÇÕES PARA NAVEGAÇÃO */
+nav, .nav, .navbar, .menu {
+    /* Suavização para elementos de navegação */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
