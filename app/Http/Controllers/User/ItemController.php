@@ -37,16 +37,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Traits\LanguageFallbackTrait;
 
 class ItemController extends Controller
 {
+    use LanguageFallbackTrait;
+    
     public function index(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $userId = Auth::guard('web')->user()->id;
+        $lang = $this->getLanguageWithFallback($request->language, $userId);
         $lang_id = $lang->id;
-        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
-        $data['item_limit'] = $current_package->product_limit;
-        $data['total_item'] = UserItemContent::where('language_id', $lang->id)->where('user_id', Auth::guard('web')->user()->id)->count();
+        $current_package = UserPermissionHelper::currentPackagePermission($userId);
+        $data['item_limit'] = $current_package->product_limit ?? 0;
+        $data['total_item'] = UserItemContent::where('language_id', $lang_id)->where('user_id', $userId)->count();
 
 
 

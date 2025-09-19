@@ -11,27 +11,30 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User\UserItemSubCategory;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\LanguageFallbackTrait;
 
 class ItemSubCategoryController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $userId = Auth::guard('web')->user()->id;
+        $lang = $this->getLanguageWithFallback($request->language, $userId);
         $lang_id = $lang->id;
 
         $data['categories'] = UserItemCategory::where('language_id', $lang_id)
-            ->where('user_id', Auth::guard('web')->user()->id)
+            ->where('user_id', $userId)
             ->where('status', 1)
             ->orderBy('name', 'ASC')->get();
 
-        $data['itemsubcategories'] = UserItemSubCategory::where('language_id', $lang_id)->where('user_id', Auth::guard('web')->user()->id)
+        $data['itemsubcategories'] = UserItemSubCategory::where('language_id', $lang_id)->where('user_id', $userId)
             ->with('category')
             ->orderBy('created_at', 'DESC')->paginate(10);
         $data['lang_id'] = $lang_id;
 
-        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
-        $data['subcategories_limit'] = $current_package->subcategories_limit;
-        $data['total_subcategories'] = UserItemSubCategory::where('language_id', $lang->id)->where('user_id', Auth::guard('web')->user()->id)->count();
+        $current_package = UserPermissionHelper::currentPackagePermission($userId);
+        $data['subcategories_limit'] = $current_package->subcategories_limit ?? 0;
+        $data['total_subcategories'] = UserItemSubCategory::where('language_id', $lang_id)->where('user_id', $userId)->count();
         return view('user.item.subcategory.index', $data);
     }
 
@@ -66,7 +69,7 @@ class ItemSubCategoryController extends Controller
             'serial_number' => 'required',
             'status' => 'required',
         ];
-        $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
+        $defaulLang = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
         $rules[$defaulLang->code . '_name'] = 'required|max:255';
         $messages[$defaulLang->code . '_name.required'] = __('The name feild is required for') . ' ' . $defaulLang->name . ' ' . __('language');
 
@@ -104,8 +107,8 @@ class ItemSubCategoryController extends Controller
         $user_id = Auth::guard('web')->user()->id;
         $data['data'] = UserItemSubCategory::findOrFail($id);
         $current_package = UserPermissionHelper::currentPackagePermission($user_id);
-        $subcategories_limit = $current_package->subcategories_limit;
-        $lang = Language::where('code', request('language'))->where('user_id', $user_id)->first();
+        $subcategories_limit = $current_package->subcategories_limit ?? 0;
+        $lang = $this->getLanguageWithFallback(request('language'), $user_id);
         $lang_id = $lang->id;
         $total_subcategories = UserItemSubCategory::where('language_id', $lang_id)->where('user_id', $user_id)->count();
         if ($total_subcategories > $subcategories_limit) {
@@ -122,7 +125,7 @@ class ItemSubCategoryController extends Controller
     {
         $user_id = Auth::guard('web')->user()->id;
         $languages = Language::where('user_id', $user_id)->get();
-        $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
+        $defaulLang = $this->getLanguageWithFallback(null, $user_id);
         $rules = [
             'status' => 'required',
             'category_id' => 'required',

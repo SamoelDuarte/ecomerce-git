@@ -11,17 +11,19 @@ use App\Http\Helpers\Uploader;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\LanguageFallbackTrait;
 
 class ItemCategoryController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
-       
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $userId = Auth::guard('web')->user()->id;
+        $lang = $this->getLanguageWithFallback($request->language, $userId);
         $lang_id = $lang->id;
-        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
-        $data['categories_limit'] = $current_package->categories_limit;
-        $data['total_categories'] = UserItemCategory::where('language_id', $lang->id)->where('user_id', Auth::guard('web')->user()->id)->count();
+        $current_package = UserPermissionHelper::currentPackagePermission($userId);
+        $data['categories_limit'] = $current_package->categories_limit ?? 0;
+        $data['total_categories'] = UserItemCategory::where('language_id', $lang_id)->where('user_id', $userId)->count();
 
         $data['itemcategories'] = UserItemCategory::where('language_id', $lang_id)->where('user_id', Auth::guard('web')->user()->id)->orderBy('serial_number', 'ASC')->paginate(10);
 
@@ -107,8 +109,8 @@ class ItemCategoryController extends Controller
         $data['data'] = UserItemCategory::findOrFail($id);
 
         $current_package = UserPermissionHelper::currentPackagePermission($user_id);
-        $categories_limit = $current_package->categories_limit;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $categories_limit = $current_package->categories_limit ?? 0;
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
         $total_categories = UserItemCategory::where('language_id', $lang_id)->where('user_id', $user_id)->count();
         if ($total_categories > $categories_limit) {

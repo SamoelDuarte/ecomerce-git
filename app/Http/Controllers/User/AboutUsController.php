@@ -13,13 +13,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Session;
+use App\Traits\LanguageFallbackTrait;
 
 class AboutUsController extends Controller
 {
+    use LanguageFallbackTrait;
     public function features(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
         $data['collection'] = HowitWorkSection::where([['user_id', $user_id], ['language_id', $lang_id]])->get();
         $data['u_langs'] = Language::where('user_id', $user_id)->get();
@@ -29,7 +31,7 @@ class AboutUsController extends Controller
     public function about(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->firstOrFail();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
 
         $data['data'] = AboutUs::where([['language_id', $lang_id], ['user_id', $user_id]])->first();
@@ -42,7 +44,7 @@ class AboutUsController extends Controller
     public function updaetAbout(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
 
         $in = $request->all();
@@ -79,7 +81,7 @@ class AboutUsController extends Controller
             return response()->json($validator->errors());
         }
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
 
         $in = $request->all();
@@ -97,7 +99,7 @@ class AboutUsController extends Controller
     public function feature_edit($id)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $data['d_lang'] = Language::where([['user_id', $user_id], ['is_default', 1]])->first();
+        $data['d_lang'] = $this->getLanguageWithFallback(null, $user_id);
         $data['data'] = AboutUsFeatures::where([['user_id', $user_id], ['id', $id]])->firstOrFail();
         return view('user.about.features.edit', $data);
     }
@@ -148,7 +150,8 @@ class AboutUsController extends Controller
         } else {
             $data['additional_section_statuses'] = [];
         }
-        $data['langid'] = Language::where([['is_default', 1], ['user_id', Auth::guard('web')->user()->id]])->first()->id;
+        $lang = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
+        $data['langid'] = $lang->id;
 
         return view('user.about.sections', $data);
     }

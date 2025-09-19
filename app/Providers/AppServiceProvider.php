@@ -288,25 +288,50 @@ class AppServiceProvider extends ServiceProvider
                         $userDashboardLang = Language::where('code', Cookie::get('userDashboardLang'))->first();
                     } else {
                         $userDashboardLang = Language::where('is_default', 1)->first();
-                        Cookie::queue('userDashboardLang', $userDashboardLang->code, 60 * 24 * 30);
                     }
-
-                    Session::put('user_lang', 'user_' . $userDashboardLang->code);
-                    app()->setLocale('user_' . $userDashboardLang->code);
+                    
+                    // Fallback para pt-BR se não encontrar nenhum idioma
+                    if (!$userDashboardLang) {
+                        $userDashboardLang = Language::where('code', 'pt-BR')->first();
+                        // Se ainda não existir pt-BR, criar um fallback padrão
+                        if (!$userDashboardLang) {
+                            $userDashboardLang = (object) [
+                                'id' => 999,
+                                'code' => 'pt-BR',
+                                'name' => 'Português',
+                                'is_default' => 1
+                            ];
+                        }
+                    }
+                    
+                    if ($userDashboardLang && $userDashboardLang->code) {
+                        Cookie::queue('userDashboardLang', $userDashboardLang->code, 60 * 24 * 30);
+                        Session::put('user_lang', 'user_' . $userDashboardLang->code);
+                        app()->setLocale('user_' . $userDashboardLang->code);
+                    }
 
                     $shopSetting = UserShopSetting::where('user_id', $userId)->select('time_format')->first();
 
-                    $be = BasicExtended::where('language_id', $userDashboardLang->id)->select('package_features', 'cname_record_section_text', 'cname_record_section_title')->first();
+                    $be = BasicExtended::where('language_id', $userDashboardLang->id ?? 999)->select('package_features', 'cname_record_section_text', 'cname_record_section_title')->first();
+                    
+                    // Fallback para $be se não encontrado
+                    if (!$be) {
+                        $be = (object) [
+                            'package_features' => '{}',
+                            'cname_record_section_text' => '',
+                            'cname_record_section_title' => ''
+                        ];
+                    }
 
                     $view->with([
                         'userBs' => $userBs,
                         'dashboard_language' => $userDashboardLang,
-                        'defaultLang' => $userDashboardLang->code,
+                        'defaultLang' => $userDashboardLang->code ?? 'pt-BR',
                         'shopSetting' => $shopSetting,
-                        'package_features' => $be->package_features,
+                        'package_features' => $be->package_features ?? '{}',
                         'package' => $package,
-                        'cname_record_section_text' => $be->cname_record_section_text,
-                        'cname_record_section_title' => $be->cname_record_section_title
+                        'cname_record_section_text' => $be->cname_record_section_text ?? '',
+                        'cname_record_section_title' => $be->cname_record_section_title ?? ''
                     ]);
                 }
             });
