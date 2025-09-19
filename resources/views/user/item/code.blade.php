@@ -1,12 +1,5 @@
 @extends('user.layout')
 
-@php
-    $selLang = \App\Models\User\Language::where([
-        ['code', request()->input('language')],
-        ['user_id', Auth::guard('web')->user()->id],
-    ])->first();
-@endphp
-
 @includeIf('user.partials.rtl-style')
 
 @section('content')
@@ -22,7 +15,7 @@
                 <i class="flaticon-right-arrow"></i>
             </li>
             <li class="nav-item">
-                <a href="{{ route('user.item.index') . '?language=' . $selLang->code }}">{{ __('Itens') }}</a>
+                <a href="{{ route('user.item.index') . '?language=' . ($selLang ? $selLang->code : 'pt') }}">{{ __('Itens') }}</a>
             </li>
             <li class="separator">
                 <i class="flaticon-right-arrow"></i>
@@ -47,7 +40,7 @@
                 </div>
                 <div class="col-lg-4 offset-lg-1 text-right">
                     <a class="btn btn-secondary btn-sm text-white"
-                        href="{{ route('user.item.index') . '?language=' . $selLang->code }}">{{ __('Voltar') }}</a>
+                        href="{{ route('user.item.index') . '?language=' . ($selLang ? $selLang->code : 'pt') }}">{{ __('Voltar') }}</a>
                 </div>
             </div>
         </div>
@@ -92,7 +85,7 @@
                                             <td>
                                                 @if ($code->order_id)
                                                     <a
-                                                        href="{{ route('user.orders.details', $code->order_id) }}">#{{ $code->order_id }}</a>
+                                                        href="{{ route('user.item.details', $code->order_id) }}">#{{ $code->order_id }}</a>
                                                 @else
                                                     -
                                                 @endif
@@ -120,7 +113,7 @@
                         {{-- Botão para adicionar manualmente --}}
                         <div class="mt-4">
                             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addCodeModal">
-                                <i class="fas fa-plus"></i> {{ __('Adicionar Código Manualmente') }}
+                                <i class="fas fa-plus"></i> {{ __('Adicionar Manualmente') }}
                             </button>
                         </div>
 

@@ -873,6 +873,25 @@ class ItemController extends Controller
 
         $data['title'] = UserItemContent::where([['item_id', $id]])->pluck('title')->first();
 
+        // Buscar idioma selecionado com fallback
+        $selLang = Language::where('code', $request->language)
+                          ->where('user_id', $user_id)
+                          ->first();
+        
+        if (!$selLang) {
+            $selLang = Language::where('user_id', $user_id)
+                             ->where('is_default', 1)
+                             ->first();
+        }
+        
+        // Se ainda não encontrar, criar um idioma padrão
+        if (!$selLang) {
+            $selLang = new Language();
+            $selLang->code = 'pt';
+            $selLang->name = 'Português';
+        }
+        
+        $data['selLang'] = $selLang;
 
         return view('user.item.code', $data);
     }
@@ -1294,5 +1313,22 @@ class ItemController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function downloadCsvModel()
+    {
+        $filePath = base_path('modeloDigital.csv');
+        
+        if (!file_exists($filePath)) {
+            // Se o arquivo não existir, criar um básico
+            $content = "nome,codigo,valor\n";
+            $content .= "EXEMPLO PRODUTO,CODIGO123,29.90\n";
+            $content .= "EXEMPLO PRODUTO 2,CODIGO456,39.90\n";
+            file_put_contents($filePath, $content);
+        }
+
+        return response()->download($filePath, 'modeloDigital.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 }

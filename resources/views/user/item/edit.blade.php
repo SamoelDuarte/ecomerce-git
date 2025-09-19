@@ -174,6 +174,9 @@
                                                         <option value="code">{{ __('Códigos') }}</option>
                                                     </select>
                                                 </div>
+                                                <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none" onclick="downloadCodeTemplate()">
+                                                    <i class="fa fa-download"></i> Modelo de Planilha de Códigos
+                                                </button>
                                             </div>
                                         @else
                                             <div class="col-lg-4">
@@ -222,19 +225,50 @@
                                                     <input name="download_file" type="file" class="form-control">
                                                     <p class="mb-0 text-warning">
                                                         {{ __('Only zip file is allowed.') }}</p>
+                                                    
+                                                    <!-- Botão para baixar modelo CSV -->
+                                                    <div class="mt-2">
+                                                        <a href="{{ route('user.item.download.csv.model') }}" 
+                                                           class="btn btn-info btn-sm" 
+                                                           download="modeloDigital.csv">
+                                                            <i class="fa fa-download"></i> {{ __('Baixar Modelo CSV') }}
+                                                        </a>
+                                                        <small class="text-muted d-block">{{ __('Use este modelo para importar códigos digitais') }}</small>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div id="downloadLink"
+                                                    class="form-group {{ !empty($item->download_link) ? '' : 'd-none' }}">
+                                                    <label for="">{{ __('Downloadable Link') }} <span
+                                                            class="text-danger">**</span></label>
+                                                    <input name="download_link" type="text" class="form-control"
+                                                        value="{{ $item->download_link }}">
+                                                </div>
+                                                
+                                                <div id="codeUploadSection" class="mt-3 d-none">
+                                                    <div class="form-group">
+                                                        <label for="codeExcelInput">
+                                                            {{ __('Importar Planilha de Códigos') }}
+                                                            <span class="text-danger">**</span>
+                                                        </label>
+                                                        <input type="file" class="form-control" name="codeExcelInput"
+                                                            id="codeExcelInput" accept=".xlsx,.csv">
+
+                                                        {{-- Feedback da validação do arquivo --}}
+                                                        <div id="file-validation-feedback" class="mt-2"></div>
+
+                                                        <div id="codeImportResult" class="mt-3 d-none">
+                                                            <div class="alert alert-info">
+                                                                <p><strong>Total de Códigos:</strong> <span
+                                                                        id="totalCodes">0</span></p>
+                                                                <p><strong>Variações encontradas:</strong></p>
+                                                                <ul id="variationList" class="mb-0"></ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
-                                            </div>
-
-                                            <div id="downloadLink"
-                                                class="form-group {{ !empty($item->download_link) ? '' : 'd-none' }}">
-                                                <label for="">{{ __('Downloadable Link') }} <span
-                                                        class="text-danger">**</span></label>
-                                                <input name="download_link" type="text" class="form-control"
-                                                    value="{{ $item->download_link }}">
-                                            </div>
-                                        </div>
                                     @endif
                                     @if ($item->type == 'fisico')
                                         <div class="col-lg-4">
@@ -568,6 +602,250 @@
 @endsection
 
 @section('scripts')
+    {{-- Importar SheetJS --}}
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script>
+        document.getElementById('codeExcelInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validação inicial do tipo de arquivo
+            const validExtensions = ['.csv', '.xls', '.xlsx'];
+            const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                alert('Arquivo deve ser um arquivo CSV (.csv) ou Excel (.xls, .xlsx)');
+                document.getElementById('codeExcelInput').value = '';
+                return;
+            }
+
+            // Mostrar feedback de processamento
+            const feedbackDiv = document.getElementById('file-validation-feedback');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = '<div class="alert alert-info">🔄 Validando arquivo, aguarde...</div>';
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = e.target.result;
+                    let workbook;
+                    let rows;
+
+                    // Detecta tipo de arquivo
+                    const isCSV = file.name.endsWith('.csv');
+
+                    if (isCSV) {
+                        // Se for CSV, lê direto como texto
+                        workbook = XLSX.read(data, {
+                            type: 'binary'
+                        });
+                        const sheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[sheetName];
+                        rows = XLSX.utils.sheet_to_json(sheet, {
+                            header: 1
+                        });
+                    } else {
+                        // Se for Excel
+                        const binary = new Uint8Array(e.target.result);
+                        workbook = XLSX.read(binary, {
+                            type: 'array'
+                        });
+                        const sheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[sheetName];
+                        rows = XLSX.utils.sheet_to_json(sheet, {
+                            header: 1
+                        });
+                    }
+
+                    // Validação básica do arquivo
+                    if (!rows || rows.length === 0) {
+                        showValidationError('Arquivo vazio ou corrompido. Por favor, use o modelo CSV fornecido.');
+                        return;
+                    }
+
+                    // Validação do cabeçalho
+                    const header = rows[0];
+                    const expectedHeaders = ['nome', 'codigo', 'valor'];
+                    
+                    if (!header || header.length < 3) {
+                        showValidationError('Arquivo não possui o cabeçalho correto. Por favor, use o modelo CSV fornecido.');
+                        return;
+                    }
+                    
+                    // Verificar se o cabeçalho está correto
+                    const headerValid = expectedHeaders.every((expectedHeader, index) => {
+                        const actualHeader = header[index] ? header[index].toString().toLowerCase().trim() : '';
+                        return actualHeader === expectedHeader;
+                    });
+
+                    if (!headerValid) {
+                        showValidationError(`Formato de arquivo inválido!\n\n` +
+                            `✅ Cabeçalho esperado: ${expectedHeaders.join(', ')}\n` +
+                            `❌ Cabeçalho encontrado: ${header.join(', ')}\n\n` +
+                            `Por favor, baixe e use o modelo CSV fornecido.`);
+                        return;
+                    }
+
+                    // Remove cabeçalho para processar apenas os dados
+                    const dataRows = rows.slice(1).filter(row => row && row.length > 0 && row.some(cell => cell !== null && cell !== undefined && cell.toString().trim() !== ''));
+
+                    if (dataRows.length === 0) {
+                        showValidationError('Nenhum dado encontrado no arquivo. Por favor, adicione códigos ao arquivo CSV seguindo o modelo.');
+                        return;
+                    }
+
+                    // Validação detalhada dos dados
+                    const validationResult = validateCsvData(dataRows);
+                    
+                    if (!validationResult.isValid) {
+                        showValidationError(`Encontrados erros no arquivo:\n\n${validationResult.errors.join('\n')}\n\nPor favor, corrija os erros e tente novamente.`);
+                        return;
+                    }
+
+                    // Sucesso - mostrar resumo da validação
+                    showValidationSuccess(validationResult);
+
+                    // Continuar com o processamento original
+                    processValidFile(dataRows, validationResult);
+
+                } catch (error) {
+                    console.error('Erro ao processar arquivo:', error);
+                    showValidationError('Erro ao processar o arquivo. Verifique se o arquivo não está corrompido e tente novamente.');
+                }
+            };
+
+            reader.onerror = function() {
+                showValidationError('Erro ao ler o arquivo. Tente novamente.');
+            };
+
+            reader.readAsBinaryString(file);
+        });
+
+        function validateCsvData(dataRows) {
+            const result = {
+                isValid: true,
+                errors: [],
+                validLines: 0,
+                totalLines: dataRows.length,
+                variations: {},
+                duplicateCodes: []
+            };
+
+            const seenCodes = new Set();
+
+            dataRows.forEach((row, index) => {
+                const lineNumber = index + 2; // +2 porque removemos o cabeçalho e index começa em 0
+                const variation = row[0] !== undefined && row[0] !== null ? row[0].toString().trim() : '';
+                const code = row[1] !== undefined && row[1] !== null ? row[1].toString().trim() : '';
+                const value = row[2] !== undefined && row[2] !== null ? row[2].toString().trim() : '';
+
+                // Validar campos obrigatórios
+                if (!variation) {
+                    result.errors.push(`Linha ${lineNumber}: Nome da variação não pode estar vazio`);
+                    result.isValid = false;
+                    return;
+                }
+
+                if (!code) {
+                    result.errors.push(`Linha ${lineNumber}: Código não pode estar vazio`);
+                    result.isValid = false;
+                    return;
+                }
+
+                if (!value) {
+                    result.errors.push(`Linha ${lineNumber}: Valor não pode estar vazio`);
+                    result.isValid = false;
+                    return;
+                }
+
+                // Validar se o valor é numérico
+                const numericValue = parseFloat(value.replace(',', '.'));
+                if (isNaN(numericValue)) {
+                    result.errors.push(`Linha ${lineNumber}: Valor "${value}" deve ser numérico (ex: 10.50)`);
+                    result.isValid = false;
+                    return;
+                }
+
+                if (numericValue < 0) {
+                    result.errors.push(`Linha ${lineNumber}: Valor não pode ser negativo`);
+                    result.isValid = false;
+                    return;
+                }
+
+                // Verificar códigos duplicados
+                if (seenCodes.has(code.toLowerCase())) {
+                    result.errors.push(`Linha ${lineNumber}: Código "${code}" já existe no arquivo`);
+                    result.duplicateCodes.push(code);
+                    result.isValid = false;
+                    return;
+                }
+                seenCodes.add(code.toLowerCase());
+
+                // Contar por variação
+                result.variations[variation] = (result.variations[variation] || 0) + 1;
+                result.validLines++;
+            });
+
+            return result;
+        }
+
+        function showValidationError(message) {
+            const feedbackDiv = document.getElementById('file-validation-feedback');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = `<div class="alert alert-danger">❌ ${message.replace(/\n/g, '<br>')}</div>`;
+            } else {
+                alert(message);
+            }
+            document.getElementById('codeExcelInput').value = '';
+        }
+
+        function showValidationSuccess(validationResult) {
+            const variationsList = Object.entries(validationResult.variations)
+                .map(([variation, count]) => `• ${variation}: ${count} código(s)`)
+                .join('<br>');
+
+            const feedbackDiv = document.getElementById('file-validation-feedback');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        ✅ <strong>Arquivo validado com sucesso!</strong><br>
+                        📊 <strong>Resumo:</strong><br>
+                        • Total de linhas processadas: ${validationResult.totalLines}<br>
+                        • Linhas válidas: ${validationResult.validLines}<br>
+                        • Cabeçalho: removido automaticamente<br><br>
+                        📋 <strong>Variações encontradas:</strong><br>
+                        ${variationsList}
+                    </div>
+                `;
+            }
+        }
+
+        function processValidFile(dataRows, validationResult) {
+            const variations = validationResult.variations;
+            let total = validationResult.validLines;
+
+            if (total === 0) {
+                alert('Nenhum código válido encontrado no arquivo.');
+                document.getElementById('codeExcelInput').value = '';
+                return;
+            }
+
+            // Atualiza na tela
+            document.getElementById('codeImportResult').classList.remove('d-none');
+            document.getElementById('totalCodes').innerText = total;
+
+            const ul = document.getElementById('variationList');
+            ul.innerHTML = '';
+
+            Object.entries(variations).forEach(([variation, count]) => {
+                const li = document.createElement('li');
+                li.innerText = `${variation} → ${count} código(s)`;
+                ul.appendChild(li);
+            });
+        }
+    </script>
     <script>
         "use strict";
         const currUrl = "{{ url()->current() }}";
@@ -577,7 +855,7 @@
         const rmvDbSliderImage = "{{ route('user.item.db-slider-remove') }}";
     </script>
     <script src="{{ asset('assets/user/js/dropzone-slider.js') }}"></script>
-
+    <script src="{{ asset('assets/user/js/custom.js') }}"></script>
     <script src="{{ asset('assets/admin/js/plugin/cropper.js') }}"></script>
     <script src="{{ asset('assets/user/js/cropper-init.js') }}"></script>
 @endsection

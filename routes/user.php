@@ -490,9 +490,10 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
             Route::get('/{id}/variations', 'User\ItemController@variations')->name('user.item.variations');
             Route::get('/{id}/codigos', 'User\ItemController@codes')->name('user.item.codes');
             Route::get('/add', 'User\ItemController@add')->name('user.item.code.add');
-            Route::post('user/item/{id}/code/store', 'User\ItemController@storeCode')->name('user.item.code.store');
-            Route::delete('user/item/code/delete/{id}', 'User\ItemController@deleteCode')->name('user.item.code.delete');
-            Route::post('user/item/code/import', 'User\ItemController@importCodes')->name('user.item.code.import');
+            Route::post('/{id}/code/store', 'User\ItemController@storeCode')->name('user.item.code.store');
+            Route::delete('/code/delete/{id}', 'User\ItemController@deleteCode')->name('user.item.code.delete');
+            Route::post('/code/import', 'User\ItemController@importCodes')->name('user.item.code.import');
+            Route::get('/download/csv-model', 'User\ItemController@downloadCsvModel')->name('user.item.download.csv.model');
             Route::get('/variations/get', 'User\ItemController@getVariation')->name('user.item.variations.get_variation');
             Route::post('/variation/store', 'User\ItemController@variationStore')->name('user.item.variation.store')->middleware('limitCheck:items,update');
             Route::get('/variation/delete/{id}', 'User\ItemController@variationDelete')->name('user.item.variation.delete');
