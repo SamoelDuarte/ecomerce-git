@@ -211,7 +211,7 @@ class BasicController extends Controller
     {
         $userId = Auth::guard('web')->user()->id;
         // first, get the language info from db
-        $language = Language::where('code', $request->language)->where('user_id', $userId)->firstOrFail();
+        $language = $this->getLanguageWithFallback($request->language, $userId);
         $langId = $language->id;
 
         // then, get the seo info of that language from db

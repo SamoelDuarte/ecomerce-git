@@ -6,15 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\User\Language;
 use App\Models\User\UserMenu;
 use App\Models\User\UserPageContent;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 
 class MenuBuilderController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->firstOrFail();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $data['lang_id'] = $lang->id;
 
         $data['keywords'] = json_decode($lang->keywords, true);

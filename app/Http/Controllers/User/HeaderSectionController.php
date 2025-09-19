@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\User\Language;
 use App\Models\User\UserHeader;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Http\Request;
 use Auth;
 use Session;
@@ -12,9 +13,10 @@ use Validator;
 
 class HeaderSectionController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->firstOrFail();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $data['lang_id'] = $lang->id;
         $header = UserHeader::where('language_id', $lang->id)->where('user_id', Auth::guard('web')->user()->id)->first();
 
