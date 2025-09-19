@@ -28,6 +28,9 @@ class SetLangMiddleware
       $defaultLang = Language::where('is_default', 1)->first();
       if (!empty($defaultLang)) {
         app()->setLocale($defaultLang->code);
+      } else {
+        // Fallback para o idioma configurado no .env se não encontrar no banco
+        app()->setLocale(config('app.locale', 'pt-br'));
       }
     }
 
