@@ -253,13 +253,10 @@ class Common
 
     public static function saveOrder($request, $txnId, $chargeId, $paymentStatus = 'Pending', $gtype = 'online', $user_id)
     {
-        $shpp_chrg = 0;
-        if (!empty($request["shipping_charge"])) {
-            $shpp_chrg = $request["shipping_charge"];
-        }
-        $total = Common::orderTotal($shpp_chrg, $user_id);
+        // Calcula total sem frete (usar 0 para ignorar shipping_charge antigo)
+        $total = Common::orderTotal(0, $user_id);
 
-        // Valor do frete vindo do input (Frenet)
+        // Valor do frete vindo do Frenet
         $shipping_service_price = floatval($request['shipping_service_price'] ?? 0);
 
         // Soma o valor do frete no total
@@ -268,14 +265,10 @@ class Common
 
         $coupon_amount = session()->get('user_coupon');
         $total = $total - session()->get('user_coupon');
-        if ($shpp_chrg != 0) {
-            $shipping = UserShippingCharge::findOrFail($shpp_chrg);
-            $shippig_charge = currency_converter_shipping($shipping->charge, $shipping->id);;
-            $shipping_method = $shipping->title;
-        } else {
-            $shippig_charge = 0;
-            $shipping_method = NULL;
-        }
+        
+        // Dados do frete do Frenet
+        $shippig_charge = $shipping_service_price;
+        $shipping_method = $request['shipping_service_name'] ?? null;
 
 
         if (Session::has('myfatoorah_user')) {
@@ -623,15 +616,31 @@ class Common
     {
         if (session()->has('user_lang')) {
             $code = str_replace('user_', '', session()->get('user_lang'));
-            $userCurrentLang = UserLanguage::where('code', $code)->where('user_id', $userId)->firstOrFail();
+            $userCurrentLang = UserLanguage::where('code', $code)->where('user_id', $userId)->first();
 
             if (empty($userCurrentLang)) {
-                $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $userId)->firstOrFail();
-                session()->put('user_lang', $userCurrentLang->code);
+                $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $userId)->first();
+                if ($userCurrentLang) {
+                    session()->put('user_lang', $userCurrentLang->code);
+                }
             }
         } else {
-            $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $userId)->firstOrFail();
+            $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $userId)->first();
         }
+        
+        // Se ainda não encontrou idioma, criar um idioma padrão para o usuário
+        if (!$userCurrentLang) {
+            $userCurrentLang = UserLanguage::create([
+                'name' => 'English',
+                'code' => 'en',
+                'is_default' => 1,
+                'rtl' => 0,
+                'type' => 'admin',
+                'user_id' => $userId,
+                'keywords' => json_encode([])
+            ]);
+        }
+        
         return $userCurrentLang;
     }
 

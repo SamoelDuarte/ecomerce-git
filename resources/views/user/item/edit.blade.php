@@ -310,19 +310,26 @@
 
 
                                     @php
-                                        $postData = $lang->itemInfo()->where('item_id', $item->id)->first();
+                                        // Verificar se $lang existe, senão usar idioma padrão
+                                        if (!$lang) {
+                                            $lang = App\Models\User\Language::where('user_id', Auth::guard('web')->user()->id)
+                                                                           ->where('is_default', 1)
+                                                                           ->first();
+                                        }
+                                        
+                                        $postData = $lang ? $lang->itemInfo()->where('item_id', $item->id)->first() : null;
 
-                                        $categories = App\Models\User\UserItemCategory::where('language_id', $lang->id)
+                                        $categories = $lang ? App\Models\User\UserItemCategory::where('language_id', $lang->id)
                                             ->where('user_id', Auth::guard('web')->user()->id)
                                             ->where('status', 1)
                                             ->orderBy('name', 'asc')
-                                            ->get();
+                                            ->get() : collect();
                                     @endphp
                                     <input hidden id="subcatGetterForItem" value="{{ route('user.item.subcatGetter') }}">
                                     <div class="col-lg-4">
-                                        <div class="form-group {{ $lang->rtl == 1 ? 'rtl text-right' : '' }}">
+                                        <div class="form-group {{ $lang && $lang->rtl == 1 ? 'rtl text-right' : '' }}">
                                             <label>{{ __('Category') }} <span class="text-danger">**</span></label>
-                                            <select data-code="{{ $lang->code }}" name="category"
+                                            <select data-code="{{ $lang ? $lang->code : 'pt' }}" name="category"
                                                 class="form-control getSubCategory">
                                                 <option value="">{{ __('Select Category') }}
                                                 </option>
@@ -339,14 +346,15 @@
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="form-group {{ $lang->rtl == 1 ? 'rtl text-right' : '' }}">
+                                        <div class="form-group {{ $lang && $lang->rtl == 1 ? 'rtl text-right' : '' }}">
                                             <label>{{ __('Subcategory') }}</label>
-                                            <select data-code="{{ $lang->code }}" name="subcategory"
-                                                id="{{ $lang->code }}_subcategory" class="form-control">
+                                            <select data-code="{{ $lang ? $lang->code : 'pt' }}" name="subcategory"
+                                                id="{{ $lang ? $lang->code : 'pt' }}_subcategory" class="form-control">
                                                 <option value="">
                                                     {{ __('Select Subcategory') }}</option>
                                                 @php
-                                                    if ($postData) {
+                                                    $sub_categories = collect();
+                                                    if ($postData && $lang) {
                                                         $sub_categories = App\Models\User\UserItemSubCategory::where(
                                                             'language_id',
                                                             $lang->id,
@@ -373,7 +381,7 @@
                                 <div id="accordion" class="mt-3">
                                     @foreach ($languages as $language)
                                         @php
-                                            $postData = $language->itemInfo()->where('item_id', $item->id)->first();
+                                            $postData = $language ? $language->itemInfo()->where('item_id', $item->id)->first() : null;
                                         @endphp
                                         <div class="version">
                                             <div class="version-header" id="heading{{ $language->id }}">

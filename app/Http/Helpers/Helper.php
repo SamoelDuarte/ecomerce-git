@@ -795,15 +795,17 @@ if (!function_exists('onlyDigitalItemsInCart')) {
     function onlyDigitalItemsInCart()
     {
         $cart = session()->get('cart', []);
-        if (!empty($cart)) {
-            foreach ($cart as $key => $cartItem) {
-                $item = UserItem::findorFail($cartItem["id"]);
-                if ($item->type == 'digital') {
-                    return true;
-                }
+        if (empty($cart)) {
+            return false;
+        }
+        
+        foreach ($cart as $key => $cartItem) {
+            $item = UserItem::findorFail($cartItem["id"]);
+            if ($item->type != 'digital') {
+                return false; // Se encontrar qualquer item físico, retorna false
             }
         }
-        return false;
+        return true; // Todos os itens são digitais
     }
 }
 

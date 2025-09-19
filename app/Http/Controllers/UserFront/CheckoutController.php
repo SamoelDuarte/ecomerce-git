@@ -260,23 +260,30 @@ class CheckoutController extends Controller
 
     public function calcularEntrega(Request $request)
     {
-        $user = Auth::guard('web')->user();
-        $session = Session::all();
+        try {
+            $user = Auth::guard('web')->user();
+            $session = Session::all();
 
-        $userId = collect($session['cart'])->first()['user_id'];
+            \Log::info('Debug calcularEntrega - início');
+            \Log::info('CEP recebido: ' . $request->cep);
+            \Log::info('Session cart: ', session('cart', []));
 
-        $userAddress = UserAddress::where('user_id', $userId)->first();
-        // dd($userAddress);
-        if (!$userAddress) {
-            return response()->json(['error' => 'Configure seu endereço nas configurações da loja primeiro'], 400);
-        }
-        
-        // Incluir dias de despacho na resposta
-        $dias_despacho = $userAddress->dias_despacho ?? 0;
-        
+            if (!session('cart') || empty(session('cart'))) {
+                return response()->json(['error' => 'Carrinho vazio'], 400);
+            }
 
-        $cepDestino = preg_replace('/\D/', '', $request->cep);
-        $cepOrigem = preg_replace('/\D/', '', $userAddress->cep);
+            $userId = collect($session['cart'])->first()['user_id'];
+            \Log::info('User ID do carrinho: ' . $userId);
+
+            $userAddress = UserAddress::where('user_id', $userId)->first();
+            if (!$userAddress) {
+                return response()->json(['error' => 'Configure seu endereço nas configurações da loja primeiro'], 400);
+            }
+
+            \Log::info('Endereço encontrado: CEP origem = ' . $userAddress->cep);
+
+            $cepDestino = preg_replace('/\D/', '', $request->cep);
+            $cepOrigem = preg_replace('/\D/', '', $userAddress->cep);
         $valorNota = 0;
         $produtos = [];
         foreach (session('cart') as $item) {
@@ -316,9 +323,19 @@ class CheckoutController extends Controller
         $frenet = new FrenetService($userAddress->token_frenet);
         $frete = $frenet->calcularFrete($produtos, $cepOrigem, $cepDestino, $valorNota);
 
-        // Adicionar dias de despacho à resposta do frete
-        $frete['dias_despacho'] = $dias_despacho;
+        // Debug: Adicionar logs para verificar resposta
+        \Log::info('Produtos enviados para Frenet:', $produtos);
+        \Log::info('Resposta do Frenet:', $frete);
+
+        // Remover dias de despacho da resposta
+        // $frete['dias_despacho'] = $dias_despacho;
         return response()->json($frete);
+        
+        } catch (\Exception $e) {
+            \Log::error('Erro em calcularEntrega: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json(['error' => 'Erro interno: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

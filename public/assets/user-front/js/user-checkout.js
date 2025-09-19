@@ -32,7 +32,7 @@ if (stripe_key) {
 // apply coupon functionality starts
 function applyCoupon() {
     // salvar HTML dos métodos de entrega antes do reload
-    const shippingOptionsHTML = $('#shippingMethodsContainer').html();
+    const shippingOptionsHTML = $('#frenetShippingMethods').html();
 
     $.post(
         coupon_url, {
@@ -46,7 +46,7 @@ function applyCoupon() {
 
                 $("#cartTotal").load(location.href + " #cartTotal", function () {
                     // restaurar os métodos de entrega
-                    $('#shippingMethodsContainer').html(shippingOptionsHTML);
+                    $('#frenetShippingMethods').html(shippingOptionsHTML);
 
                     // garantir que o total está certo com cupom + frete
                     recalculateTotal();
@@ -366,7 +366,8 @@ function paymentFormUpdate(opaqueData) {
 }
 
 
-// Função para atualizar mensagem de dias de despacho
+// Função para atualizar mensagem de dias de despacho - REMOVIDA
+/*
 function updateDispatchMessage(dias) {
     let message = `<li class="d-flex justify-content-between dispatch-info">
         <h5 class="mb-0" style="color: #28a745;">
@@ -374,13 +375,20 @@ function updateDispatchMessage(dias) {
             ${dias > 0 ? 'Seu pedido será despachado em ' + dias + ' dias úteis' : 'Despacho no mesmo dia'}
         </h5>
     </li>`;
-    $('#shippingMethodsContainer').html(message);
+    $('#frenetShippingDetails').html(message);
 }
+*/
 
 $(document).ready(function () {
     let carregandoCEP = false;
 
     function carregarEntregaPorCep() {
+        // Verificar se a seção de métodos de entrega existe (só para produtos físicos)
+        if ($('#frenetShippingMethods').length === 0) {
+            console.log('Métodos de entrega não disponíveis - apenas produtos digitais');
+            return;
+        }
+
         const cepVal = $('#billing_zip').val();
         const cep = cepVal.replace(/\D/g, '');
 
@@ -393,10 +401,12 @@ $(document).ready(function () {
             type: 'GET',
             success: function (res) {
                 carregandoCEP = false;
+                console.log('Resposta da API Frenet:', res);
 
                 // Se não precisa de frete (só produtos digitais)
                 if (res && Array.isArray(res.ShippingSevicesArray) && res.ShippingSevicesArray.length === 0) {
-                    $('#shippingMethodsContainer').html('');
+                    $('#frenetShippingMethods').html('<p class="text-info">Nenhum frete necessário (somente produtos digitais)</p>');
+                    $('#frenetShippingDetails').html('');
                     $('#shipping_service_price').val(0);
                     $('#shipping_service_name').val('Sem frete necessário');
                     recalculateTotal();
@@ -404,32 +414,20 @@ $(document).ready(function () {
                 }
 
                 if (res && res.ShippingSevicesArray) {
-                    let html = '';
-                    
-                    // Mostrar dias de despacho primeiro
-                    if (res.dias_despacho !== undefined) {
-                        html += `
-                            <div class="alert alert-success mb-3">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-clock mr-2"></i>
-                                    ${res.dias_despacho > 0 
-                                        ? `Seu pedido será despachado em ${res.dias_despacho} dias úteis` 
-                                        : 'Despacho no mesmo dia'}
-                                </h5>
-                            </div>
-                        `;
-                    }
-
-                    html += `<h5 class="mt-3">Escolha a Entrega</h5>`;
-
-                    // Mostrar dias de despacho se disponível
-                    if (typeof res.dias_despacho !== 'undefined') {
-                        updateDispatchMessage(res.dias_despacho);
-                    }
+                    console.log('Serviços encontrados:', res.ShippingSevicesArray.length);
+                    let html = `<h5 class="mt-3 hide">Escolha a Entrega</h5>`;
+                    let servicosValidos = 0;
+                    let errosEncontrados = [];
 
                     res.ShippingSevicesArray.forEach((servico, index) => {
-                        if (!servico.Error) {
-                            const checked = index === 0 ? 'checked' : '';
+                        console.log(`Serviço ${index}:`, servico);
+                        
+                        // Verifica se o serviço tem erro (via Error ou Msg contendo "Erro:")
+                        const temErro = servico.Error || (servico.Msg && servico.Msg.includes('Erro:'));
+                        
+                        if (!temErro && servico.ShippingPrice && servico.ShippingPrice > 0) {
+                            servicosValidos++;
+                            const checked = servicosValidos === 1 ? 'checked' : '';
 
                             html += `
                                 <div class="form-check">
@@ -446,21 +444,42 @@ $(document).ready(function () {
                                 </div>
                             `;
 
-                            if (index === 0) {
+                            if (servicosValidos === 1) {
                                 $('#shipping_service_price').val(servico.ShippingPrice);
                                 $('#shipping_service_name').val(`${servico.ServiceDescription} - ${servico.Carrier} - ${servico.DeliveryTime} dia(s)`);
                             }
+                        } else {
+                            // Coleta os erros para mostrar ao usuário
+                            const erro = servico.Msg || servico.Error || 'Erro desconhecido';
+                            errosEncontrados.push(`${servico.ServiceDescription}: ${erro}`);
                         }
                     });
 
-                    $('#shippingMethodsContainer').html(html);
+                    if (servicosValidos === 0) {
+                        // Se não há serviços válidos, mostra mensagem simples
+                        html = `
+                            <div class="alert alert-warning text-center">
+                                <h5>📦 Sem opções de frete para sua região</h5>
+                            </div>
+                        `;
+                        $('#shipping_service_price').val(0);
+                        $('#shipping_service_name').val('Sem opções de frete');
+                    }
+
+                    $('#frenetShippingMethods').html(html);
                     recalculateTotal();
+                } else {
+                    console.log('Nenhum serviço de entrega disponível ou resposta inválida');
+                    $('#frenetShippingMethods').html('<div class="alert alert-warning text-center"><h5>📦 Sem opções de frete para sua região</h5></div>');
                 }
             },
             error: function (xhr) {
                 carregandoCEP = false;
                 console.error('Erro ao calcular taxa de entrega:', xhr);
-                $('#shippingMethodsContainer').html(`<p class="text-danger mt-2">Não foi possível calcular o frete para este CEP.</p>`);
+                console.error('Status:', xhr.status);
+                console.error('Response:', xhr.responseText);
+                
+                $('#frenetShippingMethods').html('<div class="alert alert-warning text-center"><h5>📦 Sem opções de frete para sua região</h5></div>');
             }
         });
     }

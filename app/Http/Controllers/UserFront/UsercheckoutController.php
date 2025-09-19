@@ -74,13 +74,28 @@ class UsercheckoutController extends Controller
 
 
         if (session()->has('user_lang')) {
-            $userCurrentLang = Language::where('code', session()->get('user_lang'))->where('user_id', $user->id)->firstOrFail();
+            $userCurrentLang = Language::where('code', session()->get('user_lang'))->where('user_id', $user->id)->first();
             if (empty($userCurrentLang)) {
-                $userCurrentLang = Language::where('is_default', 1)->where('user_id', $user->id)->firstOrFail();
-                session()->put('user_lang', $userCurrentLang->code);
+                $userCurrentLang = Language::where('is_default', 1)->where('user_id', $user->id)->first();
+                if ($userCurrentLang) {
+                    session()->put('user_lang', $userCurrentLang->code);
+                }
             }
         } else {
-            $userCurrentLang = Language::where('is_default', 1)->where('user_id', $user->id)->firstOrFail();
+            $userCurrentLang = Language::where('is_default', 1)->where('user_id', $user->id)->first();
+        }
+        
+        // Se não encontrou idioma, criar um padrão
+        if (!$userCurrentLang) {
+            $userCurrentLang = Language::create([
+                'name' => 'Português',
+                'code' => 'pt',
+                'is_default' => 1,
+                'rtl' => 0,
+                'type' => 'admin',
+                'user_id' => $user->id,
+                'keywords' => json_encode([])
+            ]);
         }
         $cart = Session::get('cart');
         $items = [];
@@ -119,9 +134,10 @@ class UsercheckoutController extends Controller
             return redirect()->back()->with('st_errors', $st_errors);
         }
 
-        $total = Common::orderTotal($request->shipping_charge, $user->id);
+        // Calcula total sem frete (usar 0 para ignorar shipping_charge antigo)
+        $total = Common::orderTotal(0, $user->id);
 
-        // Converte o valor do frete para float de forma segura
+        // Adiciona o valor do frete do Frenet
         $frete = floatval($request->input('shipping_service_price', 0));
         $total += $frete;
         $total = $total - session()->get('user_coupon');

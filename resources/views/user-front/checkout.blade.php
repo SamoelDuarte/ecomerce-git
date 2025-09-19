@@ -504,65 +504,24 @@ $user_currency = user_currency(Session::get('user_curr'));
                     </div>
 
 
-                    @if (!onlyDigitalItemsInCart() && sizeof($shippings) > 0)
-                    @if (count($shippings) > 0)
+                    {{-- Seção de Métodos de Entrega via Frenet --}}
+                    @if (!onlyDigitalItemsInCart())
                     <div class="col-12 mb-5">
                         <div class="order-summery form-block border radius-md">
                             <div class="shop-title-box">
-                                <h3 class="pb-20 border-bottom">
-                                    {{ $keywords['Shipping Methods'] ?? __('Shipping Methods') }}
+                                <h3 class="pb-1">
+                                    {{ $keywords['Shipping Methods'] ?? __('Métodos de Entrega') }}
                                 </h3>
                             </div>
-                            <table class=" w-100">
-                                <thead class="cart-header">
-                                    <tr class="height-50">
-                                        <th>#</th>
-                                        <th>{{ $keywords['Method'] ?? __('Method') }} *</th>
-                                        <th class="price">{{ $keywords['Cost'] ?? __('Cost') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($shippings as $key => $charge)
-                                    <tr>
-                                        <td>
-                                            <input type="radio" {{ $key == 0 ? 'checked' : '' }}
-                                                name="shipping_charge"
-                                                {{ $cart == null ? 'disabled' : '' }}
-                                                data="{{ currency_converter_shipping($charge->charge, $charge->id) }}"
-                                                value="{{ $charge->id }}"
-                                                class="shipping shipping-charge"
-                                                id="shipping-charge-{{ $charge->id }}">
-                                        </td>
-                                        <td>
-                                            <p class="mb-0">
-                                                <strong><label
-                                                        for="shipping-charge-{{ $charge->id }}">{{ convertUtf8($charge->title) }}</label></strong>
-                                            </p>
-                                            <p class="mb-0"><small><label
-                                                        for="shipping-charge-{{ $charge->id }}">{{ convertUtf8($charge->text) }}</label></small>
-                                            </p>
-                                        </td>
-                                        <td class="d-flex">
-                                            {{ $user_currency->symbol_position == 'left' ? $user_currency->symbol : '' }}
-                                            <span>{{ currency_converter_shipping($charge->charge, $charge->id) }}</span>
-                                            {{ $user_currency->symbol_position == 'right' ? $user_currency->symbol : '' }}
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                            <div id="frenetShippingMethods">
+                                <p class="text-muted small">Digite seu CEP para calcular o frete</p>
+                            </div>
                         </div>
                     </div>
-                    @else
-                    @php
-                    $hidden = 'hidden';
-                    @endphp
-                    <div class="col-12">
-                        <input style="visibility: {{ $hidden }}" type="radio" checked
-                            name="shipping_charge" {{ $cart == null ? 'disabled' : '' }} data="0"
-                            class="shipping-charge" value="0">
-                    </div>
-                    @endif
+                    
+                    {{-- Campos hidden para armazenar dados do frete selecionado --}}
+                    <input type="hidden" id="shipping_service_price" name="shipping_service_price" value="0">
+                    <input type="hidden" id="shipping_service_name" name="shipping_service_name" value="">
                     @endif
 
                     <div id="cartTotal">
@@ -598,7 +557,7 @@ $user_currency = user_currency(Session::get('user_curr'));
 
 
                                 {{-- Fretes dinâmicos via Frenet --}}
-                                <div id="shippingMethodsContainer"></div>
+                                <div id="frenetShippingDetails"></div>
 
                                 @if ($userShop->tax != 0)
                                 <li class="d-flex justify-content-between">
@@ -711,5 +670,5 @@ $anetSrc = 'https://js.authorize.net/v1/Accept.js';
 <script type="text/javascript" src="{{ $anetSrc }}" charset="utf-8"></script>
 @endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-<script src="{{ asset('assets/user-front/js/user-checkout.js') }}"></script>
+<script src="{{ asset('assets/user-front/js/user-checkout.js?v=1.0.3') }}"></script>
 @endsection

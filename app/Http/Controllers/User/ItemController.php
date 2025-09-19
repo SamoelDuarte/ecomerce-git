@@ -398,16 +398,53 @@ class ItemController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $currentLang = Language::where('code', $request->language)->pluck('id')->firstOrFail();
         $user_id = Auth::guard('web')->user()->id;
+        
+        // Buscar idioma com user_id para evitar ItemNotFoundException
+        $currentLang = Language::where('code', $request->language)
+                              ->where('user_id', $user_id)
+                              ->pluck('id')
+                              ->first();
+        
+        // Se não encontrar o idioma, usar o idioma padrão do usuário
+        if (!$currentLang) {
+            $currentLang = Language::where('user_id', $user_id)
+                                 ->where('is_default', 1)
+                                 ->pluck('id')
+                                 ->first();
+        }
+        
         $data['languages'] = Language::where('user_id', $user_id)->get();
-        $data['item'] = UserItem::where([['id', $id], ['user_id', $user_id]])->firstOrFail();
+        $data['item'] = UserItem::where([['id', $id], ['user_id', $user_id]])->first();
+        
+        if (!$data['item']) {
+            abort(404, 'Item não encontrado');
+        }
 
         $data['title'] = UserItemContent::where([['item_id', $data['item']->id], ['language_id', $currentLang]])->pluck('title')->first();
 
         $current_package = UserPermissionHelper::currentPackagePermission($user_id);
         $item_limit = $current_package->product_limit;
+        
+        // Buscar idioma, com fallback para idioma padrão
         $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        if (!$lang) {
+            $lang = Language::where('user_id', $user_id)->where('is_default', 1)->first();
+        }
+        
+        // Se ainda não encontrou, criar um idioma padrão
+        if (!$lang) {
+            $lang = Language::create([
+                'name' => 'Português',
+                'code' => 'pt',
+                'is_default' => 1,
+                'rtl' => 0,
+                'type' => 'admin',
+                'user_id' => $user_id,
+                'keywords' => json_encode([])
+            ]);
+        }
+        
         $data['lang'] = $lang;
         $total_item = UserItem::where('user_id', $user_id)->count();
         if ($total_item > $item_limit) {
@@ -771,8 +808,23 @@ class ItemController extends Controller
 
     public function variations($id, Request $request)
     {
-        $currentLang = Language::where('code', $request->language)->pluck('id')->firstOrFail();
-        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
+        $user_id = Auth::guard('web')->user()->id;
+        
+        // Buscar idioma com user_id para evitar ItemNotFoundException
+        $currentLang = Language::where('code', $request->language)
+                              ->where('user_id', $user_id)
+                              ->pluck('id')
+                              ->first();
+        
+        // Se não encontrar o idioma, usar o idioma padrão do usuário
+        if (!$currentLang) {
+            $currentLang = Language::where('user_id', $user_id)
+                                 ->where('is_default', 1)
+                                 ->pluck('id')
+                                 ->first();
+        }
+        
+        $current_package = UserPermissionHelper::currentPackagePermission($user_id);
         $item_limit = $current_package->product_limit;
         $total_item = UserItem::where('user_id', Auth::guard('web')->user()->id)->count();
         if ($item_limit < $total_item) {
@@ -791,8 +843,23 @@ class ItemController extends Controller
 
     public function codes($id, Request $request)
     {
-        $currentLang = Language::where('code', $request->language)->pluck('id')->firstOrFail();
-        $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
+        $user_id = Auth::guard('web')->user()->id;
+        
+        // Buscar idioma com user_id para evitar ItemNotFoundException
+        $currentLang = Language::where('code', $request->language)
+                              ->where('user_id', $user_id)
+                              ->pluck('id')
+                              ->first();
+        
+        // Se não encontrar o idioma, usar o idioma padrão do usuário
+        if (!$currentLang) {
+            $currentLang = Language::where('user_id', $user_id)
+                                 ->where('is_default', 1)
+                                 ->pluck('id')
+                                 ->first();
+        }
+        
+        $current_package = UserPermissionHelper::currentPackagePermission($user_id);
         $item_limit = $current_package->product_limit;
         $total_item = UserItem::where('user_id', Auth::guard('web')->user()->id)->count();
         if ($item_limit < $total_item) {
@@ -1031,7 +1098,11 @@ class ItemController extends Controller
     public function paymentStatus(Request $request)
     {
         $order = UserOrder::findOrFail($request->order_id);
-        $user = User::where('id', $order->user_id)->firstOrFail();
+        $user = User::where('id', $order->user_id)->first();
+        
+        if (!$user) {
+            abort(404, 'Usuário não encontrado');
+        }
 
         $dir = public_path('assets/front/invoices/');
         if ($request->payment_status == 'Completed') {
