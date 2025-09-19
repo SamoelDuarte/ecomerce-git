@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Helpers\Uploader;
 use App\Models\User\CallToAction;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Session;
 
 class CtaSectionController extends Controller
 {
+    use LanguageFallbackTrait;
+    
     public function index(Request $request)
     {
-        $language = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->firstOrFail();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $info['data'] = CallToAction::where('language_id', $language->id)
             ->where('user_id', Auth::guard('web')->user()->id)
             ->first();

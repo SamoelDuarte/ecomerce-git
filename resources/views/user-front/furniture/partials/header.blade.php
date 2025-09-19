@@ -198,7 +198,7 @@
                   class="badge wishlist-count">{{ $wishListCount }}</span></i>
               {{ $keywords['Wishlist'] ?? __('Wishlist') }} </a>
           </li>
-          <li class="menu-item border-end">
+          <li class="menu-item border-end hide">
             <a href="{{ route('front.user.compare', getParam()) }}" class="menu-link"><i class="fal fa-random"><span
                   class="badge" id="compare-count">{{ $compareCount }}</span></i>
               {{ $keywords['Compare'] ?? __('Compare') }} </a>

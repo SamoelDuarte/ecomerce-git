@@ -6680,3 +6680,7 @@ h4.product-title.lc-2 {
 .list-item{
     padding: 3px;
 }
+
+.hide {
+    display: none !important
+}
