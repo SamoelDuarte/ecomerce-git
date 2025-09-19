@@ -7,21 +7,23 @@ use Illuminate\Http\Request;
 use App\Models\User\Language;
 use App\Models\User\UserHeading;
 use App\Models\User\UserPageContent;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class HeadingController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         $authId = Auth::guard('web')->user()->id;
-        $uLang = Language::where('code', $request->language)->where('user_id', $authId)->first();
+        $uLang = $this->getLanguageWithFallback($request->language, $authId);
         $userCurrentLang = $uLang->id;
 
         $data['heading'] = UserHeading::where('user_id', $authId)->where('language_id', $userCurrentLang)->first();
 
         if (!empty($request->language)) {
-            $data['language'] = Language::where('code', $request->language)->where('user_id', $authId)->firstOrFail();
+            $data['language'] = $this->getLanguageWithFallback($request->language, $authId);
         }
         $data['decodedHeadings'] = isset($data['heading']->custom_page_heading) ? json_decode($data['heading']->custom_page_heading, true) : '';
 

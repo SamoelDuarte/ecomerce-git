@@ -9,13 +9,15 @@ use Auth;
 use Illuminate\Http\Request;
 use Session;
 use Validator;
+use App\Traits\LanguageFallbackTrait;
 
 class ItemLabelController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $language = Language::where([['user_id', $user_id], ['code', $request->language]])->firstOrFail();
+        $language = $this->getLanguageWithFallback($request->language, $user_id);
         $data['userLanguages'] = Language::where('user_id', $user_id)->get();
         $data['labels'] = Label::where([['user_id', $user_id], ['language_id', $language->id]])->get();
         $data['user_id'] = $user_id;

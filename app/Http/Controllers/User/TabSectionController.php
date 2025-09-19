@@ -7,6 +7,7 @@ use App\Http\Helpers\Uploader;
 use App\Http\Helpers\UserPermissionHelper;
 use App\Models\User\Language;
 use App\Models\User\Tab;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,9 +16,10 @@ use Illuminate\Support\Facades\Validator;
 
 class TabSectionController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $lang_id = $lang->id;
         $current_package = UserPermissionHelper::currentPackagePermission(Auth::guard('web')->user()->id);
         $data['tabs_limit'] = $current_package->tabs_limit;
@@ -151,7 +153,7 @@ class TabSectionController extends Controller
     public function products($id, Request $request)
     {
         $id = (int)$id;
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $data['language_id'] = $lang->id;
         $productsdddd = Tab::where('id', $id)->where('language_id', $lang->id)->get();
 

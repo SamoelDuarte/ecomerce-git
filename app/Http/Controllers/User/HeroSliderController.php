@@ -9,6 +9,7 @@ use App\Models\User\BasicSetting;
 use App\Models\User\HeroSlider;
 use App\Models\User\Language;
 use App\Models\User\ProductHeroSlider;
+use App\Traits\LanguageFallbackTrait;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,10 +19,11 @@ use Purifier;
 
 class HeroSliderController extends Controller
 {
+    use LanguageFallbackTrait;
     public function sliderVersion(Request $request)
     {
         // first, get the language info from db
-        $language = \App\Models\User\Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         // then, get the slider version info of that language from db
         $information['sliders'] = HeroSlider::where('language_id', $language->id)
             ->orderBy('id', 'desc')
@@ -36,7 +38,7 @@ class HeroSliderController extends Controller
     public function createSlider(Request $request)
     {
         // get the language info from db
-        $language = \App\Models\User\Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $information['language'] = $language;
         return view('user.home.hero_section.create_slider', $information);
     }
@@ -73,7 +75,7 @@ class HeroSliderController extends Controller
     public function editSlider(Request $request, $id)
     {
         // get the language info from db
-        $language = \App\Models\User\Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $information['language'] = $language;
         // get the slider info from db for update
         $information['slider'] = HeroSlider::findOrFail($id);
@@ -121,7 +123,7 @@ class HeroSliderController extends Controller
 
     public function updateStaticSlider(Request $request, $language)
     {
-        $lang = \App\Models\User\Language::where('code', $language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($language, Auth::guard('web')->user()->id);
         $data = HeroSlider::where([
             ['user_id', Auth::guard('web')->user()->id],
             ['language_id', $lang->id],
@@ -170,7 +172,7 @@ class HeroSliderController extends Controller
 
     public function HeroSecBgImg(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $data = BasicExtende::where('user_id', Auth::guard('web')->user()->id)
             ->where('language_id', $lang->id)
             ->select('hero_section_background_image')
@@ -180,7 +182,7 @@ class HeroSliderController extends Controller
 
     public function updateHeroSecBgImg(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
 
         $data = BasicExtende::where('user_id', Auth::guard('web')->user()->id)->where('language_id', $lang->id)->first();
 
@@ -223,7 +225,7 @@ class HeroSliderController extends Controller
     public function productSlider()
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where([['user_id', $user_id], ['is_default', 1]])->first();
+        $lang = $this->getLanguageWithFallback(null, $user_id);
 
         $data['items'] = DB::table('user_items')->where('user_items.user_id', Auth::guard('web')->user()->id)
             ->Join('user_item_contents', 'user_items.id', '=', 'user_item_contents.item_id')

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Helpers\Uploader;
 use App\Models\User\Banner;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,11 +15,12 @@ use Illuminate\Support\Facades\Validator;
 
 class BannerSectionController extends Controller
 {
+    use LanguageFallbackTrait;
     public function bannerSection(Request $request)
     {
 
         // first, get the language info from db
-        $language = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         // also, get the banner info of that language from db
         $information['banners'] = banner::where('language_id', $language->id)
             ->where('user_id', Auth::guard('web')->user()->id)

@@ -8,6 +8,7 @@ use App\Models\User\Blog;
 use App\Models\User\BlogCategory;
 use App\Models\User\BlogContent;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Response;
 
 class BlogController extends Controller
 {
+    use LanguageFallbackTrait;
     /**
      * Display a listing of the resource.
      *
@@ -30,18 +32,7 @@ class BlogController extends Controller
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        if ($request->has('language')) {
-            $lang = Language::where([
-                ['code', $request->language],
-                ['user_id', $user_id]
-            ])->first();
-        } else {
-            $lang = Language::where([
-                ['is_default', 1],
-                ['user_id', $user_id]
-            ])
-                ->first();
-        }
+        $lang = $this->getLanguageWithFallback($request->language ?? null, $user_id);
 
         $data['blogs'] = DB::table('user_blogs')
             ->join('user_blog_contents', 'user_blogs.id', 'user_blog_contents.blog_id')
@@ -59,7 +50,7 @@ class BlogController extends Controller
             ->orderBy('serial_number', 'ASC')
             ->get();
 
-        $data['lang'] = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $data['lang'] = $lang;
         $current_package = UserPermissionHelper::currentPackagePermission($user_id);
         $features = json_decode($current_package->features);
         if (is_array($features) && in_array('Blog', $features)) {

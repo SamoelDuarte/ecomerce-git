@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\User\Language;
 use App\Models\User\UserContact;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,10 +13,11 @@ use Session;
 
 class ContactController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         // first, get the language info from db
-        $language = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         // then, get the service section heading info of that language from db
         $information['data'] = UserContact::where('language_id', $language->id)->where('user_id', Auth::guard('web')->user()->id)->first();
         // get all the languages from db
@@ -24,7 +26,7 @@ class ContactController extends Controller
 
     public function update(Request $request, $language)
     {
-        $lang = Language::where('code', $language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($language, Auth::guard('web')->user()->id);
         $data = UserContact::where([
             ['user_id', Auth::guard('web')->user()->id],
             ['language_id', $lang->id]

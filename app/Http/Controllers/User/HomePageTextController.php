@@ -13,18 +13,22 @@ use App\Rules\ImageMimeTypeRule;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Support\Facades\Session;
 
 class HomePageTextController extends Controller
 {
+    use LanguageFallbackTrait;
+    
     public function index(Request $request)
     {
-        $uLang = UserLanguage::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $userId = Auth::guard('web')->user()->id;
+        $uLang = $this->getLanguageWithFallback($request->language, $userId);
         $userCurrentLang = $uLang->id;
-        $data['ubs'] = UserSection::where('user_id', Auth::guard('web')->user()->id)->where('language_id', $userCurrentLang)->first();
+        $data['ubs'] = UserSection::where('user_id', $userId)->where('language_id', $userCurrentLang)->first();
         $data['setting'] = BasicSetting::where('user_id', Auth::guard('web')->user()->id)->firstOrFail();
         if (!empty($request->language)) {
-            $data['language'] = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->firstOrFail();
+            $data['language'] = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         }
         $data['u_langs'] = UserLanguage::where('user_id', Auth::guard('web')->user()->id)->get();
 
@@ -108,7 +112,8 @@ class HomePageTextController extends Controller
         } else {
             $data['additional_section_statuses'] = [];
         }
-        $data['langid'] = UserLanguage::where([['is_default', 1], ['user_id', Auth::guard('web')->user()->id]])->first()->id;
+        $defaultLang = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
+        $data['langid'] = $defaultLang->id;
 
         $themeConfig = config('theme_config');
         $currentTheme = $data['ubs']->theme;
@@ -154,14 +159,15 @@ class HomePageTextController extends Controller
 
     public function contentSection(Request $request)
     {
-        $uLang = UserLanguage::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $userId = Auth::guard('web')->user()->id;
+        $uLang = $this->getLanguageWithFallback($request->language, $userId);
         $userCurrentLang = $uLang->id;
-        $data['ubs'] = UserSection::where('user_id', Auth::guard('web')->user()->id)->where('language_id', $userCurrentLang)->first();
-        $data['setting'] = BasicSetting::where('user_id', Auth::guard('web')->user()->id)->firstOrFail();
+        $data['ubs'] = UserSection::where('user_id', $userId)->where('language_id', $userCurrentLang)->first();
+        $data['setting'] = BasicSetting::where('user_id', $userId)->firstOrFail();
         if (!empty($request->language)) {
-            $data['language'] = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->firstOrFail();
+            $data['language'] = $this->getLanguageWithFallback($request->language, $userId);
         }
-        $data['u_langs'] = UserLanguage::where('user_id', Auth::guard('web')->user()->id)->get();
+        $data['u_langs'] = UserLanguage::where('user_id', $userId)->get();
         return view('user.home.home-page-text', $data);
     }
 

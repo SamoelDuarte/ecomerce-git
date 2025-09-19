@@ -15,13 +15,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Session;
+use App\Traits\LanguageFallbackTrait;
 
 class VariantController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $language = Language::where([['code', $request->language], ['user_id', $user_id]])->first();
+        $language = $this->getLanguageWithFallback($request->language, $user_id);
         $data['languages'] = Language::where('user_id', $user_id)->get();
         $data['variants'] = VariantContent::where([['user_id', $user_id], ['language_id', $language->id]])->orderBy('created_at', 'DESC')->get();
 
@@ -80,7 +82,8 @@ class VariantController extends Controller
 
         foreach ($request->input('variant_names') as $languageCode => $variantNames) {
             foreach ($variantNames as $index => $variantName) {
-                $language_id = Language::where([['code', $languageCode], ['user_id', $user_id]])->first()->id;
+                $language = $this->getLanguageWithFallback($languageCode, $user_id);
+                $language_id = $language->id;
 
 
                 $category = UserItemCategory::where([['unique_id', $category_unique_id], ['language_id', $language_id]])->first();
@@ -170,7 +173,8 @@ class VariantController extends Controller
         // Step 2: Update or Create Variant Contents
         foreach ($request->input('variant_names') as $languageCode => $variantNames) {
             foreach ($variantNames as $index => $variantName) {
-                $language_id = Language::where([['code', $languageCode], ['user_id', $user_id]])->first()->id;
+                $language = $this->getLanguageWithFallback($languageCode, $user_id);
+                $language_id = $language->id;
 
                 $category = UserItemCategory::where([['unique_id', $category_unique_id], ['language_id', $language_id]])->first();
                 $subcategory = UserItemSubCategory::where([['unique_id', $subcategory_unique_id], ['language_id', $language_id]])->first();
@@ -179,7 +183,7 @@ class VariantController extends Controller
 
                 $variantContent = VariantContent::firstOrNew([
                     'variant_id' => $variant->id,
-                    'language_id' => \App\Models\User\Language::where([['code', $languageCode], ['user_id', $user_id]])->first()->id,
+                    'language_id' => $language->id,
                     'user_id' => $user_id
                 ]);
                 $variantContent->category_id = $category_id;
@@ -217,9 +221,10 @@ class VariantController extends Controller
 
     private function saveVariantOptionContent($variant_id, $variantOptionId = null, $userId, $languageCode, $optionName, $key)
     {
+        $language = $this->getLanguageWithFallback($languageCode, $userId);
         $conditions = [
             'variant_id' => $variant_id,
-            'language_id' => \App\Models\User\Language::where([['code', $languageCode], ['user_id', $userId]])->first()->id,
+            'language_id' => $language->id,
             'index_key' => $key,
             'user_id' => $userId
         ];

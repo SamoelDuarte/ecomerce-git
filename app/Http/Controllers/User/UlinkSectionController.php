@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User\UserUlink;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Session;
@@ -11,9 +12,11 @@ use Validator;
 
 class UlinkSectionController extends Controller
 {
+    use LanguageFallbackTrait;
+    
     public function index(Request $request)
     {
-        $lang = \App\Models\User\Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $lang_id = $lang->id;
         $data['aulinks'] = UserUlink::where('language_id', $lang_id)->where('user_id', Auth::guard('web')->user()->id)->get();
         $data['lang_id'] = $lang_id;

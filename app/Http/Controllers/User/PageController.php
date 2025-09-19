@@ -7,6 +7,7 @@ use App\Http\Helpers\UserPermissionHelper;
 use App\Models\User\Language;
 use App\Models\User\UserPage;
 use App\Models\User\UserPageContent;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -16,10 +17,11 @@ use Purifier;
 
 class PageController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->firstOrFail();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
 
         $apages = UserPage::join('user_page_contents', 'user_page_contents.page_id', 'user_pages.id')

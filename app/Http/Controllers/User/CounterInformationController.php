@@ -7,6 +7,7 @@ use App\Http\Helpers\Uploader;
 use App\Models\User\CounterInformation;
 use App\Models\User\CounterSection;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -14,10 +15,11 @@ use Illuminate\Support\Facades\Validator;
 
 class CounterInformationController extends Controller
 {
+    use LanguageFallbackTrait;
     public function counter(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
 
         $data['counters'] = CounterInformation::where([['language_id', $lang->id], ['user_id', $user_id]])->get();
 
@@ -32,7 +34,7 @@ class CounterInformationController extends Controller
     public function updateInfo(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
 
         $in = $request->all();

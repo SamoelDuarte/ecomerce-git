@@ -18,11 +18,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\LanguageFallbackTrait;
 use Purifier;
 use Response;
 
 class BasicController extends Controller
 {
+    use LanguageFallbackTrait;
     public function themeVersion()
     {
         $userId = Auth::guard('web')->user()->id;
@@ -56,7 +58,7 @@ class BasicController extends Controller
     public function breadcrumb(Request $request)
     {
         $authId = Auth::guard('web')->user()->id;
-        $uLang = Language::where('code', $request->language)->where('user_id', $authId)->first();
+        $uLang = $this->getLanguageWithFallback($request->language, $authId);
         $userCurrentLang = $uLang->id;
 
         $data['breadcrumb'] = BasicExtende::where([['language_id', $userCurrentLang],['user_id',$authId]])->pluck('breadcrumb')->first();
@@ -85,7 +87,7 @@ class BasicController extends Controller
         $request->validate($rules);
 
         $authId = Auth::guard('web')->user()->id;
-        $uLang = Language::where('code', $request->language)->where('user_id', $authId)->first();
+        $uLang = $this->getLanguageWithFallback($request->language, $authId);
         $userCurrentLang = $uLang->id;
 
         if ($request->hasFile('breadcrumb')) {
@@ -242,7 +244,7 @@ class BasicController extends Controller
     {
         $user_id = Auth::guard('web')->user()->id;
         // first, get the language info from db
-        $language = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $language = $this->getLanguageWithFallback($request->language, $user_id);
 
 
         $langId = $language->id;
@@ -261,7 +263,7 @@ class BasicController extends Controller
     public function faqindex(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
 
         $lang_id = $lang->id;
         $data['faqs'] = Faq::where([['language_id', $lang_id], ['user_id', $user_id]])->orderBy('id', 'DESC')->get();
@@ -346,10 +348,7 @@ class BasicController extends Controller
     public function cookieAlert(Request $request)
     {
         $userId = Auth::guard('web')->user()->id;
-        $lang = Language::query()
-            ->where('code', $request->language)
-            ->where('user_id', $userId)
-            ->first();
+        $lang = $this->getLanguageWithFallback($request->language, $userId);
 
         $data['userLangs'] = Language::where('user_id', $userId)
             ->get();
@@ -447,7 +446,7 @@ class BasicController extends Controller
     public function userNotFoundPage(Request $request)
     {
         // first, get the language info from db
-        $language = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $language = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
 
         $data =  DB::table('user_basic_extendes')
             ->where([['user_id', Auth::guard('web')->user()->id], ['language_id', $language->id]])

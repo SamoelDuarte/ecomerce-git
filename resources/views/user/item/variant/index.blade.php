@@ -1,11 +1,35 @@
 @extends('user.layout')
 
 @php
+  $userId = Auth::guard('web')->user()->id;
+  
+  // Buscar idioma com fallback
   $selLang = \App\Models\User\Language::where([
-      ['user_id', Auth::guard('web')->user()->id],
+      ['user_id', $userId],
       ['code', request()->input('language')],
   ])->first();
-  $userLanguages = \App\Models\User\Language::where('user_id', Auth::guard('web')->user()->id)->get();
+  
+  // Fallback 1: Buscar idioma padrão do usuário
+  if (!$selLang) {
+      $selLang = \App\Models\User\Language::where('user_id', $userId)->where('is_default', 1)->first();
+  }
+  
+  // Fallback 2: Buscar qualquer idioma do usuário
+  if (!$selLang) {
+      $selLang = \App\Models\User\Language::where('user_id', $userId)->first();
+  }
+  
+  // Fallback 3: Criar objeto padrão se nenhum idioma encontrado
+  if (!$selLang) {
+      $selLang = (object) [
+          'id' => 999,
+          'code' => 'pt-BR',
+          'name' => 'Português',
+          'is_default' => 1
+      ];
+  }
+  
+  $userLanguages = \App\Models\User\Language::where('user_id', $userId)->get();
 @endphp
 @includeIf('user.partials.rtl-style')
 

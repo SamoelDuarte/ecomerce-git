@@ -7,6 +7,7 @@ use App\Http\Helpers\Uploader;
 use App\Models\User\Language;
 use App\Models\User\Testimonial;
 use App\Models\User\UserSection;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -14,10 +15,12 @@ use Validator;
 
 class AboutTestimonialController extends Controller
 {
+    use LanguageFallbackTrait;
+    
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where([['code', $request->language], ['user_id', $user_id]])->firstOrFail();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
         $data['userLanguages'] = Language::where('user_id', $user_id)->get();
 

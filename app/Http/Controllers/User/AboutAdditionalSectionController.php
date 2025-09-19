@@ -7,6 +7,7 @@ use App\Models\User\AdditionalSection;
 use App\Models\User\AdditionalSectionContent;
 use App\Models\User\BasicSetting;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -15,9 +16,10 @@ use Session;
 
 class AboutAdditionalSectionController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
-        $lang = Language::where([['code', $request->language], ['user_id', Auth::guard('web')->user()->id]])->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
         $information['langs'] = Language::where('user_id', Auth::guard('web')->user()->id)->get();
 
         $information['sections'] = AdditionalSection::join('user_additional_section_contents', 'user_additional_section_contents.addition_section_id', '=', 'user_additional_sections.id')
@@ -31,7 +33,7 @@ class AboutAdditionalSectionController extends Controller
 
     public function create(Request $request)
     {
-        $information['language'] = Language::where([['is_default', 1], ['user_id', Auth::guard('web')->user()->id]])->first();
+        $information['language'] = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
         $information['languages'] = Language::where('user_id', Auth::guard('web')->user()->id)->get();
         $information['page_type'] = 'about';
         return view('user.about.additional-section.create', $information);
@@ -104,7 +106,7 @@ class AboutAdditionalSectionController extends Controller
     public function edit($id, Request $request)
     {
         $information['languages'] = Language::where('user_id', Auth::guard('web')->user()->id)->get();
-        $information['language'] = Language::where('is_default', 1)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $information['language'] = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
         $information['section'] = AdditionalSection::where([['page_type', 'about'], ['user_id', Auth::guard('web')->user()->id], ['id', $id]])->firstOrFail();
         return view('user.about.additional-section.edit', $information);
     }

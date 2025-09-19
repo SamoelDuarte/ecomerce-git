@@ -7,6 +7,7 @@ use App\Http\Helpers\Uploader;
 use App\Models\BasicExtended;
 use App\Models\User\Language;
 use App\Models\User\UserFooter;
+use App\Traits\LanguageFallbackTrait;
 use Auth;
 use Illuminate\Http\Request;
 use Purifier;
@@ -15,9 +16,10 @@ use Validator;
 
 class FooterSectionController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
-        $lang = Language::where('code', $request->language)->where('user_id', Auth::guard('web')->user()->id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, Auth::guard('web')->user()->id);
 
         $data['lang_id'] = $lang->id;
         $data['footer'] = UserFooter::where('language_id', $lang->id)->where('user_id', Auth::guard('web')->user()->id)->first();
@@ -56,6 +58,10 @@ class FooterSectionController extends Controller
 
         $bs = UserFooter::where('language_id', $langid)->where('user_id', Auth::guard('web')->user()->id)->first();
         $lang = Language::where('id', $langid)->where('user_id', Auth::guard('web')->user()->id)->first();
+        // Se não encontrar a linguagem por ID, usar fallback
+        if (!$lang) {
+            $lang = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
+        }
 
 
         if ($request->hasFile('file')) {

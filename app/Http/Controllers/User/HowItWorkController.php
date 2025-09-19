@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\User\HowitWorkSection;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -12,10 +13,11 @@ use Session;
 
 class HowItWorkController extends Controller
 {
+    use LanguageFallbackTrait;
     public function index(Request $request)
     {
         $user_id = Auth::guard('web')->user()->id;
-        $lang = Language::where('code', $request->language)->where('user_id', $user_id)->first();
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
         $lang_id = $lang->id;
         $data['collection'] = HowitWorkSection::where([['user_id', $user_id], ['language_id', $lang_id]])->get();
         $data['u_langs'] = Language::where('user_id', $user_id)->get();

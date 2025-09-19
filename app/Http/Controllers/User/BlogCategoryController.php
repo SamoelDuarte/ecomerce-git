@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User\BlogCategory;
 use App\Models\User\BlogContent;
 use App\Models\User\Language;
+use App\Traits\LanguageFallbackTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -13,6 +14,7 @@ use Validator;
 
 class BlogCategoryController extends Controller
 {
+    use LanguageFallbackTrait;
     /**
      * Display a listing of the resource.
      *
@@ -21,20 +23,9 @@ class BlogCategoryController extends Controller
     public function index(Request $request)
     {
         $user_id =  Auth::guard('web')->user()->id;
-        if ($request->has('language')) {
-            $lang = Language::where([
-                ['code', $request->language],
-                ['user_id', $user_id]
-            ])->first();
-            Session::put('currentLangCode', $request->language);
-        } else {
-            $lang = Language::where([
-                ['is_default', 1],
-                ['user_id', $user_id]
-            ])
-                ->first();
-            Session::put('currentLangCode', $lang->code);
-        }
+        $lang = $this->getLanguageWithFallback($request->language, $user_id);
+        Session::put('currentLangCode', $lang->code);
+
         $data['bcategorys'] = BlogCategory::where([
             ['language_id', '=', $lang->id],
             ['user_id', '=', $user_id],
@@ -60,7 +51,7 @@ class BlogCategoryController extends Controller
 
         $messages = [];
         $languages = Language::where('user_id', Auth::guard('web')->user()->id)->get();
-        $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
+        $defaulLang = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
         $rules[$defaulLang->code . '_name'] = 'required|max:255';
         $messages[$defaulLang->code . '_name.required'] = __('The category name field is required for') . ' ' . $defaulLang->name . ' ' . __('language');
 
@@ -114,7 +105,7 @@ class BlogCategoryController extends Controller
             'status' => __('The status field is required'),
             'serial_number' => __('The serial number field is required'),
         ];
-        $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
+        $defaulLang = $this->getLanguageWithFallback(null, Auth::guard('web')->user()->id);
         $rules[$defaulLang->code . '_name'] = 'required|max:255';
         $messages[$defaulLang->code . '_name.required'] = __('The category name field is required for') . ' ' . $defaulLang->name . ' ' . __('language');
 
