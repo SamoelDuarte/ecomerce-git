@@ -21,8 +21,8 @@ html {
     text-rendering: optimizeLegibility !important;
     
     /* Aceleração de hardware para suavizar */
-    -webkit-transform: translateZ(0) !important;
-    transform: translateZ(0) !important;
+    /* -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important; */
     -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
     
@@ -39,8 +39,8 @@ html {
 [class*="border-"],
 [class*="rounded-"] {
     /* Suavização de bordas */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
     outline: 1px solid transparent;
     
     /* Melhoria adicional para bordas circulares */
@@ -76,8 +76,8 @@ i[class*="fa-"],
     shape-rendering: geometricPrecision !important;
     
     /* Transform para suavizar */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
 }
 
 /* Correção para linhas e divisores serrilhados */
@@ -89,8 +89,8 @@ hr,
 .border-left,
 .border-right {
     /* Suavização de linhas */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
     outline: 1px solid transparent;
 }
 
@@ -100,8 +100,8 @@ hr,
 .shadow-lg,
 [class*="shadow-"] {
     /* Melhoria de sombras */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
@@ -112,8 +112,8 @@ hr,
 .position-fixed,
 .position-sticky {
     /* Correção para elementos posicionados */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
@@ -122,8 +122,8 @@ hr,
 @supports (-webkit-appearance: none) {
     * {
         -webkit-font-smoothing: antialiased;
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
+        /* -webkit-transform: translateZ(0); */
+        /* transform: translateZ(0); */
     }
 }
 
@@ -156,8 +156,8 @@ nav, header, footer, main, section, article, aside,
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
 }
 
 /* Classes utilitárias para aplicação manual */
@@ -174,8 +174,8 @@ nav, header, footer, main, section, article, aside,
 }
 
 .smooth-element {
-    -webkit-transform: translateZ(0) !important;
-    transform: translateZ(0) !important;
+    /* -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important; */
     -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
 }

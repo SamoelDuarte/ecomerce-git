@@ -67,8 +67,8 @@ svg, .icon, .fa, [class*="fa-"], [class*="icon-"] {
 /* CONFIGURAÇÕES PARA BORDAS E ELEMENTOS GRÁFICOS */
 .card, .btn, .border, .rounded, [class*="border"], [class*="rounded"] {
     /* Suavização de bordas */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0); */
+    /* transform: translateZ(0); */
     
     /* Melhoria na renderização de bordas */
     outline: 1px solid transparent;
@@ -77,8 +77,8 @@ svg, .icon, .fa, [class*="fa-"], [class*="icon-"] {
 /* CONFIGURAÇÕES PARA ANIMAÇÕES SUAVES */
 .transition, .animate, [class*="transition"], [class*="animate"] {
     /* Otimização para animações */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     -webkit-perspective: 1000px;
@@ -96,8 +96,8 @@ button, .btn, input[type="button"], input[type="submit"], .button {
     text-rendering: optimizeLegibility;
     
     /* Melhor renderização de bordas em botões */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
 }
 
 /* CONFIGURAÇÕES PARA DROPDOWNS E MODAIS */
@@ -105,16 +105,16 @@ button, .btn, input[type="button"], input[type="submit"], .button {
     /* Suavização para elementos flutuantes */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
 }
 
 /* CONFIGURAÇÕES RESPONSIVAS PARA ALTA DENSIDADE DE PIXELS */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
     /* Otimizações específicas para telas Retina/High-DPI */
     * {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
+        /* -webkit-transform: translateZ(0); */
+        /* transform: translateZ(0); */
     }
     
     img, picture, svg {
@@ -139,11 +139,11 @@ button, .btn, input[type="button"], input[type="submit"], .button {
 
 /* OTIMIZAÇÕES PARA PERFORMANCE */
 .gpu-accelerated {
-    -webkit-transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
     -moz-transform: translateZ(0);
     -ms-transform: translateZ(0);
     -o-transform: translateZ(0);
-    transform: translateZ(0);
+    transform: translateZ(0); */
     
     -webkit-backface-visibility: hidden;
     -moz-backface-visibility: hidden;
@@ -184,6 +184,6 @@ nav, .nav, .navbar, .menu {
     /* Suavização para elementos de navegação */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* -webkit-transform: translateZ(0);
+    transform: translateZ(0); */
 }
