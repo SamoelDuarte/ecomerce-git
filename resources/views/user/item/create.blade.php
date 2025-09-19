@@ -137,7 +137,6 @@ $type = request()->input('type');
                                         <br>
 
                                         <input name="download_file" type="file" class="form-control">
-                                        <p class="mb-0 text-warning">Apenas arquivos .csv</p>
 
                                         <!-- Botão para baixar modelo CSV -->
                                         <div class="mt-2">
@@ -146,7 +145,17 @@ $type = request()->input('type');
                                                 download="modeloDigital.csv">
                                                 <i class="fa fa-download"></i> {{ __('Baixar Modelo CSV') }}
                                             </a>
-                                            <small class="text-muted d-block">{{ __('Use este modelo para importar códigos digitais') }}</small>
+                                        </div>
+
+                                        {{-- Resumo do arquivo selecionado --}}
+                                        <div id="file-summary" class="mt-2" style="display: none;">
+                                            <div class="alert alert-info">
+                                                <i class="fa fa-file-text"></i> 
+                                                <span id="file-lines-count">0</span> linhas encontradas no arquivo
+                                                <small class="d-block text-muted">
+                                                    (1 linha de cabeçalho + <span id="data-lines-count">0</span> linhas de dados)
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                     <div id="downloadLink" class="form-group d-none">
@@ -726,6 +735,91 @@ $type = request()->input('type');
         };
 
         reader.readAsBinaryString(file);
+    });
+
+    // Event listener para o campo download_file para mostrar resumo das linhas
+    document.querySelector('input[name="download_file"]').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const summaryDiv = document.getElementById('file-summary');
+        
+        if (!file) {
+            summaryDiv.style.display = 'none';
+            return;
+        }
+
+        // Verificar se é arquivo CSV
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            summaryDiv.style.display = 'none';
+            return;
+        }
+
+        // Mostrar loading
+        summaryDiv.style.display = 'block';
+        summaryDiv.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fa fa-spinner fa-spin"></i> Analisando arquivo...
+            </div>
+        `;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim() !== ''); // Remove linhas vazias
+                const totalLines = lines.length;
+                const dataLines = totalLines > 0 ? totalLines - 1 : 0; // Subtrai o cabeçalho
+
+                // Verificar se tem pelo menos o cabeçalho
+                if (totalLines === 0) {
+                    summaryDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fa fa-exclamation-triangle"></i> Arquivo vazio
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (totalLines === 1) {
+                    summaryDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fa fa-exclamation-triangle"></i> 
+                            Apenas cabeçalho encontrado (nenhum dado)
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Mostrar resumo completo
+                summaryDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fa fa-file-text"></i> 
+                        <strong>${totalLines} linhas</strong> encontradas no arquivo
+                        <small class="d-block text-muted mt-1">
+                            📋 1 linha de cabeçalho + 📊 ${dataLines} linhas de dados
+                        </small>
+                    </div>
+                `;
+
+            } catch (error) {
+                summaryDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fa fa-exclamation-circle"></i> 
+                        Erro ao ler o arquivo. Verifique se é um CSV válido.
+                    </div>
+                `;
+            }
+        };
+
+        reader.onerror = function() {
+            summaryDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-circle"></i> 
+                    Erro ao ler o arquivo.
+                </div>
+            `;
+        };
+
+        reader.readAsText(file);
     });
 </script>
 <script>
