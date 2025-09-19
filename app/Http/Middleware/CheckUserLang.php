@@ -17,6 +17,11 @@ class CheckUserLang
      */
     public function handle(Request $request, Closure $next)
     {
+        // Skip database queries during console commands
+        if (app()->runningInConsole()) {
+            return $next($request);
+        }
+        
         if (session()->has('user_lang')) {
             app()->setLocale(session()->get('user_lang'));
         } else {

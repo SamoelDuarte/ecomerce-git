@@ -17,6 +17,11 @@ class CheckAdminLang
      */
     public function handle(Request $request, Closure $next)
     {
+        // Skip database queries during console commands
+        if (app()->runningInConsole()) {
+            return $next($request);
+        }
+        
         if (session()->has('admin_lang')) {
             app()->setLocale(session()->get('admin_lang'));
         } else {

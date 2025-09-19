@@ -17,6 +17,10 @@ class SetLangMiddleware
    */
   public function handle($request, Closure $next)
   {
+    // Skip database queries during console commands
+    if (app()->runningInConsole()) {
+      return $next($request);
+    }
 
     if (session()->has('lang')) {
       app()->setLocale(session()->get('lang'));
