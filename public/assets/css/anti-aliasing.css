@@ -4,27 +4,14 @@
 ==========================================
 */
 
-/* CONFIGURAÇÕES GLOBAIS DE ANTI-ALIASING */
-*, *::before, *::after {
+/* CONFIGURAÇÕES GLOBAIS DE ANTI-ALIASING - VERSÃO CORRIGIDA */
+body, h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label {
     /* Suavização de texto para WebKit (Chrome, Safari) */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     
     /* Otimização de renderização de texto */
     text-rendering: optimizeLegibility;
-    
-    /* Suavização de elementos */
-    -webkit-transform: translateZ(0);
-    -moz-transform: translateZ(0);
-    -ms-transform: translateZ(0);
-    -o-transform: translateZ(0);
-    transform: translateZ(0);
-    
-    /* Aceleração de hardware */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    -webkit-perspective: 1000;
-    perspective: 1000;
 }
 
 /* CONFIGURAÇÕES ESPECÍFICAS PARA TEXTO */
@@ -50,10 +37,6 @@ img, picture, svg, video, canvas {
     
     /* Para imagens que devem ser suavizadas */
     -ms-interpolation-mode: bicubic;
-    
-    /* Aceleração de hardware para imagens */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
 }
 
 /* CONFIGURAÇÕES ESPECÍFICAS PARA IMAGENS QUE PRECISAM DE SUAVIZAÇÃO */
