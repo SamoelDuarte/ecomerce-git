@@ -230,11 +230,26 @@ class AppServiceProvider extends ServiceProvider
 
         Paginator::useBootstrap();
 
-        if (!app()->runningInConsole()) {
-            $socials = Social::orderBy('serial_number', 'ASC')->get();
-            $langs = app('langs');
+        Paginator::useBootstrap();
 
-            View::composer('*', function ($view) {
+        // Só executar consultas de banco quando não estivermos em contexto de console
+        try {
+            if (!app()->runningInConsole()) {
+                $socials = Social::orderBy('serial_number', 'ASC')->get();
+                $langs = app('langs');
+            } else {
+                // Durante comandos artisan, usar valores padrão
+                $socials = collect([]);
+                $langs = collect([]);
+            }
+        } catch (\Exception $e) {
+            // Em caso de erro, usar valores padrão
+            $socials = collect([]);
+            $langs = collect([]);
+        }
+
+        if (!app()->runningInConsole()) {
+            View::composer('*', function ($view) use ($socials, $langs) {
                 $currentLang = app('currentLang');
                 $bs = $currentLang->basic_setting;
                 $be = $currentLang->basic_extended;

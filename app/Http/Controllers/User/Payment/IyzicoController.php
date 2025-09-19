@@ -31,7 +31,7 @@ class IyzicoController extends Controller
         $options->setApiKey($paydata['api_key']);
         $options->setSecretKey($paydata['secret_key']);
         if ($paydata['sandbox_status'] == 1) {
-            $options->setBaseUrl("https://sandbox-api.iyzipay.com");
+            $options->setBaseUrl(config('iyzipay.base_url', 'https://sandbox-api.iyzipay.com'));
         } else {
             $options->setBaseUrl("https://api.iyzipay.com"); // production mode
         }

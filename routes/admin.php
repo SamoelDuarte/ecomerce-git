@@ -276,7 +276,7 @@ Route::domain($domain)->group(function () {
         Route::prefix('package-management')->middleware('checkpermission:Package Management')->group(function () {
             // Package Settings routes
             Route::get('/settings', 'Admin\PackageController@settings')->name('admin.package.settings');
-            Route::post('/settings', 'Admin\PackageController@updateSettings')->name('admin.package.settings');
+            Route::post('/settings', 'Admin\PackageController@updateSettings')->name('admin.package.settings.update');
             // Package Settings routes
             Route::get('/package-features', 'Admin\PackageController@features')->name('admin.package.features');
             Route::post('/package/features/update', 'Admin\PackageController@updateFeatures')->name('admin.package.features_update');
@@ -435,7 +435,7 @@ Route::domain($domain)->group(function () {
         Route::group(['middleware' => 'checkpermission:Custom Domains'], function () {
             Route::get('/domains', 'Admin\CustomDomainController@index')->name('admin.custom-domain.index');
             Route::get('/domain/texts', 'Admin\CustomDomainController@texts')->name('admin.custom-domain.texts');
-            Route::post('/domain/texts', 'Admin\CustomDomainController@updateTexts')->name('admin.custom-domain.texts');
+            Route::post('/domain/texts', 'Admin\CustomDomainController@updateTexts')->name('admin.custom-domain.texts.update');
             Route::post('/domain/status', 'Admin\CustomDomainController@status')->name('admin.custom-domain.status');
             Route::post('/domain/mail', 'Admin\CustomDomainController@mail')->name('admin.custom-domain.mail');
             Route::post('/domain/delete', 'Admin\CustomDomainController@delete')->name('admin.custom-domain.delete');
