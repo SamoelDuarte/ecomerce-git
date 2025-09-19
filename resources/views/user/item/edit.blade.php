@@ -117,7 +117,21 @@
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="item_id" value="{{ $item->id }}">
-                                <input type="hidden" name="type" value="{{ $item->type }}">
+                                
+                                {{-- Tipo do Produto --}}
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="type">{{ __('Product Type') }} <span class="text-danger">**</span></label>
+                                            <select name="type" id="productType" class="form-control" onchange="toggleProductFields()">
+                                                <option value="fisico" {{ $item->type == 'fisico' ? 'selected' : '' }}>{{ __('Physical Product') }}</option>
+                                                <option value="digital" {{ $item->type == 'digital' ? 'selected' : '' }}>{{ __('Digital Product') }}</option>
+                                            </select>
+                                            <small class="text-muted">{{ __('Select the product type to show relevant fields (weight, dimensions, etc.)') }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div id="sliders"></div>
                                 {{-- thumbnail image start --}}
                                 <div class="row">
@@ -138,60 +152,102 @@
                                         </div>
                                     </div>
                                     {{-- thumbnail image end --}}
-                                    @if ($item->type == 'fisico')
-                                        <div class="col-lg-4">
+                                    
+                                    {{-- Campos específicos para cada tipo de produto --}}
+                                    
+                                    {{-- Campos para Produtos Digitais - controlados por JavaScript --}}
+                                    @php
+                                        $hasCodes = \App\Models\User\DigitalProductCode::where('user_item_id', $item->id)->count() > 0;
+                                    @endphp
+                                    
+                                    @if (!$hasCodes)
+                                        <div class="col-lg-4" data-product-type="digital" style="display: none;">
                                             <div class="form-group">
-                                                <label for="">{{ __('Stock') }} <span
-                                                        class="text-danger">**</span></label>
-                                                <input type="number" class="form-control" name="stock"
-                                                    placeholder="{{ __('Enter Stock') }}" min="0"
-                                                    value="{{ $item->stock ?? 0 }}">
-                                                <p class="mb-0 text-warning">
-                                                    {{ __('If the item has variations, then set the stocks in the variations page') }}
-                                                </p>
+                                                <label for="">{{ __('Type') }} <span class="text-danger">**</span></label>
+                                                <select name="file_type" class="form-control" id="fileType" onchange="toggleFileUpload();">
+                                                    <option value="upload" {{ !empty($item->download_file) ? 'selected' : '' }}>
+                                                        {{ __('File Upload') }}
+                                                    </option>
+                                                    <option value="link" {{ !empty($item->download_link) ? 'selected' : '' }}>
+                                                        {{ __('File Download Link') }}
+                                                    </option>
+                                                    <option value="code">{{ __('Códigos') }}</option>
+                                                </select>
                                             </div>
+                                            <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none" onclick="downloadCodeTemplate()">
+                                                <i class="fa fa-download"></i> Modelo de Planilha de Códigos
+                                            </button>
                                         </div>
-                                    @endif
-                                    @if ($item->type == 'digital')
-                                        @php
-                                            $hasCodes = \App\Models\User\DigitalProductCode::where('user_item_id', $item->id)->count() > 0;
-                                        @endphp
                                         
-                                        @if (!$hasCodes)
-                                            <div class="col-lg-4">
-                                                <div class="form-group">
-                                                    <label for="">{{ __('Type') }} <span
-                                                            class="text-danger">**</span></label>
-                                                    <select name="file_type" class="form-control" id="fileType"
-                                                        onchange="toggleFileUpload();">
-                                                        <option value="upload"
-                                                            {{ !empty($item->download_file) ? 'selected' : '' }}>
-                                                            {{ __('File Upload') }}
-                                                        </option>
-                                                        <option value="link"
-                                                            {{ !empty($item->download_link) ? 'selected' : '' }}>
-                                                            {{ __('File Download Link') }}</option>
-                                                        <option value="code">{{ __('Códigos') }}</option>
-                                                    </select>
+                                        <div class="col-lg-4" data-product-type="digital" style="display: none;">
+                                            <div id="downloadFile" class="form-group {{ !empty($item->download_link) ? 'd-none' : '' }}">
+                                                <label for="">{{ __('Downloadable File') }} <span class="text-danger">**</span></label>
+                                                <br>
+                                                <input name="download_file" type="file" class="form-control">
+                                                <p class="mb-0 text-warning">{{ __('Only zip file is allowed.') }}</p>
+                                                
+                                                <!-- Botão para baixar modelo CSV -->
+                                                <div class="mt-2">
+                                                    <a href="{{ route('user.item.download.csv.model') }}" 
+                                                       class="btn btn-info btn-sm" 
+                                                       download="modeloDigital.csv">
+                                                        <i class="fa fa-download"></i> {{ __('Baixar Modelo CSV') }}
+                                                    </a>
                                                 </div>
-                                                <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none" onclick="downloadCodeTemplate()">
-                                                    <i class="fa fa-download"></i> Modelo de Planilha de Códigos
-                                                </button>
-                                            </div>
-                                        @else
-                                            <div class="col-lg-4">
-                                                <div class="form-group">
-                                                    <label>{{ __('Gerenciamento de Códigos') }}</label>
-                                                    <div>
-                                                        <a class="btn btn-secondary btn-sm"
-                                                           href="{{ route('user.item.codes', $item->id) . '?language=' . request()->input('language') }}">
-                                                            <span class="btn-label">Gerenciar Código</span>
-                                                        </a>
+
+                                                {{-- Resumo do arquivo selecionado --}}
+                                                <div id="file-summary" class="mt-2" style="display: none;">
+                                                    <div class="alert alert-info">
+                                                        <i class="fa fa-file-text"></i> 
+                                                        <span id="file-lines-count">0</span> linhas encontradas no arquivo
+                                                        <small class="d-block text-muted">
+                                                            (1 linha de cabeçalho + <span id="data-lines-count">0</span> linhas de dados)
+                                                        </small>
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endif
+                                            
+                                            <div id="downloadLink" class="form-group {{ !empty($item->download_link) ? '' : 'd-none' }}">
+                                                <label for="">{{ __('Downloadable Link') }} <span class="text-danger">**</span></label>
+                                                <input name="download_link" type="text" class="form-control" value="{{ $item->download_link }}">
+                                            </div>
+                                            
+                                            <div id="codeUploadSection" class="mt-3 d-none">
+                                                <div class="form-group">
+                                                    <label for="codeExcelInput">
+                                                        {{ __('Importar Planilha de Códigos') }}
+                                                        <span class="text-danger">**</span>
+                                                    </label>
+                                                    <input type="file" class="form-control" name="codeExcelInput"
+                                                        id="codeExcelInput" accept=".xlsx,.csv">
+
+                                                    {{-- Feedback da validação do arquivo --}}
+                                                    <div id="file-validation-feedback" class="mt-2"></div>
+
+                                                    <div id="codeImportResult" class="mt-3 d-none">
+                                                        <div class="alert alert-info">
+                                                            <p><strong>Total de Códigos:</strong> <span id="totalCodes">0</span></p>
+                                                            <p><strong>Variações encontradas:</strong></p>
+                                                            <ul id="variationList" class="mb-0"></ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="col-lg-4" data-product-type="digital" style="display: none;">
+                                            <div class="form-group">
+                                                <label>{{ __('Gerenciamento de Códigos') }}</label>
+                                                <div>
+                                                    <a class="btn btn-secondary btn-sm"
+                                                       href="{{ route('user.item.codes', $item->id) . '?language=' . request()->input('language') }}">
+                                                        <span class="btn-label">Gerenciar Código</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endif
+
                                     <div class="col-lg-4">
                                         <div class="form-group">
                                             <label for="">{{ __('Status') }} <span
@@ -209,126 +265,8 @@
                                         </div>
                                     </div>
 
-                                    @if ($item->type == 'digital')
-                                        @php
-                                            $hasCodes = \App\Models\User\DigitalProductCode::where('user_item_id', $item->id)->count() > 0;
-                                        @endphp
-                                        
-                                        @if (!$hasCodes)
-                                            <div class="col-lg-4">
-                                                <div id="downloadFile"
-                                                    class="form-group {{ !empty($item->download_link) ? 'd-none' : '' }}">
-                                                    <label for="">{{ __('Downloadable File') }} <span
-                                                            class="text-danger">**</span></label>
-                                                    <br>
 
-                                                    <input name="download_file" type="file" class="form-control">
-                                                    <p class="mb-0 text-warning">
-                                                        {{ __('Only zip file is allowed.') }}</p>
-                                                    
-                                                    <!-- Botão para baixar modelo CSV -->
-                                                    <div class="mt-2">
-                                                        <a href="{{ route('user.item.download.csv.model') }}" 
-                                                           class="btn btn-info btn-sm" 
-                                                           download="modeloDigital.csv">
-                                                            <i class="fa fa-download"></i> {{ __('Baixar Modelo CSV') }}
-                                                        </a>
-                                                    </div>
 
-                                                    {{-- Resumo do arquivo selecionado --}}
-                                                    <div id="file-summary" class="mt-2" style="display: none;">
-                                                        <div class="alert alert-info">
-                                                            <i class="fa fa-file-text"></i> 
-                                                            <span id="file-lines-count">0</span> linhas encontradas no arquivo
-                                                            <small class="d-block text-muted">
-                                                                (1 linha de cabeçalho + <span id="data-lines-count">0</span> linhas de dados)
-                                                            </small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div id="downloadLink"
-                                                    class="form-group {{ !empty($item->download_link) ? '' : 'd-none' }}">
-                                                    <label for="">{{ __('Downloadable Link') }} <span
-                                                            class="text-danger">**</span></label>
-                                                    <input name="download_link" type="text" class="form-control"
-                                                        value="{{ $item->download_link }}">
-                                                </div>
-                                                
-                                                <div id="codeUploadSection" class="mt-3 d-none">
-                                                    <div class="form-group">
-                                                        <label for="codeExcelInput">
-                                                            {{ __('Importar Planilha de Códigos') }}
-                                                            <span class="text-danger">**</span>
-                                                        </label>
-                                                        <input type="file" class="form-control" name="codeExcelInput"
-                                                            id="codeExcelInput" accept=".xlsx,.csv">
-
-                                                        {{-- Feedback da validação do arquivo --}}
-                                                        <div id="file-validation-feedback" class="mt-2"></div>
-
-                                                        <div id="codeImportResult" class="mt-3 d-none">
-                                                            <div class="alert alert-info">
-                                                                <p><strong>Total de Códigos:</strong> <span
-                                                                        id="totalCodes">0</span></p>
-                                                                <p><strong>Variações encontradas:</strong></p>
-                                                                <ul id="variationList" class="mb-0"></ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    @endif
-                                    @if ($item->type == 'fisico')
-                                        <div class="col-lg-4">
-                                            <div class="form-group">
-                                                <label for="sku">SKU do Produto <span
-                                                        class="text-danger">**</span></label>
-                                                <input type="number" class="form-control" name="sku"
-                                                    placeholder="Digite o SKU do produto" value="{{ $item->sku }}">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-2">
-                                            <div class="form-group">
-                                                <label for="weight">Peso (kg) <span
-                                                        class="text-danger">**</span></label>
-                                                <input type="number" step="any" min="0.00" class="form-control"
-                                                    name="weight" placeholder="Peso em kg" value="{{ $item->weight }}">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-2">
-                                            <div class="form-group">
-                                                <label for="length">Comprimento (cm) <span
-                                                        class="text-danger">**</span></label>
-                                                <input type="number" step="1" min="0" class="form-control"
-                                                    name="length" placeholder="Comprimento em cm"
-                                                    value="{{ $item->length }}">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-2">
-                                            <div class="form-group">
-                                                <label for="width">Largura (cm) <span
-                                                        class="text-danger">**</span></label>
-                                                <input type="number" step="1" min="0" class="form-control"
-                                                    name="width" placeholder="Largura em cm"
-                                                    value="{{ $item->width }}">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-2">
-                                            <div class="form-group">
-                                                <label for="height">Altura (cm) <span
-                                                        class="text-danger">**</span></label>
-                                                <input type="number" step="1" min="0" class="form-control"
-                                                    name="height" placeholder="Altura em cm"
-                                                    value="{{ $item->height }}">
-                                            </div>
-                                        </div>
-                                    @endif
 
 
                                     <div class="col-lg-4">
@@ -351,6 +289,61 @@
                                         </div>
                                     </div>
 
+                                    {{-- Campos para Produtos Físicos - sempre disponíveis --}}
+                                    <div class="col-lg-4" data-product-type="fisico" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="">{{ __('Stock') }} <span class="text-danger">**</span></label>
+                                            <input type="number" class="form-control" name="stock"
+                                                placeholder="{{ __('Enter Stock') }}" min="0" required
+                                                value="{{ $item->stock ?? 0 }}">
+                                            <p class="mb-0 text-warning">
+                                                {{ __('If the item has variations, then set the stocks in the variations page') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-4" data-product-type="fisico" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="sku">SKU do Produto <span class="text-danger">**</span></label>
+                                            <input type="number" class="form-control" name="sku"
+                                                placeholder="Digite o SKU do produto" value="{{ $item->sku }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2" data-product-type="fisico" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="weight">Peso (kg) <span class="text-danger">**</span></label>
+                                            <input type="number" step="any" min="0.00" class="form-control"
+                                                name="weight" placeholder="Peso em kg" value="{{ $item->weight }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2" data-product-type="fisico" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="length">Comprimento (cm) <span class="text-danger">**</span></label>
+                                            <input type="number" step="1" min="0" class="form-control"
+                                                name="length" placeholder="Comprimento em cm"
+                                                value="{{ $item->length }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2" data-product-type="fisico" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="width">Largura (cm) <span class="text-danger">**</span></label>
+                                            <input type="number" step="1" min="0" class="form-control"
+                                                name="width" placeholder="Largura em cm"
+                                                value="{{ $item->width }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2" data-product-type="fisico" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="height">Altura (cm) <span class="text-danger">**</span></label>
+                                            <input type="number" step="1" min="0" class="form-control"
+                                                name="height" placeholder="Altura em cm"
+                                                value="{{ $item->height }}" required>
+                                        </div>
+                                    </div>
 
 
                                     @php
@@ -941,6 +934,69 @@
             });
         }
     </script>
+    
+    <script>
+        // Função para alternar campos baseado no tipo do produto
+        function toggleProductFields() {
+            const productType = document.getElementById('productType').value;
+            
+            // Selecionar elementos de produto físico e digital
+            const physicalFields = document.querySelectorAll('[data-product-type="fisico"]');
+            const digitalFields = document.querySelectorAll('[data-product-type="digital"]');
+            
+            // Controlar campos físicos
+            physicalFields.forEach(field => {
+                const inputs = field.querySelectorAll('input, select, textarea');
+                if (productType === 'fisico') {
+                    field.style.display = 'block';
+                    field.classList.remove('d-none');
+                    // Ativar validação required para campos físicos
+                    inputs.forEach(input => {
+                        if (input.name && (input.name === 'stock' || input.name === 'sku' || 
+                            input.name === 'weight' || input.name === 'length' || 
+                            input.name === 'width' || input.name === 'height')) {
+                            input.setAttribute('required', 'required');
+                        }
+                    });
+                } else {
+                    field.style.display = 'none';
+                    field.classList.add('d-none');
+                    // Desativar validação required para campos físicos quando ocultos
+                    inputs.forEach(input => {
+                        input.removeAttribute('required');
+                    });
+                }
+            });
+            
+            // Controlar campos digitais
+            digitalFields.forEach(field => {
+                const inputs = field.querySelectorAll('input, select, textarea');
+                if (productType === 'digital') {
+                    field.style.display = 'block';
+                    field.classList.remove('d-none');
+                    // Ativar validação required para campos digitais se necessário
+                    inputs.forEach(input => {
+                        if (input.name && (input.name.includes('file_type') || input.name.includes('download_'))) {
+                            input.setAttribute('required', 'required');
+                        }
+                    });
+                } else {
+                    field.style.display = 'none';
+                    field.classList.add('d-none');
+                    // Desativar validação required para campos digitais quando ocultos
+                    inputs.forEach(input => {
+                        input.removeAttribute('required');
+                    });
+                }
+            });
+        }
+        
+        // Executar ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleProductFields();
+        });
+    </script>
+    
     <script>
         "use strict";
         const currUrl = "{{ url()->current() }}";
