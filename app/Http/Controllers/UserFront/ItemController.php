@@ -428,9 +428,9 @@ class ItemController extends Controller
     public function checkoutGuest($domain, Request $request)
     {
         session()->put('prevUrl', url()->previous());
-        if (onlyDigitalItemsInCart()) {
-            return redirect()->back();
-        }
+        // if (onlyDigitalItemsInCart()) {
+        //     return redirect()->back();
+        // }
         $user = getUser();
         $keywords = Common::get_keywords($user->id);
         $userShop = UserShopSetting::where('user_id', $user->id)->first();

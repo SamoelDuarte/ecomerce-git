@@ -16,7 +16,6 @@
       <div class="row justify-content-center">
         <div class="col-lg-6 col-xl-5">
 
-          <!-- @if (!onlyDigitalItemsInCart()) -->
             @if ($input == 'checkout')
               <div class="form-group">
                 <h3 class="text-center text-muted  mb-20">
@@ -28,7 +27,6 @@
                 <h3 class="mb-0"><strong> {{ $keywords['OR'] ?? __('OR') }},</strong></h3>
               </div>
             @endif
-          <!-- @endif -->
 
           <div class="auth-form p-30 border radius-md">
             @if (Session::has('error'))

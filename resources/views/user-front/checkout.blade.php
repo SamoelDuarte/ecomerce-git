@@ -426,6 +426,12 @@ $user_currency = user_currency(Session::get('user_curr'));
                                             <span>{{ symbolPrice($user_currency->symbol_position, $user_currency->symbol, $item['product_price']) }}</span>
                                         </div>
 
+                                        @if ($prd->type == 'digital')
+                                        <div class="product-type">
+                                            <span class="badge bg-info text-dark"> {{ $keywords['Digital Product'] ?? __('Produto Digital') }}</span>
+                                        </div>
+                                        @endif
+
                                         @if ($item['variations'] && !$itemPrincipal->hasCode())
                                         <div class="variation-area">
                                             <h5 class="text-dark fw-bold mb-0">
@@ -505,7 +511,11 @@ $user_currency = user_currency(Session::get('user_curr'));
 
 
                     {{-- Seção de Métodos de Entrega via Frenet --}}
-                    @if (!onlyDigitalItemsInCart())
+                    @php
+                        $onlyDigital = onlyDigitalItemsInCart();
+                        \Log::info('Checkout - onlyDigitalItemsInCart resultado:', ['onlyDigital' => $onlyDigital]);
+                    @endphp
+                    @if (!$onlyDigital)
                     <div class="col-12 mb-5">
                         <div class="order-summery form-block border radius-md">
                             <div class="shop-title-box">
@@ -670,5 +680,5 @@ $anetSrc = 'https://js.authorize.net/v1/Accept.js';
 <script type="text/javascript" src="{{ $anetSrc }}" charset="utf-8"></script>
 @endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-<script src="{{ asset('assets/user-front/js/user-checkout.js?v=1.0.3') }}"></script>
+<script src="{{ asset('assets/user-front/js/user-checkout.js?v=1.0.4') }}"></script>
 @endsection

@@ -43,9 +43,9 @@ class UsercheckoutController extends Controller
 
         $prevUrl = session()->get('prevUrl', []);
         if (!empty($prevUrl) && is_string($prevUrl)) {
-            if (onlyDigitalItemsInCart() && !Auth::check()) {
-                return redirect()->to($prevUrl);
-            }
+            // if (onlyDigitalItemsInCart() && !Auth::check()) {
+            //     return redirect()->to($prevUrl);
+            // }
         }
 
         $user = getUser();

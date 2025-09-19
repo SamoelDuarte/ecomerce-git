@@ -795,16 +795,33 @@ if (!function_exists('onlyDigitalItemsInCart')) {
     function onlyDigitalItemsInCart()
     {
         $cart = session()->get('cart', []);
+        \Log::info('onlyDigitalItemsInCart - Verificando carrinho:', ['cart' => $cart]);
+        
         if (empty($cart)) {
+            \Log::info('onlyDigitalItemsInCart - Carrinho vazio, retornando false');
             return false;
         }
         
         foreach ($cart as $key => $cartItem) {
-            $item = UserItem::findorFail($cartItem["id"]);
+            $item = UserItem::find($cartItem["id"]);
+            if (!$item) {
+                \Log::error('onlyDigitalItemsInCart - Item não encontrado:', ['id' => $cartItem["id"]]);
+                continue;
+            }
+            
+            \Log::info('onlyDigitalItemsInCart - Item verificado:', [
+                'id' => $item->id,
+                'title' => $item->title ?? 'N/A',
+                'type' => $item->type
+            ]);
+            
             if ($item->type != 'digital') {
+                \Log::info('onlyDigitalItemsInCart - Item físico encontrado, retornando false');
                 return false; // Se encontrar qualquer item físico, retorna false
             }
         }
+        
+        \Log::info('onlyDigitalItemsInCart - Todos os itens são digitais, retornando true');
         return true; // Todos os itens são digitais
     }
 }
