@@ -6,7 +6,7 @@
 @section('page-title', $pageHeading->signup_page ?? __('Signup'))
 @section('content')
   <!-- Authentication Start -->
-  <div class="authentication-area ptb-100">
+  <div class="authentication-area pt-1 pb-100">
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-6 col-xl-5">

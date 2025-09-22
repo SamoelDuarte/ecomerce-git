@@ -105,7 +105,7 @@
   var category_url = "{{ route('user.blog.getcats') }}";
   var user_status = "{{ route('user-status') }}";
 </script>
-<script src="{{ asset('assets/admin/js/misc.js') }}"></script>
+<script src="{{ asset('assets/admin/js/misc.js?v=1.0') }}"></script>
 
 @yield('scripts')
 

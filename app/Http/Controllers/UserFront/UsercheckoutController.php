@@ -139,8 +139,7 @@ class UsercheckoutController extends Controller
 
         // Adiciona o valor do frete do Frenet
         $frete = floatval($request->input('shipping_service_price', 0));
-        $total += $frete;
-        $total = $total - session()->get('user_coupon');
+        $total = $total - session()->get('user_coupon') + $frete;
 
         $offline_payment_gateways = UserOfflineGateway::where('user_id', $user->id)->get()->pluck('name')->toArray();
         if (in_array(@$request->payment_method, $offline_payment_gateways)) {
@@ -168,12 +167,12 @@ class UsercheckoutController extends Controller
                 return redirect()->back()->withInput($request->all());
             }
 
-            $amount = $total;
-            $email = $request->billing_email ?? 'cliente@email.com'; // ou outro campo que tenha o e-mail
-            $success_url = route('customer.itemcheckout.pagSmile.success', getParam());
-            $cancel_url = route('customer.itemcheckout.pagSmile.cancel', getParam());
-            $title = 'Pagamento de pedido';
-            $description = 'Pedido de compra realizado pelo cliente';
+            $amount         = $total;
+            $email          = $request->billing_email ?? 'cliente@email.com';
+            $success_url    = route('customer.itemcheckout.pagSmile.success', getParam());
+            $cancel_url     = route('customer.itemcheckout.pagSmile.cancel', getParam());
+            $title          = 'Pagamento de pedido';
+            $description    = 'Pedido de compra realizado pelo cliente';
 
             $pagSmile = new PagSmileController();
             return $pagSmile->paymentProcess($request, $amount, $email, $success_url, $cancel_url, $title, $description);

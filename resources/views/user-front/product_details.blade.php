@@ -36,7 +36,7 @@
     </div>
 
     <!-- Shop Start -->
-    <div class="product-single pt-100 pb-70 overflow-hidden">
+    <div class="product-single pt-1 pb-70 overflow-hidden">
         <div class="container">
             <div class="product-single-default">
                 <div class="row ">

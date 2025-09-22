@@ -362,20 +362,6 @@
             $(".price-group").removeClass('d-none');
             $(".price-group input").removeAttr('disabled');
 
-        } else if (type == 'code') {
-            // Mostrar input planilha
-            $("#codeUploadSection").removeClass('d-none');
-
-            // Esconder upload e link
-            $("#downloadFile input").attr('disabled', true);
-            $("#downloadFile").addClass('d-none');
-            $("#downloadLink input").attr('disabled', true);
-            $("#downloadLink").addClass('d-none');
-
-            // Esconder preços
-            $(".price-group").addClass('d-none');
-            $(".price-group input").attr('disabled', true);
-
         } else {
             // Mostrar upload
             $("#downloadLink input").attr('disabled', true);

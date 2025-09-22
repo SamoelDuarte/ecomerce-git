@@ -71,7 +71,7 @@
 
 @yield('variables')
 <!-- misc JS -->
-<script src="{{ asset('assets/admin/js/misc.js') }}"></script>
+<script src="{{ asset('assets/admin/js/misc.js?v=1.0') }}"></script>
 
 @yield('scripts')
 

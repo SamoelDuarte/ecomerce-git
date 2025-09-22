@@ -528,10 +528,6 @@ $user_currency = user_currency(Session::get('user_curr'));
                             </div>
                         </div>
                     </div>
-                    
-                    {{-- Campos hidden para armazenar dados do frete selecionado --}}
-                    <input type="hidden" id="shipping_service_price" name="shipping_service_price" value="0">
-                    <input type="hidden" id="shipping_service_name" name="shipping_service_name" value="">
                     @endif
 
                     <div id="cartTotal">
@@ -624,7 +620,6 @@ $user_currency = user_currency(Session::get('user_curr'));
 
 
                     <div class="order-payment form-block border radius-md mb-30">
-                        <h3 class="mb-20">{{ $keywords['Payment Method'] ?? __('Payment Method') }}</h3>
                         @include('user-front.payment-gateways')
 
                         {{-- START: Offline Gateways Information & Receipt Area --}}
@@ -641,7 +636,7 @@ $user_currency = user_currency(Session::get('user_curr'));
 
                         <div class="text-center mt-30">
                             <button {{ $cart ? '' : 'disabled' }} class="btn btn-lg btn-primary radius-md w-100"
-                                type="submit">{{ $keywords['Place Order'] ?? __('Place Order') }} </button>
+                                type="submit">Finalizar compra</button>
                         </div>
                     </div>
 
