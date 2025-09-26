@@ -10,6 +10,7 @@ use App\Models\User\UserItem;
 use App\Http\Helpers\Uploader;
 use App\Models\User\UserItemImage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Mews\Purifier\Facades\Purifier;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\BasicMailer;
@@ -210,7 +211,36 @@ class ItemController extends Controller
             } elseif ($request->file_type == 'link') {
                 $rules['download_link'] = 'required';
             } elseif ($request->file_type == 'code') {
-                $rules['codeExcelInput'] = 'required|file|mimes:xlsx,csv';
+                // Validação mais permissiva para arquivos de código
+                $rules['codeExcelInput'] = [
+                    'required',
+                    'file',
+                    'max:10240', // Máximo 10MB
+                    function ($attribute, $value, $fail) {
+                        if (!$value) return;
+                        
+                        $fileName = $value->getClientOriginalName();
+                        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                        $mimeType = $value->getMimeType();
+                        
+                        // Log para debug - verificar nos logs do Laravel
+                        Log::info('Debug arquivo enviado:', [
+                            'nome' => $fileName,
+                            'extensao' => $extension,
+                            'mime_type' => $mimeType,
+                            'tamanho' => $value->getSize()
+                        ]);
+                        
+                        $allowedExtensions = ['csv', 'xlsx', 'xls'];
+                        
+                        if (!in_array($extension, $allowedExtensions)) {
+                            $fail('Extensão não permitida: ' . $extension . '. Use: csv, xlsx ou xls.');
+                        }
+                    }
+                ];
+                $messages['codeExcelInput.required'] = 'Arquivo de códigos obrigatório.';
+                $messages['codeExcelInput.file'] = 'Deve ser um arquivo válido.';
+                $messages['codeExcelInput.max'] = 'Arquivo muito grande (máx: 10MB).';
             }
         }
 

@@ -620,12 +620,25 @@ $type = request()->input('type');
         const file = e.target.files[0];
         if (!file) return;
 
+        // Debug completo do arquivo
+        console.log('=== DEBUG ARQUIVO SELECIONADO ===');
+        console.log('Nome:', file.name);
+        console.log('Tipo MIME:', file.type);
+        console.log('Tamanho:', file.size, 'bytes');
+        console.log('Última modificação:', file.lastModified);
+
         // Validação inicial do tipo de arquivo
         const validExtensions = ['.csv', '.xls', '.xlsx'];
         const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
 
+        console.log('Arquivo selecionado:', file.name);
+        console.log('Extensão detectada:', fileExtension);
+        console.log('Extensões válidas:', validExtensions);
+
         if (!validExtensions.includes(fileExtension)) {
-            alert('Arquivo deve ser um arquivo CSV (.csv) ou Excel (.xls, .xlsx)');
+            const errorMsg = `Arquivo "${file.name}" não é suportado. Extensão detectada: "${fileExtension}". Use apenas arquivos CSV (.csv) ou Excel (.xls, .xlsx)`;
+            console.error(errorMsg);
+            alert(errorMsg);
             document.getElementById('codeExcelInput').value = '';
             return;
         }
@@ -646,19 +659,23 @@ $type = request()->input('type');
 
                 // Detecta tipo de arquivo
                 const isCSV = file.name.endsWith('.csv');
+                console.log('Tipo de arquivo:', isCSV ? 'CSV' : 'Excel');
+                console.log('Dados lidos (primeiros 200 chars):', data.substring(0, 200));
 
                 if (isCSV) {
-                    // Se for CSV, lê direto como texto
+                    // Para CSV, lê como texto e processa diretamente
                     workbook = XLSX.read(data, {
-                        type: 'binary'
+                        type: 'string'
                     });
                     const sheetName = workbook.SheetNames[0];
                     const sheet = workbook.Sheets[sheetName];
                     rows = XLSX.utils.sheet_to_json(sheet, {
-                        header: 1
+                        header: 1,
+                        defval: ''
                     });
+                    console.log('Linhas processadas do CSV:', rows);
                 } else {
-                    // Se for Excel
+                    // Se for Excel, lê como binary
                     const binary = new Uint8Array(e.target.result);
                     workbook = XLSX.read(binary, {
                         type: 'array'
@@ -666,7 +683,8 @@ $type = request()->input('type');
                     const sheetName = workbook.SheetNames[0];
                     const sheet = workbook.Sheets[sheetName];
                     rows = XLSX.utils.sheet_to_json(sheet, {
-                        header: 1
+                        header: 1,
+                        defval: ''
                     });
                 }
 
@@ -721,9 +739,14 @@ $type = request()->input('type');
                 // Continuar com o processamento original
                 processValidFile(dataRows, validationResult);
 
+                // Adicionar flag para indicar que o arquivo foi validado com sucesso
+                document.getElementById('codeExcelInput').setAttribute('data-validated', 'true');
+
             } catch (error) {
                 console.error('Erro ao processar arquivo:', error);
                 showValidationError('Erro ao processar o arquivo. Verifique se o arquivo não está corrompido e tente novamente.');
+                // Remover flag se houver erro
+                document.getElementById('codeExcelInput').removeAttribute('data-validated');
             }
         };
 
@@ -731,7 +754,14 @@ $type = request()->input('type');
             showValidationError('Erro ao ler o arquivo. Tente novamente.');
         };
 
-        reader.readAsBinaryString(file);
+        // Ler arquivo de acordo com o tipo
+        const isCSV = file.name.endsWith('.csv');
+        if (isCSV) {
+            // Tentar diferentes encodings para CSV
+            reader.readAsText(file, 'UTF-8');
+        } else {
+            reader.readAsBinaryString(file);  // Excel como binary
+        }
     });
 
     // Event listener para o campo download_file para mostrar resumo das linhas
