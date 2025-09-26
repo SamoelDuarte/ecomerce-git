@@ -603,7 +603,6 @@ $type = request()->input('type');
         }
 
         // Atualiza na tela
-        document.getElementById('codeImportResult').classList.remove('d-none');
         document.getElementById('totalCodes').innerText = total;
 
         const ul = document.getElementById('variationList');
