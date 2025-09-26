@@ -357,13 +357,27 @@
 
             // Esconder input planilha
             $("#codeUploadSection").addClass('d-none');
+            $("#downloadTemplateBtn").addClass('d-none');
 
             // Mostrar preços
             $(".price-group").removeClass('d-none');
             $(".price-group input").removeAttr('disabled');
 
+        } else if (type == 'code') {
+            // Mostrar input planilha
+            $("#downloadFile input").attr('disabled', true);
+            $("#downloadFile").addClass('d-none');
+            $("#downloadLink input").attr('disabled', true);
+            $("#downloadLink").addClass('d-none');
+            $("#codeUploadSection").removeClass('d-none');
+            $("#downloadTemplateBtn").removeClass('d-none');
+
+            // Esconder preços para códigos
+            $(".price-group").addClass('d-none');
+            $(".price-group input").attr('disabled', true);
+
         } else {
-            // Mostrar upload
+            // Mostrar upload (default)
             $("#downloadLink input").attr('disabled', true);
             $("#downloadLink").addClass('d-none');
             $("#downloadFile").removeClass('d-none');
@@ -371,11 +385,32 @@
 
             // Esconder input planilha
             $("#codeUploadSection").addClass('d-none');
+            $("#downloadTemplateBtn").addClass('d-none');
 
             // Mostrar preços
             $(".price-group").removeClass('d-none');
             $(".price-group input").removeAttr('disabled');
         }
+    });
+
+    // Event listener para o botão de download do template de códigos
+    $(document).on('click', '#downloadTemplateBtn', function() {
+        // Create workbook and worksheet
+        const workbook = XLSX.utils.book_new();
+        const ws_data = [
+            ['nome', 'codigo', 'valor'], // Header - usar minúsculo para compatibilidade
+            ['Versão Básica', 'ABC123', '10.50'], // Sample data
+            ['Versão Premium', 'XYZ789', '25.00'],
+            ['Versão Enterprise', 'ENT456', '50.00']
+        ];
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Códigos');
+        
+        // Save file
+        XLSX.writeFile(workbook, 'modelo_codigos.xlsx');
     });
 
 
