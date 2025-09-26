@@ -120,17 +120,17 @@ $type = request()->input('type');
                                     <div class="form-group">
                                         <label for="">{{ __('Type') }} <span
                                                 class="text-danger">**</span></label>
-                                        <select name="file_type" class="form-control" id="fileType" onchange="toggleFileUpload()">
+                                        <select name="file_type" class="form-control" id="fileType">
                                             <option value="upload" selected>{{ __('File Upload') }}</option>
                                             <option value="link">{{ __('File Download Link') }}</option>
                                             <option value="code">Código</option>
                                         </select>
                                     </div>
-                                    <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none" onclick="downloadCodeTemplate()">
+                                    <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none">
                                         <i class="fa fa-download"></i> Modelo de Planilha de Códigos
                                     </button>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-8" id="fileUploadContainer">
                                     <div id="downloadFile" class="form-group">
                                         <label for="">{{ __('Downloadable File') }} <span
                                                 class="text-danger">**</span></label>
@@ -163,30 +163,28 @@ $type = request()->input('type');
                                                 class="text-danger">**</span></label>
                                         <input name="download_link" type="text" class="form-control">
                                     </div>
-                                    <div id="codeUploadSection" class="col-md-12 mt-3 d-none">
-                                        <div class="form-group">
-                                            <label for="codeExcelInput">
-                                                {{ __('Importar Planilha de Códigos') }}
-                                                <span class="text-danger">**</span>
-                                            </label>
-                                            <input type="file" class="form-control" name="codeExcelInput"
-                                                id="codeExcelInput" accept=".xlsx,.csv">
+                                </div>
+                                <div class="col-md-8 " id="codeUploadSection">
+                                    <div class="form-group">
+                                        <label for="codeExcelInput">
+                                            {{ __('Importar Planilha de Códigos') }}
+                                            <span class="text-danger">**</span>
+                                        </label>
+                                        <input type="file" class="form-control" name="codeExcelInput"
+                                            id="codeExcelInput" accept=".xlsx,.csv">
 
-                                            {{-- Feedback da validação do arquivo --}}
-                                            <div id="file-validation-feedback" class="mt-2"></div>
+                                        {{-- Feedback da validação do arquivo --}}
+                                        <div id="file-validation-feedback" class="mt-2"></div>
 
-                                            <div id="codeImportResult" class="mt-3 d-none">
-                                                <div class="alert alert-info">
-                                                    <p><strong>Total de Códigos:</strong> <span
-                                                            id="totalCodes">0</span></p>
-                                                    <p><strong>Variações encontradas:</strong></p>
-                                                    <ul id="variationList" class="mb-0"></ul>
-                                                </div>
+                                        <div id="codeImportResult" class="mt-3 d-none">
+                                            <div class="alert alert-info">
+                                                <p><strong>Total de Códigos:</strong> <span
+                                                        id="totalCodes">0</span></p>
+                                                <p><strong>Variações encontradas:</strong></p>
+                                                <ul id="variationList" class="mb-0"></ul>
                                             </div>
                                         </div>
                                     </div>
-
-
                                 </div>
                                 @endif
 
@@ -821,6 +819,99 @@ $type = request()->input('type');
 
         reader.readAsText(file);
     });
+
+    // toggleFileUpload function
+    function toggleFileUpload() {
+        console.log('toggleFileUpload chamada!'); // Debug
+        
+        let fileType = document.getElementById('fileType');
+        if (!fileType) {
+            console.log('Elemento fileType não encontrado!');
+            return;
+        }
+        
+        let fileTypeValue = fileType.value;
+        console.log('Tipo selecionado:', fileTypeValue); // Debug
+        
+        let downloadFile = document.getElementById('downloadFile');
+        let downloadLink = document.getElementById('downloadLink');
+        let codeUploadSection = document.getElementById('codeUploadSection');
+        let fileUploadContainer = document.getElementById('fileUploadContainer');
+        let templateBtn = document.getElementById('downloadTemplateBtn');
+        let priceGroups = document.querySelectorAll('.price-group');
+        
+        console.log('Elementos encontrados:', {
+            downloadFile: !!downloadFile,
+            downloadLink: !!downloadLink,
+            codeUploadSection: !!codeUploadSection,
+            fileUploadContainer: !!fileUploadContainer,
+            templateBtn: !!templateBtn,
+            priceGroups: priceGroups.length
+        });
+
+        if (fileTypeValue === 'upload') {
+            // Mostrar container de upload/link, ocultar seção de códigos
+            if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
+            if (codeUploadSection) codeUploadSection.classList.add('d-none');
+            if (downloadFile) downloadFile.classList.remove('d-none');
+            if (downloadLink) downloadLink.classList.add('d-none');
+            if (templateBtn) templateBtn.classList.add('d-none');
+            
+            // Mostrar campos de preço
+            priceGroups.forEach(function(group) {
+                group.classList.remove('d-none');
+                group.style.display = ''; // Remove inline style
+            });
+            console.log('Modo upload ativado');
+        } else if (fileTypeValue === 'link') {
+            // Mostrar container de upload/link, ocultar seção de códigos
+            if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
+            if (codeUploadSection) codeUploadSection.classList.add('d-none');
+            if (downloadFile) downloadFile.classList.add('d-none');
+            if (downloadLink) downloadLink.classList.remove('d-none');
+            if (templateBtn) templateBtn.classList.add('d-none');
+            
+            // Mostrar campos de preço
+            priceGroups.forEach(function(group) {
+                group.classList.remove('d-none');
+                group.style.display = ''; // Remove inline style
+            });
+            console.log('Modo link ativado');
+        } else if (fileTypeValue === 'code') {
+            // Ocultar container de upload/link, mostrar seção de códigos
+            if (fileUploadContainer) fileUploadContainer.classList.add('d-none');
+            if (codeUploadSection) codeUploadSection.classList.remove('d-none');
+            if (downloadFile) downloadFile.classList.add('d-none');
+            if (downloadLink) downloadLink.classList.add('d-none');
+            if (templateBtn) templateBtn.classList.remove('d-none');
+            
+            // Ocultar campos de preço quando tipo for 'código'
+            priceGroups.forEach(function(group) {
+                group.classList.add('d-none');
+                group.style.display = 'none'; // Backup para garantir que oculte
+            });
+            console.log('Modo código ativado - preços e uploads ocultos');
+        }
+    }
+
+    function downloadCodeTemplate() {
+        // Create workbook and worksheet
+        const workbook = XLSX.utils.book_new();
+        const ws_data = [
+            ['nome', 'codigo', 'valor'], // Header
+            ['Versão Básica', 'ABC123', '10.50'], // Sample data
+            ['Versão Premium', 'XYZ789', '25.00'],
+            ['Versão Enterprise', 'ENT456', '50.00']
+        ];
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Códigos');
+        
+        // Save file
+        XLSX.writeFile(workbook, 'modelo_codigos.xlsx');
+    }
 </script>
 <script>
     "use strict";

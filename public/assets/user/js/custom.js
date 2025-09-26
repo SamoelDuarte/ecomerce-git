@@ -1,29 +1,78 @@
 "use strict";
 
-function toggleFileUpload() {
-    let fileType = document.getElementById('fileType').value;
-    let downloadFile = document.getElementById('downloadFile');
-    let downloadLink = document.getElementById('downloadLink');
-    let codeUploadSection = document.getElementById('codeUploadSection');
-    let templateBtn = document.getElementById('downloadTemplateBtn');
+// Função removida - usando misc.js para evitar conflitos
+// function toggleFileUpload() {
+//     console.log('toggleFileUpload chamada!'); // Debug
+//     
+//     let fileType = document.getElementById('fileType');
+//     if (!fileType) {
+//         console.log('Elemento fileType não encontrado!');
+//         return;
+//     }
+//     
+//     let fileTypeValue = fileType.value;
+//     console.log('Tipo selecionado:', fileTypeValue); // Debug
+//     
+//     let downloadFile = document.getElementById('downloadFile');
+//     let downloadLink = document.getElementById('downloadLink');
+//     let codeUploadSection = document.getElementById('codeUploadSection');
+//     let fileUploadContainer = document.getElementById('fileUploadContainer');
+//     let templateBtn = document.getElementById('downloadTemplateBtn');
+//     let priceGroups = document.querySelectorAll('.price-group');
+//     
+//     console.log('Elementos encontrados:', {
+//         downloadFile: !!downloadFile,
+//         downloadLink: !!downloadLink,
+//         codeUploadSection: !!codeUploadSection,
+//         fileUploadContainer: !!fileUploadContainer,
+//         templateBtn: !!templateBtn,
+//         priceGroups: priceGroups.length
+//     });
 
-    if (fileType === 'upload') {
-        downloadFile.classList.remove('d-none');
-        downloadLink.classList.add('d-none');
-        codeUploadSection.classList.add('d-none');
-        if (templateBtn) templateBtn.classList.add('d-none');
-    } else if (fileType === 'link') {
-        downloadFile.classList.add('d-none');
-        downloadLink.classList.remove('d-none');
-        codeUploadSection.classList.add('d-none');
-        if (templateBtn) templateBtn.classList.add('d-none');
-    } else if (fileType === 'code') {
-        downloadFile.classList.add('d-none');
-        downloadLink.classList.add('d-none');
-        codeUploadSection.classList.remove('d-none');
-        if (templateBtn) templateBtn.classList.remove('d-none');
-    }
-}
+//     if (fileTypeValue === 'upload') {
+//         // Mostrar container de upload/link, ocultar seção de códigos
+//         if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
+//         if (codeUploadSection) codeUploadSection.classList.add('d-none');
+//         if (downloadFile) downloadFile.classList.remove('d-none');
+//         if (downloadLink) downloadLink.classList.add('d-none');
+//         if (templateBtn) templateBtn.classList.add('d-none');
+//         
+//         // Mostrar campos de preço
+//         priceGroups.forEach(function(group) {
+//             group.classList.remove('d-none');
+//             group.style.display = ''; // Remove inline style
+//         });
+//         console.log('Modo upload ativado');
+//     } else if (fileTypeValue === 'link') {
+//         // Mostrar container de upload/link, ocultar seção de códigos
+//         if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
+//         if (codeUploadSection) codeUploadSection.classList.add('d-none');
+//         if (downloadFile) downloadFile.classList.add('d-none');
+//         if (downloadLink) downloadLink.classList.remove('d-none');
+//         if (templateBtn) templateBtn.classList.add('d-none');
+//         
+//         // Mostrar campos de preço
+//         priceGroups.forEach(function(group) {
+//             group.classList.remove('d-none');
+//             group.style.display = ''; // Remove inline style
+//         });
+//         console.log('Modo link ativado');
+//     } else if (fileTypeValue === 'code') {
+//         // Ocultar container de upload/link, mostrar seção de códigos
+//         if (fileUploadContainer) fileUploadContainer.classList.add('d-none');
+//         if (codeUploadSection) codeUploadSection.classList.remove('d-none');
+//         if (downloadFile) downloadFile.classList.add('d-none');
+//         if (downloadLink) downloadLink.classList.add('d-none');
+//         if (templateBtn) templateBtn.classList.remove('d-none');
+//         
+//         // Ocultar campos de preço quando tipo for 'código'
+//         priceGroups.forEach(function(group) {
+//             group.classList.add('d-none');
+//             group.style.display = 'none'; // Backup para garantir que oculte
+//         });
+//         console.log('Modo código ativado - preços e uploads ocultos');
+//     }
+// }
 
 function downloadCodeTemplate() {
     // Create workbook and worksheet
@@ -161,6 +210,11 @@ $(function ($) {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    // Inicializar toggleFileUpload quando a página carrega
+    if (document.getElementById('fileType')) {
+        toggleFileUpload();
+    }
 
     /* ***************************************************************
     ==========disabling default behave of form submits start==========
