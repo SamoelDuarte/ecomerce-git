@@ -357,6 +357,167 @@
 
                                     </div>
 
+                                    @if ($isDigital && $hasCodes)
+                                        <div id="productDetails" data-is-digital="{{ $isDigital ? '1' : '0' }}"
+                                            data-has-codes="{{ $hasCodes ? '1' : '0' }}"
+                                            data-new-price="{{ $product->price }}"
+                                            data-old-price="{{ $product->old_price ?? 0 }}">
+                                        </div>
+                                        @php
+                                            $groupedCodes = $product->item->digitalCodes
+                                                ->where('is_used', false)
+                                                ->groupBy('name');
+                                        @endphp
+
+                                        <style>
+                                            /* Estilos modernos para códigos digitais */
+                                            #variantListULDetails.digital-codes-modern {
+                                                display: grid;
+                                                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                                                gap: 10px;
+                                                list-style: none;
+                                                padding: 0;
+                                                margin-bottom: 15px;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern>.list-item {
+                                                margin: 0;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .variantUL {
+                                                list-style: none;
+                                                padding: 0;
+                                                margin: 0;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .variantUL>li {
+                                                margin: 0;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .product-variant {
+                                                position: absolute;
+                                                opacity: 0;
+                                                pointer-events: none;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .form-radio-label {
+                                                display: flex;
+                                                flex-direction: column;
+                                                padding: 12px 10px;
+                                                border: 2px solid #e0e0e0;
+                                                border-radius: 8px;
+                                                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                                                cursor: pointer;
+                                                transition: all 0.3s ease;
+                                                position: relative;
+                                                overflow: hidden;
+                                                min-height: 60px;
+                                                justify-content: center;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .form-radio-label::before {
+                                                content: '';
+                                                position: absolute;
+                                                top: 39px;
+                                                left: 0;
+                                                width: 100%;
+                                                height: 100%;
+                                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                                opacity: 0;
+                                                transition: opacity 0.3s ease;
+                                                z-index: 0;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .form-radio-label:hover {
+                                                border-color: #667eea;
+                                                transform: translateY(-3px);
+                                                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.25);
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label {
+                                                border-color: #667eea;
+                                                box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label::before {
+                                                opacity: 1;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label .details_view_variants_price {
+                                                color: white !important;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label::after {
+                                                content: '✓';
+                                                position: absolute;
+                                                top: 6px;
+                                                right: 8px;
+                                                width: 22px;
+                                                height: 22px;
+                                                background: white;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 13px;
+                                                font-weight: bold;
+                                                color: #667eea;
+                                                z-index: 2;
+                                            }
+
+                                            #variantListULDetails.digital-codes-modern .details_view_variants_price {
+                                                position: relative;
+                                                z-index: 1;
+                                                font-size: 13px;
+                                                font-weight: 600;
+                                                text-align: center;
+                                                transition: color 0.3s ease;
+                                            }
+
+                                            @media (max-width: 768px) {
+                                                #variantListULDetails.digital-codes-modern {
+                                                    grid-template-columns: 1fr;
+                                                }
+                                            }
+
+                                            .custom-radio .form-radio-label::before {
+                                                border: 1px solid var(--color-primary);
+                                                border-radius: 0%;
+                                            }
+                                        </style>
+
+
+                                        <ul class="product-list-group digital-codes-modern mb-20" id="variantListULDetails">
+                                            @foreach ($groupedCodes as $groupName => $codes)
+                                                @php
+                                                    $firstCode = $codes->first();
+                                                    $price = $firstCode->price;
+                                                    $stock = $codes->count();
+                                                    $groupSlug = \Illuminate\Support\Str::slug($groupName, '_');
+                                                    $mainId = 'detail_' . $groupSlug . '_' . $groupSlug;
+                                                @endphp
+
+                                                <li class="list-item" data-variant_name="Digital Codes">
+                                                    <ul class="custom-radio variantUL" id="variantUL">
+                                                        <li>
+                                                            <input id="radio_{{ $mainId }}" type="radio"
+                                                                name="{{ make_input_name('Digital Codes') }}[]"
+                                                                class="{{ $mainId }} product-variant input-radio"
+                                                                value="{{ $groupName }}:{{ $price }}:{{ $stock }}:0:0">
+
+                                                            <label class="form-radio-label" for="radio_{{ $mainId }}">
+                                                                <span class="details_view_variants_price color-primary">
+                                                                    {{ $groupName }}
+                                                                </span>
+
+                                                            </label>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
                                     <input type="hidden" name="final-price" id="details_final-price"
                                         class="form-control final-price">
 
@@ -392,166 +553,7 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($isDigital && $hasCodes)
-                                    <div id="productDetails" data-is-digital="{{ $isDigital ? '1' : '0' }}"
-                                        data-has-codes="{{ $hasCodes ? '1' : '0' }}"
-                                        data-new-price="{{ $product->price }}"
-                                        data-old-price="{{ $product->old_price ?? 0 }}">
-                                    </div>
-                                    @php
-                                        $groupedCodes = $product->item->digitalCodes
-                                            ->where('is_used', false)
-                                            ->groupBy('name');
-                                    @endphp
-
-                                    <style>
-                                        /* Estilos modernos para códigos digitais */
-                                        #variantListULDetails.digital-codes-modern {
-                                            display: grid;
-                                            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                                            gap: 15px;
-                                            list-style: none;
-                                            padding: 0;
-                                            margin-bottom: 20px;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern>.list-item {
-                                            margin: 0;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .variantUL {
-                                            list-style: none;
-                                            padding: 0;
-                                            margin: 0;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .variantUL>li {
-                                            margin: 0;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .product-variant {
-                                            position: absolute;
-                                            opacity: 0;
-                                            pointer-events: none;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .form-radio-label {
-                                            display: flex;
-                                            flex-direction: column;
-                                            padding: 18px 16px;
-                                            border: 2px solid #e0e0e0;
-                                            border-radius: 12px;
-                                            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-                                            cursor: pointer;
-                                            transition: all 0.3s ease;
-                                            position: relative;
-                                            overflow: hidden;
-                                            min-height: 80px;
-                                            justify-content: center;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .form-radio-label::before {
-                                            content: '';
-                                            position: absolute;
-                                            top: 39px;
-                                            left: 0;
-                                            width: 100%;
-                                            height: 100%;
-                                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                            opacity: 0;
-                                            transition: opacity 0.3s ease;
-                                            z-index: 0;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .form-radio-label:hover {
-                                            border-color: #667eea;
-                                            transform: translateY(-3px);
-                                            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.25);
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label {
-                                            border-color: #667eea;
-                                            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label::before {
-                                            opacity: 1;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label .details_view_variants_price {
-                                            color: white !important;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .product-variant:checked+.form-radio-label::after {
-                                            content: '✓';
-                                            position: absolute;
-                                            top: 8px;
-                                            right: 12px;
-                                            width: 28px;
-                                            height: 28px;
-                                            background: white;
-                                            border-radius: 50%;
-                                            display: flex;
-                                            align-items: center;
-                                            justify-content: center;
-                                            font-size: 16px;
-                                            font-weight: bold;
-                                            color: #667eea;
-                                            z-index: 2;
-                                        }
-
-                                        #variantListULDetails.digital-codes-modern .details_view_variants_price {
-                                            position: relative;
-                                            z-index: 1;
-                                            font-size: 15px;
-                                            font-weight: 600;
-                                            text-align: center;
-                                            transition: color 0.3s ease;
-                                        }
-
-                                        @media (max-width: 768px) {
-                                            #variantListULDetails.digital-codes-modern {
-                                                grid-template-columns: 1fr;
-                                            }
-                                        }
-
-                                        .custom-radio .form-radio-label::before {
-                                            border: 1px solid var(--color-primary);
-                                            border-radius: 0%;
-                                        }
-                                    </style>
-
-
-                                    <ul class="product-list-group digital-codes-modern mb-20" id="variantListULDetails">
-                                        @foreach ($groupedCodes as $groupName => $codes)
-                                            @php
-                                                $firstCode = $codes->first();
-                                                $price = $firstCode->price;
-                                                $stock = $codes->count();
-                                                $groupSlug = \Illuminate\Support\Str::slug($groupName, '_');
-                                                $mainId = 'detail_' . $groupSlug . '_' . $groupSlug;
-                                            @endphp
-
-                                            <li class="list-item" data-variant_name="Digital Codes">
-                                                <ul class="custom-radio variantUL" id="variantUL">
-                                                    <li>
-                                                        <input id="radio_{{ $mainId }}" type="radio"
-                                                            name="{{ make_input_name('Digital Codes') }}[]"
-                                                            class="{{ $mainId }} product-variant input-radio"
-                                                            value="{{ $groupName }}:{{ $price }}:{{ $stock }}:0:0">
-
-                                                        <label class="form-radio-label" for="radio_{{ $mainId }}">
-                                                            <span class="details_view_variants_price color-primary">
-                                                                {{ $groupName }}
-                                                            </span>
-
-                                                        </label>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                             
 
                             </div>
 
