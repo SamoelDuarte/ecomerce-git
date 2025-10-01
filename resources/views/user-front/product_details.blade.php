@@ -418,7 +418,7 @@
                                             #variantListULDetails.digital-codes-modern .form-radio-label::before {
                                                 content: '';
                                                 position: absolute;
-                                                top: 39px;
+                                                top: 28px;
                                                 left: 0;
                                                 width: 100%;
                                                 height: 100%;
