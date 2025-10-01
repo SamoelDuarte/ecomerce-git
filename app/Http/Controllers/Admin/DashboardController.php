@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Exports\EcommerceExport;
+use App\Exports\MembershipExport;
 use App\Models\Customer;
 use App\Models\Language;
 use App\Models\Membership;
@@ -17,6 +19,7 @@ use App\Models\User\Blog;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use DB;
 
 class DashboardController extends Controller
@@ -328,9 +331,9 @@ class DashboardController extends Controller
 
   private function exportToExcel($data)
   {
-    // Aqui você pode implementar a exportação para Excel usando uma biblioteca como PhpSpreadsheet
-    // Por simplicidade, vou retornar CSV com extensão .xlsx
-    return $this->exportToCSV($data);
+    $filename = 'memberships_export_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+    
+    return Excel::download(new MembershipExport($data), $filename);
   }
 
   // public function ecommerce()
@@ -683,7 +686,7 @@ class DashboardController extends Controller
     if ($format === 'csv') {
       return $this->exportEcommerceToCSV($data, $headers, $filename);
     } else {
-      return $this->exportEcommerceToExcel($data, $headers, $filename);
+      return $this->exportEcommerceToExcel($data, $headers, $filename, $chartType);
     }
   }
 
@@ -834,11 +837,11 @@ class DashboardController extends Controller
     return response()->stream($callback, 200, $headers_response);
   }
 
-  private function exportEcommerceToExcel($data, $headers, $filename)
+  private function exportEcommerceToExcel($data, $headers, $filename, $type = 'general')
   {
-    // Por simplicidade, usando CSV com extensão Excel
-    // Em produção, seria recomendado usar PhpSpreadsheet
-    return $this->exportEcommerceToCSV($data, $headers, $filename . '.xlsx');
+    $filename = $filename . '.xlsx';
+    
+    return Excel::download(new EcommerceExport($data, $headers, $type), $filename);
   }
 
 
