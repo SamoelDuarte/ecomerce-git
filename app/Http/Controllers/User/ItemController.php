@@ -689,14 +689,23 @@ class ItemController extends Controller
                 
                 // Validar que não é uma linha vazia ou cabeçalho
                 if ($code && trim($code) !== '' && strtolower($code) !== 'codigo') {
-                    DB::table('digital_product_codes')->insert([
-                        'user_item_id' => $item->id,
-                        'name' => $name,
-                        'code' => $code,
-                        'price' => $value,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    // Verificar se o código já existe para este item
+                    $exists = DB::table('digital_product_codes')
+                        ->where('user_item_id', $item->id)
+                        ->where('code', $code)
+                        ->exists();
+                    
+                    // Só inserir se o código ainda não existe
+                    if (!$exists) {
+                        DB::table('digital_product_codes')->insert([
+                            'user_item_id' => $item->id,
+                            'name' => $name,
+                            'code' => $code,
+                            'price' => $value,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
             }
         }
