@@ -489,15 +489,14 @@ $(document).ready(function () {
     }, 1000);
 });
 
-$('body').on('click', '.product-variant, .digital-code-variant', function () {
+$('body').on('click', '.product-variant, .digital-code-variant, .code-radio-input', function () {
 
     if ($('#details_max-price').length > 0) {
-
         $('#details_max-price').prev('span.mx-1').remove(); // remove o traço "–"
         $('#details_max-price').remove(); // remove o span do max price
     }
 
-    var price = parseFloat($('#new-price').attr('data-base_price'));
+    var price = parseFloat($('#details_new-price').attr('data-base_price')) || 0;
     var old_price = 0;
     if ($('#details_old-price').length > 0) {
         old_price = parseFloat($('#details_old-price').attr('data-old_price'));
@@ -507,6 +506,26 @@ $('body').on('click', '.product-variant, .digital-code-variant', function () {
     var variant_price = 0;
     var variant_found = false;
 
+    // Verificar se é produto digital com códigos
+    var $productDetails = $('#productDetails');
+    var isDigital = $productDetails.data('is-digital') == 1;
+    var hasCodes = $productDetails.data('has-codes') == 1;
+
+    if (isDigital && hasCodes) {
+        // Para produtos digitais com códigos, usar apenas o preço do código selecionado
+        var $selectedCode = $('.code-radio-input:checked');
+        if ($selectedCode.length > 0) {
+            var codePrice = parseFloat($selectedCode.data('price'));
+            $('#details_new-price').text(codePrice.toFixed(2));
+            $('#details_final-price').val(codePrice.toFixed(2));
+            if ($('#details_old-price').length > 0) {
+                $('#details_old-price').text(codePrice.toFixed(2));
+            }
+            return;
+        }
+    }
+
+    // Lógica original para produtos normais
     // pega variações normais
     $('#variantListULDetails').find('li input:checked.product-variant').each(function () {
         var values = $(this).val().split(":");
@@ -519,7 +538,7 @@ $('body').on('click', '.product-variant, .digital-code-variant', function () {
         variant_found = true;
     });
 
-    // pega códigos digitais
+    // pega códigos digitais (sistema antigo)
     $('#digitalCodeVariantULDetails').find('li input:checked.digital-code-variant').each(function () {
         var values = $(this).val().split(":");
         if (parseFloat(values[2]) < quantity) {
@@ -531,11 +550,11 @@ $('body').on('click', '.product-variant, .digital-code-variant', function () {
         variant_found = true;
     });
 
-    if (!variant_found) {
+    if (!variant_found && price > 0) {
         // Nenhum selecionado, volta ao preço base
         var total_price = price * quantity;
-        $('#final-price').val(total_price.toFixed(2));
-        $('#new-price').text(total_price.toFixed(2));
+        $('#details_final-price').val(total_price.toFixed(2));
+        $('#details_new-price').text(total_price.toFixed(2));
         if ($('#details_old-price').length > 0) {
             var total_old_price = old_price * quantity;
             $('#details_old-price').text(total_old_price.toFixed(2));
@@ -544,8 +563,8 @@ $('body').on('click', '.product-variant, .digital-code-variant', function () {
     }
 
     var total_price = (price + variant_price) * quantity;
-    $('#final-price').val(total_price.toFixed(2));
-    $('#new-price').text(total_price.toFixed(2));
+    $('#details_final-price').val(total_price.toFixed(2));
+    $('#details_new-price').text(total_price.toFixed(2));
     if ($('#details_old-price').length > 0) {
         var total_old_price = (old_price + variant_price) * quantity;
         $('#details_old-price').text(total_old_price.toFixed(2));
@@ -762,16 +781,51 @@ var hasCodes = $product.data('has-codes') == 1;
 var old_price = parseFloat($product.data('old-price'));
 
 function totalPriceDetails2(qty) {
-    qty = qty.toString().length > 0 ? qty : 0;
+    qty = qty.toString().length > 0 ? qty : 1;
 
     var variant_price = [];
     var stErr = 0;
     var stErrMsg = [];
 
+    variant = {};
+
+    // Verificar se é produto digital com códigos (novo sistema de botões)
+    if (isDigital && hasCodes) {
+        var $selectedCode = $('.code-radio-input:checked');
+        if ($selectedCode.length > 0) {
+            var codeName = $selectedCode.data('name');
+            var codePrice = parseFloat($selectedCode.data('price'));
+            var codeStock = parseFloat($selectedCode.data('stock'));
+
+            variant[codeName] = {
+                'name': codeName,
+                'price': codePrice,
+                'stock': codeStock,
+                'option_id': 0,
+                'variation_id': 0,
+            };
+
+            // Para códigos digitais, quantidade sempre 1, preço direto
+            var total = codePrice.toFixed(2);
+            
+            $('#details_final-price').val(total);
+            $('#details_new-price').text(total);
+            
+            if ($('#details_old-price').length > 0) {
+                $('#details_old-price').text(total);
+            }
+
+            return total;
+        } else {
+            // Nenhum código selecionado ainda, mostrar preço mínimo
+            var minPrice = parseFloat($('#details_new-price').attr('data-base_price')) || 0;
+            return minPrice.toFixed(2);
+        }
+    }
+
+    // Lógica para produtos normais com variações
     var $ul_parent = $('#variantListULDetails');
     var $li_parent = $ul_parent.find('.list-item');
-
-    variant = {};
 
     $li_parent.each(function (i, li) {
         var variant_name = $(this).data('variant_name');
@@ -798,40 +852,20 @@ function totalPriceDetails2(qty) {
                     stErr = 1;
                 }
             }
-            return false; // só o primeiro checked por variante
+            return false;
         });
     });
 
-    console.log("Preços capturados das variantes:", variant_price);
-    console.log("isDigital:", isDigital);
-    console.log("hasCodes:", hasCodes);
-    console.log("qty:", qty);
-    console.log("variant_price array:", variant_price);
-    console.log("detail_new_price:", detail_new_price);
-    console.log("detail_old_price:", detail_old_price);
     var total = parseFloat(detail_new_price) || 0;
     var old_total = parseFloat(detail_old_price) || 0;
 
-    if (isDigital && hasCodes) {
-        // Se produto digital com códigos, usar só o preço da variante selecionada
-        if (variant_price.length > 0) {
-            total = variant_price[0] * qty;
-            old_total = variant_price[0] * qty; // se quiser aplicar aqui também
-        } else {
-            total = total * qty;
-            old_total = old_total * qty;
-        }
-    } else {
-        // Produto normal: soma base + todas variantes
-        for (var i = 0; i < variant_price.length; i++) {
-            total += variant_price[i];
-            old_total += variant_price[i];
-        }
-        total = total * qty;
-        old_total = old_total * qty;
+    // Produto normal: soma base + todas variantes
+    for (var i = 0; i < variant_price.length; i++) {
+        total += variant_price[i];
+        old_total += variant_price[i];
     }
-
-
+    total = total * qty;
+    old_total = old_total * qty;
 
     total = total.toFixed(2);
     $('#details_final-price').val(total);
@@ -844,7 +878,6 @@ function totalPriceDetails2(qty) {
         $('#details_old-price').text(old_total.toFixed(2));
     }
 
-    console.log("TOTAL FINAL:", total);
     return total;
 }
 
@@ -855,6 +888,11 @@ $(document).on("change", "input[type=radio]", function () {
     let $input = $(".item_quantity_details input");
     let currval = parseInt($input.val()) || 1;
     totalPriceDetails2(currval);
+});
+
+// Atualiza o preço quando um código digital for selecionado
+$(document).on("change", ".code-radio-input", function () {
+    totalPriceDetails2(1); // Códigos digitais sempre quantidade 1
 });
 
 /*************************************
