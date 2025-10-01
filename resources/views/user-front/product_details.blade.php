@@ -453,7 +453,7 @@
                                         #variantListULDetails.digital-codes-modern .form-radio-label::before {
                                             content: '';
                                             position: absolute;
-                                            top: 0;
+                                            top: 39px;
                                             left: 0;
                                             width: 100%;
                                             height: 100%;
@@ -514,6 +514,11 @@
                                                 grid-template-columns: 1fr;
                                             }
                                         }
+
+                                        .custom-radio .form-radio-label::before {
+                                            border: 1px solid var(--color-primary);
+                                            border-radius: 0%;
+                                        }
                                     </style>
 
 
@@ -539,12 +544,7 @@
                                                             <span class="details_view_variants_price color-primary">
                                                                 {{ $groupName }}
                                                             </span>
-                                                            <small
-                                                                style="position: relative; z-index: 1; font-size: 13px; margin-top: 8px; opacity: 0.9;">
-                                                                {{ $user_currency->symbol_position == 'left' ? $user_currency->symbol : '' }}{{ currency_converter($price) }}{{ $user_currency->symbol_position == 'right' ? $user_currency->symbol : '' }}
-                                                                • {{ $stock }}
-                                                                {{ $stock > 1 ? 'disponíveis' : 'disponível' }}
-                                                            </small>
+
                                                         </label>
                                                     </li>
                                                 </ul>
