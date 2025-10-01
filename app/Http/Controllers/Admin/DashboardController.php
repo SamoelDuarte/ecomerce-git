@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Exports\MembershipExport;
 use App\Models\Customer;
 use App\Models\Language;
 use App\Models\Membership;
@@ -17,6 +18,7 @@ use App\Models\User\Blog;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use DB;
 
 class DashboardController extends Controller
@@ -328,9 +330,9 @@ class DashboardController extends Controller
 
   private function exportToExcel($data)
   {
-    // Aqui você pode implementar a exportação para Excel usando uma biblioteca como PhpSpreadsheet
-    // Por simplicidade, vou retornar CSV com extensão .xlsx
-    return $this->exportToCSV($data);
+    $filename = 'memberships_export_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+    
+    return Excel::download(new MembershipExport($data), $filename);
   }
 
   // public function ecommerce()
