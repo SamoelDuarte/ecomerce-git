@@ -165,3 +165,19 @@
     });
   </script>
 @endif
+
+<script type="text/javascript">
+//<![CDATA[
+var ttChatLoaderS = document.createElement('script');
+document.tomticketChatLoaderScriptVersion = 2;
+ttChatLoaderS.src = 'https://lidglobal.tomticket.com/scripts-chat/chat.min.js'
++ '?id=EP69864'
++ '&account=4471296P02092025112255'
++ '&autoOpen=0'
++ '&hideWhenOffline=0'
++ '&d=lidglobal'
++ '&ts=' + new Date().getTime()
++ '&ref=' + encodeURIComponent(document.URL);
+document.body.appendChild(ttChatLoaderS);
+//]]>
+</script>

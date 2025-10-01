@@ -357,12 +357,18 @@ class ItemController extends Controller
             $spreadsheet = IOFactory::load($path);
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
-            foreach ($rows as $row) {
+            
+            // Remove a primeira linha (cabeçalho) antes de processar
+            $dataRows = array_slice($rows, 1);
+            
+            foreach ($dataRows as $row) {
                 // Ajuste conforme suas colunas, ex: col 1 descrição, col 2 código, col 3 valor
                 $name = $row[0] ?? null;
                 $code = $row[1] ?? null;
                 $value = isset($row[2]) ? floatval($row[2]) : null;
-                if ($code) {
+                
+                // Validar que não é uma linha vazia
+                if ($code && trim($code) !== '') {
                     DB::table('digital_product_codes')->insert([
                         'user_item_id' => $item->id,
                         'name' =>  $name,
@@ -523,8 +529,18 @@ class ItemController extends Controller
         $languages = Language::where('user_id', Auth::guard('web')->user()->id)->get();
         $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
         $messages = [];
-        $rules['current_price'] = 'required|numeric|min:0.01';
-        $rules['previous_price'] = 'nullable|numeric|min:0.01';
+        
+        // Ajuste regras para preço: se digital+code, preços não são obrigatórios
+        if (!($item->type == 'digital' && $request->file_type == 'code')) {
+            // Para demais casos, preços obrigatórios
+            $rules['current_price'] = 'required|numeric|min:0.01';
+            $rules['previous_price'] = 'nullable|numeric|min:0.01';
+        } else {
+            // Para digital + code, preços opcionais
+            $rules['current_price'] = 'nullable|numeric|min:0.01';
+            $rules['previous_price'] = 'nullable|numeric|min:0.01';
+        }
+        
         $rules['category'] = 'required';
 
         // $rules[$defaulLang->code . '_title'] = 'required|max:255';
@@ -631,8 +647,15 @@ class ItemController extends Controller
         $item->sku = $request->sku;
         $item->status = $request->status;
         $item->thumbnail = $request->hasFile('thumbnail') ? $thumbnail_name : $item->thumbnail;
-        $item->current_price = $request->current_price;
-        $item->previous_price = $request->previous_price;
+        
+        // Se for tipo digital com códigos, define preço como 0
+        if ($item->type == 'digital' && $request->file_type == 'code') {
+            $item->current_price = 0;
+            $item->previous_price = 0;
+        } else {
+            $item->current_price = $request->current_price;
+            $item->previous_price = $request->previous_price;
+        }
         $item->type = $request->type;
         $item->download_file = $filename ?? null;
         $item->download_link = $request->download_link;
@@ -643,6 +666,41 @@ class ItemController extends Controller
             $item->height = $request->height;
         }
         $item->save();
+        
+      
+        // Se for digital + code, ler planilha e salvar códigos na tabela digital_product_codes
+        if ($item->type == 'digital' && $request->file_type == 'code' && $request->hasFile('codeExcelInput')) {
+            
+            $codeFile = $request->file('codeExcelInput');
+            $path = $codeFile->getRealPath();
+
+            $spreadsheet = IOFactory::load($path);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+            
+            // Remove a primeira linha (cabeçalho) antes de processar
+            $dataRows = array_slice($rows, 1);
+            
+            foreach ($dataRows as $row) {
+                // Ajuste conforme suas colunas: col 0 = nome, col 1 = código, col 2 = valor
+                $name = $row[0] ?? null;
+                $code = $row[1] ?? null;
+                $value = isset($row[2]) ? floatval($row[2]) : null;
+                
+                // Validar que não é uma linha vazia ou cabeçalho
+                if ($code && trim($code) !== '' && strtolower($code) !== 'codigo') {
+                    DB::table('digital_product_codes')->insert([
+                        'user_item_id' => $item->id,
+                        'name' => $name,
+                        'code' => $code,
+                        'price' => $value,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
+        
         if ($request->image) {
             foreach ($request->image as $value) {
                 UserItemImage::create([

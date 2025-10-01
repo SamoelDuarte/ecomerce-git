@@ -161,7 +161,8 @@
                                     @endphp
                                     
                                     @if (!$hasCodes)
-                                        <div class="col-lg-4" data-product-type="digital" style="display: none;">
+                                        {{-- Produto NÃO tem códigos - mostrar seletor de tipo --}}
+                                        <div class="col-lg-4" data-product-type="digital" style="display: none;" id="fileTypeSection">
                                             <div class="form-group">
                                                 <label for="">{{ __('Type') }} <span class="text-danger">**</span></label>
                                                 <select name="file_type" class="form-control" id="fileType" onchange="toggleFileUpload();">
@@ -174,37 +175,14 @@
                                                     <option value="code">{{ __('Códigos') }}</option>
                                                 </select>
                                             </div>
-                                            <button type="button" id="downloadTemplateBtn" class="btn btn-info mt-2 d-none" onclick="downloadCodeTemplate()">
-                                                <i class="fa fa-download"></i> Modelo de Planilha de Códigos
-                                            </button>
                                         </div>
                                         
-                                        <div class="col-lg-4" data-product-type="digital" style="display: none;">
+                                        <div class="col-lg-4" data-product-type="digital" style="display: none;" id="fileInputSection">
                                             <div id="downloadFile" class="form-group {{ !empty($item->download_link) ? 'd-none' : '' }}">
                                                 <label for="">{{ __('Downloadable File') }} <span class="text-danger">**</span></label>
                                                 <br>
                                                 <input name="download_file" type="file" class="form-control">
                                                 <p class="mb-0 text-warning">{{ __('Only zip file is allowed.') }}</p>
-                                                
-                                                <!-- Botão para baixar modelo CSV -->
-                                                <div class="mt-2">
-                                                    <a href="{{ route('user.item.download.csv.model') }}" 
-                                                       class="btn btn-info btn-sm" 
-                                                       download="modeloDigital.csv">
-                                                        <i class="fa fa-download"></i> {{ __('Baixar Modelo CSV') }}
-                                                    </a>
-                                                </div>
-
-                                                {{-- Resumo do arquivo selecionado --}}
-                                                <div id="file-summary" class="mt-2" style="display: none;">
-                                                    <div class="alert alert-info">
-                                                        <i class="fa fa-file-text"></i> 
-                                                        <span id="file-lines-count">0</span> linhas encontradas no arquivo
-                                                        <small class="d-block text-muted">
-                                                            (1 linha de cabeçalho + <span id="data-lines-count">0</span> linhas de dados)
-                                                        </small>
-                                                    </div>
-                                                </div>
                                             </div>
                                             
                                             <div id="downloadLink" class="form-group {{ !empty($item->download_link) ? '' : 'd-none' }}">
@@ -235,14 +213,47 @@
                                             </div>
                                         </div>
                                     @else
-                                        <div class="col-lg-4" data-product-type="digital" style="display: none;">
+                                        {{-- Produto JÁ TEM códigos - mostrar botão gerenciar e campo para adicionar mais --}}
+                                        <input type="hidden" name="file_type" value="code">
+                                        
+                                        <div class="col-lg-4" data-product-type="digital" style="display: none;" id="fileInputSection">
                                             <div class="form-group">
-                                                <label>{{ __('Gerenciamento de Códigos') }}</label>
-                                                <div>
-                                                    <a class="btn btn-secondary btn-sm"
-                                                       href="{{ route('user.item.codes', $item->id) . '?language=' . request()->input('language') }}">
-                                                        <span class="btn-label">Gerenciar Código</span>
-                                                    </a>
+                                                <label for="codeExcelInput">
+                                                    {{ __('Adicionar Mais Códigos') }}
+                                                </label>
+                                                <input type="file" class="form-control" name="codeExcelInput"
+                                                    id="codeExcelInput" accept=".xlsx,.csv">
+
+                                                {{-- Feedback da validação do arquivo --}}
+                                                <div id="file-validation-feedback" class="mt-2"></div>
+
+                                                <div id="codeImportResult" class="mt-3 d-none">
+                                                    <div class="alert alert-info">
+                                                        <p><strong>Total de Códigos:</strong> <span id="totalCodes">0</span></p>
+                                                        <p><strong>Variações encontradas:</strong></p>
+                                                        <ul id="variationList" class="mb-0"></ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-lg-8" data-product-type="digital" style="display: none;" id="manageCodesSection">
+                                            <div class="alert alert-info">
+                                                <div class="row align-items-center">
+                                                    <div class="col-lg-12">
+                                                        <h5 class="mb-2">
+                                                            <i class="fas fa-key"></i> 
+                                                            {{ __('Este produto possui códigos cadastrados') }}
+                                                        </h5>
+                                                        <p class="mb-2">
+                                                            Você pode adicionar mais códigos usando o campo ao lado ou gerenciar os códigos existentes.
+                                                        </p>
+                                                        <a class="btn btn-secondary btn-sm"
+                                                           href="{{ route('user.item.codes', $item->id) . '?language=' . request()->input('language') }}">
+                                                            <i class="fas fa-cog"></i>
+                                                            <span class="btn-label">Gerenciar Códigos Existentes</span>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -269,23 +280,25 @@
 
 
 
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-4" id="currentPriceSection" @if($hasCodes) style="display: none;" @endif>
                                         <div class="form-group">
                                             <label for=""> {{ __('Current Price') }}
                                                 ({{ $currency->symbol }}) <span class="text-danger">**</span></label>
                                             <input type="number" class="form-control" name="current_price"
                                                 min="0.01" value="{{ $item->current_price }}" step="any"
-                                                placeholder="{{ __('Enter Current Price') }}">
+                                                placeholder="{{ __('Enter Current Price') }}" 
+                                                @if($hasCodes) disabled @endif>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-4" id="previousPriceSection" @if($hasCodes) style="display: none;" @endif>
                                         <div class="form-group">
                                             <label for="">{{ __('Previous Price') }} (
                                                 {{ $currency->symbol }}
                                                 )</label>
                                             <input type="number" class="form-control" name="previous_price"
                                                 min="0.01" value="{{ $item->previous_price }}" step="any"
-                                                placeholder="{{ __('Enter Previous Price') }}">
+                                                placeholder="{{ __('Enter Previous Price') }}"
+                                                @if($hasCodes) disabled @endif>
                                         </div>
                                     </div>
 
@@ -933,6 +946,103 @@
                 ul.appendChild(li);
             });
         }
+
+        // Função para alternar entre upload de arquivo, link e código
+        function toggleFileUpload() {
+            const fileType = document.getElementById('fileType');
+            if (!fileType) return;
+            
+            const fileTypeValue = fileType.value;
+            const downloadFile = document.getElementById('downloadFile');
+            const downloadLink = document.getElementById('downloadLink');
+            const codeUploadSection = document.getElementById('codeUploadSection');
+            
+            // Selecionar os campos de preço e seus inputs
+            const currentPriceInput = document.querySelector('input[name="current_price"]');
+            const previousPriceInput = document.querySelector('input[name="previous_price"]');
+            const priceFields = document.querySelectorAll('.col-lg-4:has(input[name="current_price"]), .col-lg-4:has(input[name="previous_price"])');
+            
+            console.log('toggleFileUpload chamado, tipo:', fileTypeValue);
+            
+            if (fileTypeValue === 'upload') {
+                // Mostrar upload, ocultar link e código
+                if (downloadFile) downloadFile.classList.remove('d-none');
+                if (downloadLink) downloadLink.classList.add('d-none');
+                if (codeUploadSection) codeUploadSection.classList.add('d-none');
+                
+                // Mostrar campos de preço e habilitar validação
+                priceFields.forEach(field => {
+                    field.style.display = 'block';
+                });
+                if (currentPriceInput) {
+                    currentPriceInput.removeAttribute('disabled');
+                    currentPriceInput.setAttribute('required', 'required');
+                }
+                if (previousPriceInput) {
+                    previousPriceInput.removeAttribute('disabled');
+                }
+            } else if (fileTypeValue === 'link') {
+                // Mostrar link, ocultar upload e código
+                if (downloadFile) downloadFile.classList.add('d-none');
+                if (downloadLink) downloadLink.classList.remove('d-none');
+                if (codeUploadSection) codeUploadSection.classList.add('d-none');
+                
+                // Mostrar campos de preço e habilitar validação
+                priceFields.forEach(field => {
+                    field.style.display = 'block';
+                });
+                if (currentPriceInput) {
+                    currentPriceInput.removeAttribute('disabled');
+                    currentPriceInput.setAttribute('required', 'required');
+                }
+                if (previousPriceInput) {
+                    previousPriceInput.removeAttribute('disabled');
+                }
+            } else if (fileTypeValue === 'code') {
+                // Mostrar código, ocultar upload e link
+                if (downloadFile) downloadFile.classList.add('d-none');
+                if (downloadLink) downloadLink.classList.add('d-none');
+                if (codeUploadSection) codeUploadSection.classList.remove('d-none');
+                
+                // OCULTAR campos de preço e DESABILITAR validação
+                priceFields.forEach(field => {
+                    field.style.display = 'none';
+                });
+                if (currentPriceInput) {
+                    currentPriceInput.removeAttribute('required');
+                    currentPriceInput.setAttribute('disabled', 'disabled');
+                }
+                if (previousPriceInput) {
+                    previousPriceInput.setAttribute('disabled', 'disabled');
+                }
+            }
+        }
+        
+        // Executar ao carregar a página para configurar estado inicial
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('fileType')) {
+                toggleFileUpload();
+            }
+            
+            // Se o produto é digital E tem códigos, mostrar seção de gerenciar códigos
+            const productType = document.getElementById('productType').value;
+            @if($hasCodes)
+                if (productType === 'digital') {
+                    const manageCodesSection = document.getElementById('manageCodesSection');
+                    const fileInputSection = document.getElementById('fileInputSection');
+                    const currentPriceSection = document.getElementById('currentPriceSection');
+                    const previousPriceSection = document.getElementById('previousPriceSection');
+                    
+                    // Mostrar campo para adicionar mais códigos e botão de gerenciar
+                    if (manageCodesSection) manageCodesSection.style.display = 'block';
+                    if (fileInputSection) fileInputSection.style.display = 'block';
+                    
+                    // Ocultar campos de preço
+                    if (currentPriceSection) currentPriceSection.style.display = 'none';
+                    if (previousPriceSection) previousPriceSection.style.display = 'none';
+                }
+            @endif
+        });
     </script>
     
     <script>
