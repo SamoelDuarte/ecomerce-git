@@ -1219,36 +1219,21 @@ class ItemController extends Controller
         $order->payment_status = $request->payment_status;
         $order->save();
 
-        $be = DB::table('basic_extendeds')
-            ->select('is_smtp', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
-            ->first();;
         $sub = 'Payment Status Updated';
-
         $to = $order->billing_email;
         $fname = $order->billing_fname;
 
-        if ($be->is_smtp == 1) {
-            $mail_body    = 'Hello <strong>' . $fname . '</strong>,<br/>Your payment status is changed to ' . $request->payment_status . '.<br/>Thank you.';
+        $mail_body = 'Hello <strong>' . $fname . '</strong>,<br/>Your payment status is changed to ' . $request->payment_status . '.<br/>Thank you.';
 
-            /******** Send mail to user ********/
-            $data = [];
-            $data['smtp_status'] = $be->is_smtp;
-            $data['smtp_host'] = $be->smtp_host;
-            $data['smtp_port'] = $be->smtp_port;
-            $data['encryption'] = $be->encryption;
-            $data['smtp_username'] = $be->smtp_username;
-            $data['smtp_password'] = $be->smtp_password;
-
-            //mail info in array
-            $data['from_mail'] = $be->from_mail;
-            $data['recipient'] = $to;
-            $data['subject'] = $sub;
-            $data['body'] = $mail_body;
-            if ($request->payment_status == 'Completed') {
-                $data['invoice'] = $dir . $invoice;
-            }
-            BasicMailer::sendMail($data);
+        /******** Send mail to user using lojista's SMTP ********/
+        $data = [];
+        $data['recipient'] = $to;
+        $data['subject'] = $sub;
+        $data['body'] = $mail_body;
+        if ($request->payment_status == 'Completed') {
+            $data['invoice'] = $dir . $invoice;
         }
+        BasicMailer::sendMailFromUser($user, $data);
 
         Session::flash('success', __('Updated Successfully'));
         return back();

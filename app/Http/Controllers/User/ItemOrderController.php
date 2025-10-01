@@ -131,32 +131,19 @@ class ItemOrderController extends Controller
             $mail_subject = $mail_template->email_subject;
             $mail_body = $mail_template->email_body;
 
-            $info = DB::table('basic_extendeds')
-                ->select('is_smtp', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
-                ->first();
-
             $mail_body = str_replace('{customer_name}', $f_name . ' ' . $l_name, $mail_body);
             $mail_body = str_replace('{order_status}', $request->order_status, $mail_body);
             $mail_body = str_replace('{website_title}', $root_user->shop_name ?? $root_user->username, $mail_body);
 
             $to = $email;
 
-            /******** Send mail to user ********/
+            /******** Send mail to user using lojista's SMTP ********/
             $data = [];
-            $data['smtp_status'] = $info->is_smtp;
-            $data['smtp_host'] = $info->smtp_host;
-            $data['smtp_port'] = $info->smtp_port;
-            $data['encryption'] = $info->encryption;
-            $data['smtp_username'] = $info->smtp_username;
-            $data['smtp_password'] = $info->smtp_password;
-
-            //mail info in array
-            $data['from_mail'] = $info->from_mail;
             $data['recipient'] = $to;
             $data['subject'] = $mail_subject;
             $data['body'] = $mail_body;
             $data['invoice'] = public_path('assets/front/invoices/' . $po->invoice_number);
-            BasicMailer::sendMail($data);
+            BasicMailer::sendMailFromUser($root_user, $data);
 
             Session::flash('success', __('Updated Successfully'));
             return back();
@@ -176,26 +163,18 @@ class ItemOrderController extends Controller
             $validator->getMessageBag()->add('error', 'true');
             return response()->json($validator->errors());
         }
-        $be = BasicExtended::first();
+        
+        $user = Auth::guard('web')->user();
         $sub = $request->subject;
         $msg = $request->message;
         $to = $request->email;
 
-        /******** Send mail to user ********/
+        /******** Send mail to user using lojista's SMTP ********/
         $data = [];
-        $data['smtp_status'] = $be->is_smtp;
-        $data['smtp_host'] = $be->smtp_host;
-        $data['smtp_port'] = $be->smtp_port;
-        $data['encryption'] = $be->encryption;
-        $data['smtp_username'] = $be->smtp_username;
-        $data['smtp_password'] = $be->smtp_password;
-
-        //mail info in array
-        $data['from_mail'] = $be->from_mail;
         $data['recipient'] = $to;
         $data['subject'] = $sub;
         $data['body'] = $msg;
-        BasicMailer::sendMail($data);
+        BasicMailer::sendMailFromUser($user, $data);
 
         Session::flash('success', __('Sent successfully'));
         return "success";

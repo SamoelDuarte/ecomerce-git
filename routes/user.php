@@ -258,6 +258,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
 
             Route::get('/mail-information', 'User\SubscriberController@getMailInformation')->name('user.mail.information');
             Route::post('/mail-information/update', 'User\SubscriberController@storeMailInformation')->name('user.mail.subscriber')->middleware('limitCheck:items,update,without_ajax');
+            Route::post('/mail-information/test', 'User\SubscriberController@testMailConfiguration')->name('user.mail.test');
         });
 
         //user language

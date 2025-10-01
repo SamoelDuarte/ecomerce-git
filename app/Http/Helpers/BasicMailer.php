@@ -12,7 +12,8 @@ class BasicMailer
 {
   public static function sendMailFromUser($user, $data)
   {
-    if ($user->smtp_status == 1) {
+    // Check if user has SMTP configured
+    if ($user->smtp_status == 1 && !empty($user->smtp_host)) {
       $smtp = [
         'transport' => 'smtp',
         'host' => $user->smtp_host,
@@ -27,8 +28,12 @@ class BasicMailer
 
       try {
         Mail::send([], [], function (Message $message) use ($data, $user) {
+          $fromEmail = $user->email ?? $user->from_mail;
+          $fromName = $user->from_name ?? $user->username;
+          
           $message->to($data['recipient'])
-            ->from($user->email, $user->from_name)
+            ->from($fromEmail, $fromName)
+            ->cc($fromEmail, $fromName) // Envia cópia para o remetente
             ->subject($data['subject'])
             ->html($data['body'], 'text/html');
 
@@ -41,8 +46,21 @@ class BasicMailer
         Session::flash('warning', 'Mail could not be sent. Mailer Error: ' . Str::limit($e->getMessage(), 120));
         return false;
       }
+    } else {
+      // Fallback to admin SMTP if user doesn't have SMTP configured
+      $be = \App\Models\BasicExtended::first();
+      if ($be && $be->is_smtp == 1) {
+        $data['smtp_status'] = $be->is_smtp;
+        $data['smtp_host'] = $be->smtp_host;
+        $data['smtp_port'] = $be->smtp_port;
+        $data['encryption'] = $be->encryption;
+        $data['smtp_username'] = $be->smtp_username;
+        $data['smtp_password'] = $be->smtp_password;
+        $data['from_mail'] = $user->email ?? $be->from_mail;
+        return self::sendMail($data);
+      }
+      return false;
     }
-    return false;
   }
 
   public static function sendMail($data)
@@ -64,9 +82,12 @@ class BasicMailer
       try {
         Mail::send([], [], function (Message $message) use ($data) {
           $fromMail = $data['from_mail'];
+          $fromName = $data['from_name'] ?? $fromMail;
           $subject = $data['subject'];
+          
           $message->to($data['recipient'])
-            ->from($fromMail)
+            ->from($fromMail, $fromName)
+            ->cc($fromMail, $fromName) // Envia cópia para o remetente
             ->subject($subject)
             ->html($data['body'], 'text/html');
 

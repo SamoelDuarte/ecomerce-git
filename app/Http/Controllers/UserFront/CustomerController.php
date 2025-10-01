@@ -291,30 +291,22 @@ class CustomerController extends Controller
         $mailBody = str_replace('{password_reset_link}', $link, $mailBody);
         $mailBody = str_replace('{website_title}', $website_title, $mailBody);
 
-        $data = [];
-        $data['smtp_status'] = $parentUser->smtp_status ?? 0;
-        $data['smtp_host'] = $parentUser->smtp_host;
-        $data['smtp_port'] = $parentUser->smtp_port;
-        $data['encryption'] = $parentUser->encryption;
-        $data['smtp_username'] = $parentUser->smtp_username;
-        $data['smtp_password'] = $parentUser->smtp_password;
-        $data['from_mail'] = $parentUser->from_mail;
-        $data['from_name'] = $parentUser->from_name;
-
         //mail info in array
+        $data = [];
         $data['recipient'] = $request->email;
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
 
-        // Send Mail only if SMTP is enabled for parent user
-        if ($parentUser->smtp_status == 1) {
-            BasicMailer::sendMail($data);
+        // Send Mail using lojista's SMTP
+        $mailSent = BasicMailer::sendMailFromUser($parentUser, $data);
+        
+        if ($mailSent) {
             // store user email in session to use it later
             $user->verification_token = $token;
             $user->save();
             Session::flash('success', $keywords['We have sent a password reset link into your email address'] ?? __('We have sent a password reset link into your email address'));
         } else {
-            Session::flash('success', $keywords['Mail could not sent'] ?? __('Mail could not sent'));
+            Session::flash('warning', $keywords['Mail could not be sent. Please check your SMTP settings'] ?? __('Mail could not be sent. Please check your SMTP settings'));
         }
         return redirect()->back();
     }
@@ -465,24 +457,14 @@ class CustomerController extends Controller
         }
 
         // Get SMTP settings from parent user
-        $data = [];
-        $data['smtp_status'] = $parentUser->smtp_status ?? 0;
-        $data['smtp_host'] = $parentUser->smtp_host;
-        $data['smtp_port'] = $parentUser->smtp_port;
-        $data['encryption'] = $parentUser->encryption;
-        $data['smtp_username'] = $parentUser->smtp_username;
-        $data['smtp_password'] = $parentUser->smtp_password;
-        $data['from_mail'] = $parentUser->from_mail;
-        $data['from_name'] = $parentUser->from_name;
-
         //mail info in array
+        $data = [];
         $data['recipient'] = $request->email;
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
 
-        if ($parentUser->smtp_status == 1) {
-            BasicMailer::sendMail($data);
-        }
+        // Send mail using lojista's SMTP
+        BasicMailer::sendMailFromUser($parentUser, $data);
         return;
     }
     public function signupVerify(Request $request, $domain, $token)

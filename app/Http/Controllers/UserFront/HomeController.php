@@ -415,25 +415,16 @@ class HomeController extends Controller
         $request->validate($rules, $messages);
 
         if (!is_null($user->email)) {
-            $be =  BE::firstOrFail();
-            if ($be->is_smtp == 1 && !is_null($use_bs->email)) {
+            if (!is_null($use_bs->email)) {
                 $subject = $request->subject;
                 $message = '<p><strong>Enquirer Name: </strong>' . $request->name . '<br/><strong>Enquirer Mail: </strong>' . $request->email . '</p> <p>Message : ' . $request->message . '</p>';
-                /******** Send mail to user ********/
+                
+                /******** Send mail to user using lojista's SMTP ********/
                 $data = [];
-                $data['smtp_status'] = $be->is_smtp;
-                $data['smtp_host'] = $be->smtp_host;
-                $data['smtp_port'] = $be->smtp_port;
-                $data['encryption'] = $be->encryption;
-                $data['smtp_username'] = $be->smtp_username;
-                $data['smtp_password'] = $be->smtp_password;
-
-                //mail info in array
-                $data['from_mail'] = $be->from_mail;
                 $data['recipient'] = !is_null($use_bs->email) ? $use_bs->email : $user->email;
                 $data['subject'] = $subject;
                 $data['body'] = $message;
-                BasicMailer::sendMail($data);
+                BasicMailer::sendMailFromUser($user, $data);
             }
 
             Session::flash('success', $keywords['Message sent successfully'] ?? __('Message sent successfully'));

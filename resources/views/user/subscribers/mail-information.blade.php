@@ -64,13 +64,14 @@
                     <label>{{__("SMTP Status")}}</label>
                     <div class="selectgroup w-100">
                         <label class="selectgroup-item">
-                            <input type="checkbox" name="smtp_status" value="1" class="selectgroup-input" {{$user->smtp_status == 1 ? 'checked' : ''}}>
+                            <input type="checkbox" name="smtp_status" id="smtp_status" value="1" class="selectgroup-input smtp-status-toggle" {{$user->smtp_status == 1 ? 'checked' : ''}}>
                             <span class="selectgroup-button">{{__("Active")}}</span>
                         </label>
                     </div>
+                    <small class="form-text text-muted">{{__("Ative para usar seu próprio servidor SMTP. Se desativado, usará o SMTP do sistema.")}}</small>
                 </div>
 
-                <div class="smtp-fields" id="smtp-fields" style="{{$user->smtp_status != 1 ? 'display: none;' : ''}}">
+                <div class="smtp-fields" id="smtp-fields">
                     <div class="form-group">
                         <label>{{__("SMTP Host")}}</label>
                         <input type="text" class="form-control" name="smtp_host" value="{{$user->smtp_host}}">
@@ -110,13 +111,26 @@
                             <p class="mt-2 mb-0 text-danger">{{$errors->first('smtp_password')}}</p>
                         @endif
                     </div>
+
+                    <div class="alert alert-info">
+                        <strong>{{__("Nota:")}} </strong>{{__("Se o SMTP não estiver configurado, os emails serão enviados usando o SMTP do sistema.")}}
+                    </div>
+
+                    <div class="form-group">
+                        <label>{{__("Email para Teste")}} <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="test-email" placeholder="{{__("Digite o email onde deseja receber o teste")}}">
+                        <small class="form-text text-muted">{{__("Este email será usado apenas para o teste. Você pode usar qualquer email válido.")}}</small>
+                    </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="card-footer text-center">
             <button type="submit" class="btn btn-success">
-              {{ __('save') }}
+              <i class="fas fa-save"></i> {{ __('Salvar Configurações') }}
+            </button>
+            <button type="button" class="btn btn-info ml-2" id="test-smtp-btn">
+              <i class="fas fa-paper-plane"></i> {{ __('Enviar Email de Teste') }}
             </button>
           </div>
         </form>
@@ -128,12 +142,94 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('input[name="smtp_status"]').on('change', function() {
-            if($(this).is(':checked')) {
-                $('#smtp-fields').show();
+        // Show/Hide SMTP fields based on checkbox
+        function toggleSmtpFields() {
+            if($('#smtp_status').is(':checked')) {
+                $('#smtp-fields').slideDown();
             } else {
-                $('#smtp-fields').hide();
+                $('#smtp-fields').slideUp();
             }
+        }
+        
+        // Initialize on page load
+        toggleSmtpFields();
+        
+        // Handle checkbox change
+        $('#smtp_status, .smtp-status-toggle').on('change', function() {
+            toggleSmtpFields();
+        });
+
+        // Test SMTP button
+        $('#test-smtp-btn').on('click', function(e) {
+            e.preventDefault();
+            
+            var smtpStatus = $('input[name="smtp_status"]').is(':checked');
+            
+            if (!smtpStatus) {
+                alert('{{__("Por favor, ative o SMTP antes de testar.")}}');
+                return;
+            }
+
+            var smtpHost = $('input[name="smtp_host"]').val();
+            var smtpPort = $('input[name="smtp_port"]').val();
+            var smtpUsername = $('input[name="smtp_username"]').val();
+            var smtpPassword = $('input[name="smtp_password"]').val();
+            var testEmail = $('#test-email').val();
+            var fromEmail = $('input[name="email"]').val();
+
+            if (!smtpHost || !smtpPort || !smtpUsername || !smtpPassword) {
+                alert('{{__("Por favor, preencha todos os campos SMTP antes de testar.")}}');
+                return;
+            }
+
+            if (!testEmail) {
+                alert('{{__("Por favor, informe o email de destino para o teste.")}}');
+                $('#test-email').focus();
+                return;
+            }
+
+            // Validação básica de email
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(testEmail)) {
+                alert('{{__("Por favor, informe um email válido para o teste.")}}');
+                $('#test-email').focus();
+                return;
+            }
+
+            var btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> {{__("Enviando...")}}');
+
+            $.ajax({
+                url: '{{ route("user.mail.test") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    smtp_host: smtpHost,
+                    smtp_port: smtpPort,
+                    smtp_username: smtpUsername,
+                    smtp_password: smtpPassword,
+                    encryption: $('select[name="encryption"]').val(),
+                    test_email: testEmail,
+                    from_email: fromEmail,
+                    from_name: $('input[name="from_name"]').val()
+                },
+                success: function(response) {
+                    btn.prop('disabled', false).html('<i class="fas fa-paper-plane"></i> {{__("Enviar Email de Teste")}}');
+                    if (response.success) {
+                        alert('✅ {{__("Email de teste enviado com sucesso para")}} ' + testEmail + '!\n\n{{__("Verifique sua caixa de entrada e também a pasta de spam.")}}');
+                        $('#test-email').val(''); // Limpa o campo após envio
+                    } else {
+                        alert('❌ {{__("Erro ao enviar email:")}}\n\n' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false).html('<i class="fas fa-paper-plane"></i> {{__("Enviar Email de Teste")}}');
+                    var errorMsg = xhr.responseJSON && xhr.responseJSON.message 
+                        ? xhr.responseJSON.message 
+                        : '{{__("Erro ao enviar email de teste.")}}';
+                    alert('❌ {{__("Erro:")}} ' + errorMsg);
+                }
+            });
         });
     });
 </script>
