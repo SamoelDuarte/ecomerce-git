@@ -21,6 +21,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class DashboardController extends Controller
 {
@@ -333,7 +336,70 @@ class DashboardController extends Controller
   {
     $filename = 'memberships_export_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
     
-    return Excel::download(new MembershipExport($data), $filename);
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    
+    // Definir cabeçalhos
+    $headers = [
+      'ID',
+      'Usuário',
+      'Nome da Loja',
+      'Plano',
+      'Preço',
+      'Status',
+      'Data Início',
+      'Data Expiração',
+      'Método Pagamento',
+      'Data Criação'
+    ];
+    
+    // Escrever cabeçalhos
+    $col = 'A';
+    foreach ($headers as $header) {
+      $sheet->setCellValue($col . '1', $header);
+      $sheet->getStyle($col . '1')->getFont()->setBold(true);
+      $sheet->getColumnDimension($col)->setAutoSize(true);
+      $col++;
+    }
+    
+    // Escrever dados
+    $row = 2;
+    foreach ($data as $membership) {
+      $sheet->setCellValue('A' . $row, $membership->id);
+      $sheet->setCellValue('B' . $row, $membership->user->username ?? '');
+      $sheet->setCellValue('C' . $row, $membership->user->shop_name ?? '');
+      $sheet->setCellValue('D' . $row, $membership->package->title ?? '');
+      $sheet->setCellValue('E' . $row, $membership->price);
+      $sheet->setCellValue('F' . $row, $membership->status == 1 ? 'Ativo' : 'Inativo');
+      $sheet->setCellValue('G' . $row, $membership->start_date);
+      $sheet->setCellValue('H' . $row, $membership->expire_date);
+      $sheet->setCellValue('I' . $row, $membership->payment_method);
+      $sheet->setCellValue('J' . $row, $membership->created_at->format('Y-m-d H:i:s'));
+      $row++;
+    }
+    
+    // Aplicar estilo ao cabeçalho
+    $sheet->getStyle('A1:J1')->applyFromArray([
+      'fill' => [
+        'fillType' => Fill::FILL_SOLID,
+        'startColor' => ['rgb' => '4CAF50']
+      ],
+      'font' => [
+        'bold' => true,
+        'color' => ['rgb' => 'FFFFFF']
+      ]
+    ]);
+    
+    // Criar o writer
+    $writer = new Xlsx($spreadsheet);
+    
+    // Headers para download
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    
+    $writer->save('php://output');
+    exit;
   }
 
   // public function ecommerce()
