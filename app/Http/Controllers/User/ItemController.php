@@ -191,16 +191,9 @@ class ItemController extends Controller
         $rules['status'] = 'required';
         $rules['category'] = 'required';
 
-        // 5. Ajuste regras para preço: se digital+code, preços não são obrigatórios
-        if (!($request->type == 'digital' && $request->file_type == 'code')) {
-            // Para demais casos, preços obrigatórios
-            $rules['current_price'] = 'required|numeric|min:0.01';
-            $rules['previous_price'] = 'nullable|numeric|min:0.01';
-        } else {
-            // Para digital + code, preços opcionais, mas pode deixar nullable
-            $rules['current_price'] = 'nullable|numeric|min:0.01';
-            $rules['previous_price'] = 'nullable|numeric|min:0.01';
-        }
+        // 5. Regras para preço - sempre obrigatórios
+        $rules['current_price'] = 'required|numeric|min:0.01';
+        $rules['previous_price'] = 'nullable|numeric|min:0.01';
 
         // 6. Regras para tipo digital
         if ($request->type == 'digital') {
@@ -532,16 +525,9 @@ class ItemController extends Controller
         $defaulLang = Language::where([['user_id', Auth::guard('web')->user()->id], ['is_default', 1]])->first();
         $messages = [];
         
-        // Ajuste regras para preço: se digital+code, preços não são obrigatórios
-        if (!($item->type == 'digital' && $request->file_type == 'code')) {
-            // Para demais casos, preços obrigatórios
-            $rules['current_price'] = 'required|numeric|min:0.01';
-            $rules['previous_price'] = 'nullable|numeric|min:0.01';
-        } else {
-            // Para digital + code, preços opcionais
-            $rules['current_price'] = 'nullable|numeric|min:0.01';
-            $rules['previous_price'] = 'nullable|numeric|min:0.01';
-        }
+        // Regras para preço - sempre obrigatórios
+        $rules['current_price'] = 'required|numeric|min:0.01';
+        $rules['previous_price'] = 'nullable|numeric|min:0.01';
         
         $rules['category'] = 'required';
 
