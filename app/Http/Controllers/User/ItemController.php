@@ -648,14 +648,10 @@ class ItemController extends Controller
         $item->status = $request->status;
         $item->thumbnail = $request->hasFile('thumbnail') ? $thumbnail_name : $item->thumbnail;
         
-        // Se for tipo digital com códigos, define preço como 0
-        if ($item->type == 'digital' && $request->file_type == 'code') {
-            $item->current_price = 0;
-            $item->previous_price = 0;
-        } else {
-            $item->current_price = $request->current_price;
-            $item->previous_price = $request->previous_price;
-        }
+        // Sempre salvar o preço, independente do tipo de produto
+        $item->current_price = $request->current_price ?? $item->current_price;
+        $item->previous_price = $request->previous_price ?? $item->previous_price;
+        
         $item->type = $request->type;
         $item->download_file = $filename ?? null;
         $item->download_link = $request->download_link;
