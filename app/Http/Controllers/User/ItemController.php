@@ -361,11 +361,13 @@ class ItemController extends Controller
             // Remove a primeira linha (cabeçalho) antes de processar
             $dataRows = array_slice($rows, 1);
             
+            // Usar o preço do produto (current_price) para todos os códigos
+            $productPrice = $request->current_price ?? 0;
+            
             foreach ($dataRows as $row) {
-                // Ajuste conforme suas colunas, ex: col 1 descrição, col 2 código, col 3 valor
+                // Agora apenas 2 colunas: col 0 = nome, col 1 = código
                 $name = $row[0] ?? null;
                 $code = $row[1] ?? null;
-                $value = isset($row[2]) ? floatval($row[2]) : null;
                 
                 // Validar que não é uma linha vazia
                 if ($code && trim($code) !== '') {
@@ -373,7 +375,7 @@ class ItemController extends Controller
                         'user_item_id' => $item->id,
                         'name' =>  $name,
                         'code' => $code,
-                        'price' => $value,
+                        'price' => $productPrice,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -677,11 +679,13 @@ class ItemController extends Controller
             // Remove a primeira linha (cabeçalho) antes de processar
             $dataRows = array_slice($rows, 1);
             
+            // Usar o preço do produto (current_price) para todos os códigos
+            $productPrice = $request->current_price ?? $item->current_price ?? 0;
+            
             foreach ($dataRows as $row) {
-                // Ajuste conforme suas colunas: col 0 = nome, col 1 = código, col 2 = valor
+                // Agora apenas 2 colunas: col 0 = nome, col 1 = código
                 $name = $row[0] ?? null;
                 $code = $row[1] ?? null;
-                $value = isset($row[2]) ? floatval($row[2]) : null;
                 
                 // Validar que não é uma linha vazia ou cabeçalho
                 if ($code && trim($code) !== '' && strtolower($code) !== 'codigo') {
@@ -697,7 +701,7 @@ class ItemController extends Controller
                             'user_item_id' => $item->id,
                             'name' => $name,
                             'code' => $code,
-                            'price' => $value,
+                            'price' => $productPrice,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -1344,14 +1348,17 @@ class ItemController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
         ]);
+
+        // Buscar o preço do produto
+        $item = UserItem::findOrFail($id);
+        $productPrice = $item->current_price ?? 0;
 
         DigitalProductCode::create([
             'user_item_id' => $id,
             'name' => $request->name,
             'code' => $request->code,
-            'price' => $request->price,
+            'price' => $productPrice,
             'is_used' => false,
         ]);
 
@@ -1377,15 +1384,18 @@ class ItemController extends Controller
             'codes' => 'required|array',
             'codes.*.variation' => 'required|string',
             'codes.*.code' => 'required|string',
-            'codes.*.price' => 'required|numeric',
         ]);
+
+        // Buscar o preço do produto
+        $item = UserItem::findOrFail($request->item_id);
+        $productPrice = $item->current_price ?? 0;
 
         foreach ($request->codes as $code) {
             DigitalProductCode::create([
                 'user_item_id' => $request->item_id,
                 'name' => $code['variation'],
                 'code' => $code['code'],
-                'price' => $code['price'],
+                'price' => $productPrice,
                 'is_used' => 0,
             ]);
         }
