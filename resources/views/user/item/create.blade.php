@@ -120,7 +120,7 @@ $type = request()->input('type');
                                     <div class="form-group">
                                         <label for="">{{ __('Type') }} <span
                                                 class="text-danger">**</span></label>
-                                        <select name="file_type" class="form-control" id="fileType">
+                                        <select name="file_type" class="form-control" id="fileType" onchange="toggleFileUpload()">
                                             <option value="upload" selected>{{ __('File Upload') }}</option>
                                             <option value="link">{{ __('File Download Link') }}</option>
                                             <option value="code">Código</option>
@@ -154,7 +154,7 @@ $type = request()->input('type');
                                                 class="text-danger">**</span></label>
                                         <input name="download_link" type="text" class="form-control">
                                     </div>
-                                     <div id="codeUploadSection">
+                                     <div id="codeUploadSection" class="d-none">
                                     <div class="form-group">
                                         <label for="codeExcelInput">
                                             {{ __('Importar Planilha de Códigos') }}
@@ -163,9 +163,7 @@ $type = request()->input('type');
                                         <input type="file" class="form-control" name="codeExcelInput"
                                             id="codeExcelInput" accept=".xlsx,.csv,.xls">
                                         <small class="form-text text-muted">
-                                            📋 Formatos aceitos: CSV (.csv) ou Excel (.xlsx, .xls)<br>
-                                            ℹ️ O arquivo deve conter 3 colunas: <strong>nome</strong>, <strong>codigo</strong>, <strong>valor</strong><br>
-                                            💡 <a href="{{ asset('modelo_codigos_correto.csv') }}" download class="text-primary">
+                                            <a href="{{ asset('modelo_codigos_correto.csv') }}" download class="text-primary">
                                                 <i class="fa fa-download"></i> Baixar modelo CSV de exemplo
                                             </a>
                                         </small>
@@ -247,10 +245,10 @@ $type = request()->input('type');
                                                 class="text-danger">**</span></label>
                                         <select class="form-control" name="status">
                                             <option value="" selected disabled>
-                                                {{ __('Select Status') }}
+                                                Selecionar Status
                                             </option>
-                                            <option value="1">{{ __('Show') }}</option>
-                                            <option value="0">{{ __('Hide') }}</option>
+                                            <option value="1">Visível</option>
+                                            <option value="0">Oculto</option>
                                         </select>
                                     </div>
                                 </div>
@@ -508,7 +506,6 @@ $type = request()->input('type');
             const lineNumber = index + 2; // +2 porque removemos o cabeçalho e index começa em 0
             const variation = row[0] !== undefined && row[0] !== null ? row[0].toString().trim() : '';
             const code = row[1] !== undefined && row[1] !== null ? row[1].toString().trim() : '';
-            const value = row[2] !== undefined && row[2] !== null ? row[2].toString().trim() : '';
 
             // Validar campos obrigatórios
             if (!variation) {
@@ -519,26 +516,6 @@ $type = request()->input('type');
 
             if (!code) {
                 result.errors.push(`Linha ${lineNumber}: Código não pode estar vazio`);
-                result.isValid = false;
-                return;
-            }
-
-            if (!value) {
-                result.errors.push(`Linha ${lineNumber}: Valor não pode estar vazio`);
-                result.isValid = false;
-                return;
-            }
-
-            // Validar se o valor é numérico
-            const numericValue = parseFloat(value.replace(',', '.'));
-            if (isNaN(numericValue)) {
-                result.errors.push(`Linha ${lineNumber}: Valor "${value}" deve ser numérico (ex: 10.50)`);
-                result.isValid = false;
-                return;
-            }
-
-            if (numericValue < 0) {
-                result.errors.push(`Linha ${lineNumber}: Valor não pode ser negativo`);
                 result.isValid = false;
                 return;
             }
@@ -580,12 +557,7 @@ $type = request()->input('type');
             feedbackDiv.innerHTML = `
                 <div class="alert alert-success">
                     ✅ <strong>Arquivo validado com sucesso!</strong><br>
-                    📊 <strong>Resumo:</strong><br>
                     • Total de linhas processadas: ${validationResult.totalLines}<br>
-                    • Linhas válidas: ${validationResult.validLines}<br>
-                    • Cabeçalho: removido automaticamente<br><br>
-                    📋 <strong>Variações encontradas:</strong><br>
-                    ${variationsList}
                 </div>
             `;
         }
@@ -698,8 +670,8 @@ $type = request()->input('type');
                 // Validação do cabeçalho - MAIS FLEXÍVEL
                 const header = rows[0];
                 
-                if (!header || header.length < 3) {
-                    showValidationError('Arquivo não possui o cabeçalho correto. Por favor, use o modelo CSV fornecido.');
+                if (!header || header.length < 2) {
+                    showValidationError('Arquivo não possui o cabeçalho correto. O arquivo deve ter 2 colunas: nome e codigo.');
                     return;
                 }
 
@@ -715,14 +687,14 @@ $type = request()->input('type');
 
                 const normalizedHeader = header.map(h => normalizeHeader(h || ''));
                 
-                // Aceitar diferentes variações do cabeçalho
+                // Aceitar diferentes variações do cabeçalho (apenas 2 colunas agora)
                 const validHeaderPatterns = [
-                    ['nome', 'codigo', 'valor'],
-                    ['name', 'code', 'value'],
-                    ['variacao', 'codigo', 'valor'],
-                    ['variation', 'code', 'value'],
-                    ['produto', 'codigo', 'valor'],
-                    ['product', 'code', 'value']
+                    ['nome', 'codigo'],
+                    ['name', 'code'],
+                    ['variacao', 'codigo'],
+                    ['variation', 'code'],
+                    ['produto', 'codigo'],
+                    ['product', 'code']
                 ];
 
                 const headerValid = validHeaderPatterns.some(pattern => {
@@ -736,11 +708,12 @@ $type = request()->input('type');
                     console.warn('Cabeçalho normalizado:', normalizedHeader);
                     showValidationError(`Formato de arquivo inválido!\n\n` +
                         `✅ Cabeçalho esperado (uma das opções):\n` +
-                        `   • nome, codigo, valor\n` +
-                        `   • name, code, value\n` +
-                        `   • variacao, codigo, valor\n\n` +
+                        `   • nome, codigo\n` +
+                        `   • name, code\n` +
+                        `   • variacao, codigo\n\n` +
                         `❌ Cabeçalho encontrado: ${header.join(', ')}\n\n` +
-                        `DICA: Certifique-se de que a primeira linha tem 3 colunas com os nomes corretos.`);
+                        `💰 IMPORTANTE: O valor do produto será o preço definido na página.\n\n` +
+                        `DICA: Certifique-se de que a primeira linha tem 2 colunas com os nomes corretos.`);
                     return;
                 }
 
@@ -893,48 +866,29 @@ $type = request()->input('type');
         let downloadLink = document.getElementById('downloadLink');
         let codeUploadSection = document.getElementById('codeUploadSection');
         let fileUploadContainer = document.getElementById('fileUploadContainer');
-        let priceGroups = document.querySelectorAll('.price-group');
         
       
         if (fileTypeValue === 'upload') {
-            // Mostrar container de upload/link, ocultar seção de códigos
+            // Mostrar upload de arquivo, ocultar link e códigos
             if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
-            if (codeUploadSection) codeUploadSection.classList.add('d-none');
             if (downloadFile) downloadFile.classList.remove('d-none');
             if (downloadLink) downloadLink.classList.add('d-none');
-            
-            // Mostrar campos de preço
-            priceGroups.forEach(function(group) {
-                group.classList.remove('d-none');
-                group.style.display = ''; // Remove inline style
-            });
-            console.log('Modo upload ativado');
-        } else if (fileTypeValue === 'link') {
-            // Mostrar container de upload/link, ocultar seção de códigos
-            if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
             if (codeUploadSection) codeUploadSection.classList.add('d-none');
+            
+        } else if (fileTypeValue === 'link') {
+            // Mostrar link, ocultar upload de arquivo e códigos
+            if (fileUploadContainer) fileUploadContainer.classList.remove('d-none');
             if (downloadFile) downloadFile.classList.add('d-none');
             if (downloadLink) downloadLink.classList.remove('d-none');
-            
-            // Mostrar campos de preço
-            priceGroups.forEach(function(group) {
-                group.classList.remove('d-none');
-                group.style.display = ''; // Remove inline style
-            });
-            console.log('Modo link ativado');
+            if (codeUploadSection) codeUploadSection.classList.add('d-none');
+
         } else if (fileTypeValue === 'code') {
-            // Ocultar container de upload/link, mostrar seção de códigos
-            if (fileUploadContainer) fileUploadContainer.classList.add('d-none');
-            if (codeUploadSection) codeUploadSection.classList.remove('d-none');
+            // Mostrar seção de códigos, ocultar upload de arquivo e link
+            if (fileUploadContainer) fileUploadContainer.classList.remove('d-none'); // Manter container visível!
             if (downloadFile) downloadFile.classList.add('d-none');
             if (downloadLink) downloadLink.classList.add('d-none');
-            
-            // Ocultar campos de preço quando tipo for 'código'
-            priceGroups.forEach(function(group) {
-                group.classList.add('d-none');
-                group.style.display = 'none'; // Backup para garantir que oculte
-            });
-            console.log('Modo código ativado - preços e uploads ocultos');
+            if (codeUploadSection) codeUploadSection.classList.remove('d-none'); // Mostrar códigos
+
         }
     }
 
@@ -942,10 +896,10 @@ $type = request()->input('type');
         // Create workbook and worksheet
         const workbook = XLSX.utils.book_new();
         const ws_data = [
-            ['nome', 'codigo', 'valor'], // Header
-            ['Versão Básica', 'ABC123', '10.50'], // Sample data
-            ['Versão Premium', 'XYZ789', '25.00'],
-            ['Versão Enterprise', 'ENT456', '50.00']
+            ['nome', 'codigo'], // Header - removida coluna valor
+            ['Versão Básica', 'ABC123'], // Sample data
+            ['Versão Premium', 'XYZ789'],
+            ['Versão Enterprise', 'ENT456']
         ];
         
         const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
@@ -956,6 +910,13 @@ $type = request()->input('type');
         // Save file
         XLSX.writeFile(workbook, 'modelo_codigos.xlsx');
     }
+
+    // Executar ao carregar a página para configurar estado inicial
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('fileType')) {
+            toggleFileUpload();
+        }
+    });
 </script>
 <script>
     "use strict";

@@ -373,8 +373,8 @@
             $("#downloadTemplateBtn").removeClass('d-none');
 
             // Esconder preços para códigos
-            $(".price-group").addClass('d-none');
-            $(".price-group input").attr('disabled', true);
+            // $(".price-group").addClass('d-none');
+            // $(".price-group input").attr('disabled', true);
 
         } else {
             // Mostrar upload (default)

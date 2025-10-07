@@ -265,12 +265,12 @@
                                                     class="text-danger">**</span></label>
                                             <select class="form-control" name="status">
                                                 <option value="" selected disabled>
-                                                    {{ __('Select Status') }}</option>
+                                                    Selecionar Status</option>
                                                 <option value="1" {{ $item->status == 1 ? 'selected' : '' }}>
-                                                    {{ __('Show') }}
+                                                    Visível
                                                 </option>
                                                 <option value="0" {{ $item->status == 0 ? 'selected' : '' }}>
-                                                    {{ __('Hide') }}
+                                                    Oculto
                                                 </option>
                                             </select>
                                         </div>
@@ -280,25 +280,23 @@
 
 
 
-                                    <div class="col-lg-4" id="currentPriceSection" @if($hasCodes) style="display: none;" @endif>
+                                    <div class="col-lg-4" id="currentPriceSection">
                                         <div class="form-group">
                                             <label for=""> {{ __('Current Price') }}
                                                 ({{ $currency->symbol }}) <span class="text-danger">**</span></label>
                                             <input type="number" class="form-control" name="current_price"
                                                 min="0.01" value="{{ $item->current_price }}" step="any"
-                                                placeholder="{{ __('Enter Current Price') }}" 
-                                                @if($hasCodes) disabled @endif>
+                                                placeholder="{{ __('Enter Current Price') }}" required>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4" id="previousPriceSection" @if($hasCodes) style="display: none;" @endif>
+                                    <div class="col-lg-4" id="previousPriceSection">
                                         <div class="form-group">
                                             <label for="">{{ __('Previous Price') }} (
                                                 {{ $currency->symbol }}
                                                 )</label>
                                             <input type="number" class="form-control" name="previous_price"
                                                 min="0.01" value="{{ $item->previous_price }}" step="any"
-                                                placeholder="{{ __('Enter Previous Price') }}"
-                                                @if($hasCodes) disabled @endif>
+                                                placeholder="{{ __('Enter Previous Price') }}">
                                         </div>
                                     </div>
 
@@ -683,10 +681,10 @@
 
                     // Validação do cabeçalho
                     const header = rows[0];
-                    const expectedHeaders = ['nome', 'codigo', 'valor'];
+                    const expectedHeaders = ['nome', 'codigo'];
                     
-                    if (!header || header.length < 3) {
-                        showValidationError('Arquivo não possui o cabeçalho correto. Por favor, use o modelo CSV fornecido.');
+                    if (!header || header.length < 2) {
+                        showValidationError('Arquivo não possui o cabeçalho correto. O arquivo deve ter 2 colunas: nome e codigo.');
                         return;
                     }
                     
@@ -700,6 +698,7 @@
                         showValidationError(`Formato de arquivo inválido!\n\n` +
                             `✅ Cabeçalho esperado: ${expectedHeaders.join(', ')}\n` +
                             `❌ Cabeçalho encontrado: ${header.join(', ')}\n\n` +
+                            `💰 IMPORTANTE: O valor do produto será o preço definido na página.\n\n` +
                             `Por favor, baixe e use o modelo CSV fornecido.`);
                         return;
                     }
@@ -840,7 +839,6 @@
                 const lineNumber = index + 2; // +2 porque removemos o cabeçalho e index começa em 0
                 const variation = row[0] !== undefined && row[0] !== null ? row[0].toString().trim() : '';
                 const code = row[1] !== undefined && row[1] !== null ? row[1].toString().trim() : '';
-                const value = row[2] !== undefined && row[2] !== null ? row[2].toString().trim() : '';
 
                 // Validar campos obrigatórios
                 if (!variation) {
@@ -851,26 +849,6 @@
 
                 if (!code) {
                     result.errors.push(`Linha ${lineNumber}: Código não pode estar vazio`);
-                    result.isValid = false;
-                    return;
-                }
-
-                if (!value) {
-                    result.errors.push(`Linha ${lineNumber}: Valor não pode estar vazio`);
-                    result.isValid = false;
-                    return;
-                }
-
-                // Validar se o valor é numérico
-                const numericValue = parseFloat(value.replace(',', '.'));
-                if (isNaN(numericValue)) {
-                    result.errors.push(`Linha ${lineNumber}: Valor "${value}" deve ser numérico (ex: 10.50)`);
-                    result.isValid = false;
-                    return;
-                }
-
-                if (numericValue < 0) {
-                    result.errors.push(`Linha ${lineNumber}: Valor não pode ser negativo`);
                     result.isValid = false;
                     return;
                 }
@@ -1004,16 +982,16 @@
                 if (downloadLink) downloadLink.classList.add('d-none');
                 if (codeUploadSection) codeUploadSection.classList.remove('d-none');
                 
-                // OCULTAR campos de preço e DESABILITAR validação
+                // Manter campos de preço VISÍVEIS e com validação
                 priceFields.forEach(field => {
-                    field.style.display = 'none';
+                    field.style.display = 'block';
                 });
                 if (currentPriceInput) {
-                    currentPriceInput.removeAttribute('required');
-                    currentPriceInput.setAttribute('disabled', 'disabled');
+                    currentPriceInput.setAttribute('required', 'required');
+                    currentPriceInput.removeAttribute('disabled');
                 }
                 if (previousPriceInput) {
-                    previousPriceInput.setAttribute('disabled', 'disabled');
+                    previousPriceInput.removeAttribute('disabled');
                 }
             }
         }
@@ -1030,16 +1008,12 @@
                 if (productType === 'digital') {
                     const manageCodesSection = document.getElementById('manageCodesSection');
                     const fileInputSection = document.getElementById('fileInputSection');
-                    const currentPriceSection = document.getElementById('currentPriceSection');
-                    const previousPriceSection = document.getElementById('previousPriceSection');
                     
                     // Mostrar campo para adicionar mais códigos e botão de gerenciar
                     if (manageCodesSection) manageCodesSection.style.display = 'block';
                     if (fileInputSection) fileInputSection.style.display = 'block';
                     
-                    // Ocultar campos de preço
-                    if (currentPriceSection) currentPriceSection.style.display = 'none';
-                    if (previousPriceSection) previousPriceSection.style.display = 'none';
+                    // Manter campos de preço visíveis - NÃO OCULTAR
                 }
             @endif
         });
