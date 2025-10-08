@@ -390,23 +390,17 @@ class Common
             $itemPrincipal = UserItem::findOrFail($item['id']);
 
             if ($itemPrincipal->hasCode()) {
-                // Nome da variação (chave do array)
-                $nomeV = key($item['variations']);
-                // Buscar códigos digitais disponíveis
+                // Buscar códigos digitais disponíveis (sem filtrar por nome)
                 $codigos = DigitalProductCode::where('user_item_id', $itemPrincipal->id)
-                    ->where('name', $nomeV)
                     ->where('is_used', 0)
                     ->limit($item['qty'])
                     ->get();
-
 
                 $codesArray = [];
 
                 foreach ($codigos as $codigo) {
                     $codesArray[] = [
-                        'name'  => $codigo->name,
-                        'code'  => $codigo->code,
-                        'price' => $codigo->price
+                        'code'  => $codigo->code
                     ];
 
                     // Atualiza como usado
@@ -449,19 +443,20 @@ class Common
                 ->first();
 
             if ($isDigital && !empty($codesList[$key])) {
-                // Somar os preços dos códigos digitais
+                // Para produtos digitais com códigos, usar o preço do produto multiplicado pela quantidade
                 $codesDecoded = json_decode($codesList[$key], true);
-                $item_price = 0;
-                foreach ($codesDecoded as $codeData) {
-                    $item_price += currency_converter($codeData['price'], $item->id);
-                }
+                $codeQuantity = count($codesDecoded);
+                $item_price = currency_converter(
+                    ($item->flash == 1
+                        ? ($item->current_price - ($item->current_price * ($item->flash_amount / 100)))
+                        : $item->current_price)
+                ) * $codeQuantity;
             } else {
                 // Preço físico normal
                 $item_price = currency_converter(
                     ($item->flash == 1
                         ? ($item->current_price - ($item->current_price * ($item->flash_amount / 100)))
-                        : $item->current_price),
-                    $item->id
+                        : $item->current_price)
                 );
             }
 
