@@ -12,9 +12,7 @@ class DigitalProductCode extends Model
 
     protected $fillable = [
         'user_item_id',
-        'name',
         'code',
-        'price',
         'is_used',
         'used_at',
         'order_id',

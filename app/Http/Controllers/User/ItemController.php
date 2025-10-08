@@ -341,7 +341,7 @@ class ItemController extends Controller
         $item->height = $request->height ?? null;
         $item->save();
 
-        // 11. Se for digital + code, ler planilha e salvar códigos na tabela user_item_codes
+        // 11. Se for digital + code, ler planilha e salvar códigos na tabela digital_product_codes
         if ($request->type == 'digital' && $request->file_type == 'code' && $request->hasFile('codeExcelInput')) {
 
             $codeFile = $request->file('codeExcelInput');
@@ -354,21 +354,15 @@ class ItemController extends Controller
             // Remove a primeira linha (cabeçalho) antes de processar
             $dataRows = array_slice($rows, 1);
             
-            // Usar o preço do produto (current_price) para todos os códigos
-            $productPrice = $request->current_price ?? 0;
-            
             foreach ($dataRows as $row) {
-                // Agora apenas 2 colunas: col 0 = nome, col 1 = código
-                $name = $row[0] ?? null;
-                $code = $row[1] ?? null;
+                // Agora apenas 1 coluna: col 0 = código
+                $code = $row[0] ?? null;
                 
                 // Validar que não é uma linha vazia
                 if ($code && trim($code) !== '') {
                     DB::table('digital_product_codes')->insert([
                         'user_item_id' => $item->id,
-                        'name' =>  $name,
                         'code' => $code,
-                        'price' => $productPrice,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -665,13 +659,9 @@ class ItemController extends Controller
             // Remove a primeira linha (cabeçalho) antes de processar
             $dataRows = array_slice($rows, 1);
             
-            // Usar o preço do produto (current_price) para todos os códigos
-            $productPrice = $request->current_price ?? $item->current_price ?? 0;
-            
             foreach ($dataRows as $row) {
-                // Agora apenas 2 colunas: col 0 = nome, col 1 = código
-                $name = $row[0] ?? null;
-                $code = $row[1] ?? null;
+                // Agora apenas 1 coluna: col 0 = código
+                $code = $row[0] ?? null;
                 
                 // Validar que não é uma linha vazia ou cabeçalho
                 if ($code && trim($code) !== '' && strtolower($code) !== 'codigo') {
@@ -685,9 +675,7 @@ class ItemController extends Controller
                     if (!$exists) {
                         DB::table('digital_product_codes')->insert([
                             'user_item_id' => $item->id,
-                            'name' => $name,
                             'code' => $code,
-                            'price' => $productPrice,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -1368,20 +1356,13 @@ class ItemController extends Controller
         $request->validate([
             'item_id' => 'required|exists:user_items,id',
             'codes' => 'required|array',
-            'codes.*.variation' => 'required|string',
             'codes.*.code' => 'required|string',
         ]);
-
-        // Buscar o preço do produto
-        $item = UserItem::findOrFail($request->item_id);
-        $productPrice = $item->current_price ?? 0;
 
         foreach ($request->codes as $code) {
             DigitalProductCode::create([
                 'user_item_id' => $request->item_id,
-                'name' => $code['variation'],
                 'code' => $code['code'],
-                'price' => $productPrice,
                 'is_used' => 0,
             ]);
         }
