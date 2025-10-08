@@ -17,6 +17,7 @@ use App\Http\Helpers\BasicMailer;
 use App\Http\Helpers\Common;
 use App\Models\User;
 use App\Models\User\DigitalProductCode;
+use App\Models\User\Tag;
 use App\Models\User\ProductVariantOption;
 use App\Models\User\ProductVariantOptionContent;
 use App\Models\User\ProductVariation;
@@ -370,7 +371,10 @@ class ItemController extends Controller
             }
         }
 
-        // 12. Salvar imagens slider
+        // 12. Processar e salvar tags
+        $this->processTags($request, $item->id);
+
+        // 13. Salvar imagens slider
         if ($request->has('image')) {
             foreach ($request->image as $value) {
                 UserItemImage::create([
@@ -380,7 +384,7 @@ class ItemController extends Controller
             }
         }
 
-        // 13. Salvar conteúdo multilíngue
+        // 14. Salvar conteúdo multilíngue
         $catUnique_id = UserItemCategory::where('id', $request->category)
             ->pluck('unique_id')->first();
         $subcatUnique_id = UserItemSubCategory::where('id', $request->subcategory)
@@ -1378,5 +1382,102 @@ class ItemController extends Controller
         return response()->download($filePath, 'modeloDigital.csv', [
             'Content-Type' => 'text/csv',
         ]);
+    }
+
+    /**
+     * Buscar tags para autocomplete
+     */
+    public function searchTags(Request $request)
+    {
+        $userId = Auth::guard('web')->user()->id;
+        $term = $request->input('term', '');
+
+        if (strlen($term) < 1) {
+            return response()->json([]);
+        }
+
+        $tags = \App\Models\User\Tag::forUser($userId)
+            ->search($term)
+            ->select('id', 'name', 'slug')
+            ->limit(10)
+            ->get();
+
+        return response()->json($tags);
+    }
+
+    /**
+     * Processar tags do produto
+     */
+    private function processTags(Request $request, $itemId)
+    {
+        $userId = Auth::guard('web')->user()->id;
+        $tagsJson = $request->input('tags');
+        
+        if (!$tagsJson) {
+            return; // Nenhuma tag enviada
+        }
+
+        try {
+            $tags = json_decode($tagsJson, true);
+            if (!is_array($tags)) {
+                return;
+            }
+
+            $tagIds = [];
+
+            foreach ($tags as $tagData) {
+                if (!isset($tagData['name']) || empty(trim($tagData['name']))) {
+                    continue; // Pula tags vazias
+                }
+
+                $tagName = trim($tagData['name']);
+                
+                // Se a tag tem ID, ela já existe
+                if (isset($tagData['id']) && $tagData['id']) {
+                    $tag = Tag::where('id', $tagData['id'])
+                              ->where('user_id', $userId)
+                              ->first();
+                    
+                    if ($tag) {
+                        $tagIds[] = $tag->id;
+                    }
+                } else {
+                    // Tentar encontrar tag existente pelo nome
+                    $existingTag = Tag::where('user_id', $userId)
+                                     ->where('name', $tagName)
+                                     ->first();
+                    
+                    if ($existingTag) {
+                        $tagIds[] = $existingTag->id;
+                    } else {
+                        // Criar nova tag
+                        $newTag = Tag::create([
+                            'name' => $tagName,
+                            'slug' => \Str::slug($tagName),
+                            'user_id' => $userId
+                        ]);
+                        $tagIds[] = $newTag->id;
+                    }
+                }
+            }
+
+            // Conectar tags ao produto (sincronizar)
+            if (!empty($tagIds)) {
+                DB::table('tags_product')->where('user_item_id', $itemId)->delete();
+                
+                foreach ($tagIds as $tagId) {
+                    DB::table('tags_product')->insert([
+                        'tag_id' => $tagId,
+                        'user_item_id' => $itemId,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            }
+
+        } catch (\Exception $e) {
+            // Log do erro mas não quebra o salvamento do produto
+            Log::error('Erro ao processar tags: ' . $e->getMessage());
+        }
     }
 }

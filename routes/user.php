@@ -510,6 +510,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
             Route::post('/db/slider/remove', 'User\ItemController@dbSliderRemove')->name('user.item.db-slider-remove');
 
             Route::post('/sub-category-getter', 'User\ItemController@subcatGetter')->name('user.item.subcatGetter');
+            Route::get('/search-tags', 'User\ItemController@searchTags')->name('user.item.searchTags');
 
 
             Route::get('{id}/getcategory', 'User\ItemController@getCategory')->name('user.item.getcategory');

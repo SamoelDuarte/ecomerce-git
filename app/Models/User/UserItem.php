@@ -33,6 +33,11 @@ class UserItem extends Model
         return $this->hasMany(DigitalProductCode::class, 'user_item_id', 'id');
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'tags_product', 'user_item_id', 'tag_id');
+    }
+
     public function hasCode(): bool
     {
         return $this->digitalCodes()->exists();
