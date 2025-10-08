@@ -378,15 +378,24 @@ class ShopController extends Controller
             })
             ->when($keyword, function ($query, $keyword) {
                 // Debug: Log da busca
-                \Log::info('Busca por keyword: ' . $keyword);
+                \Log::info('Busca ShopSearch por keyword: ' . $keyword);
                 
-                // Teste simples - só buscar no título primeiro
-                return $query->where('user_item_contents.title', 'like', '%' . $keyword . '%');
-            })
-            // Se houver busca mas nenhum resultado, forçar resultado vazio
-            ->when($keyword && !request()->filled('category') && !request()->filled('subcategory'), function ($query) use ($keyword) {
-                // Esta condição já foi aplicada acima, não precisa fazer nada
-                return $query;
+                return $query->where(function ($q) use ($keyword) {
+                    // Buscar no título
+                    $q->where('user_item_contents.title', 'like', '%' . $keyword . '%')
+                      // Buscar na descrição
+                      ->orWhere('user_item_contents.description', 'like', '%' . $keyword . '%')
+                      // Buscar no resumo
+                      ->orWhere('user_item_contents.summary', 'like', '%' . $keyword . '%')
+                      // Buscar nas tags
+                      ->orWhereExists(function ($tagQuery) use ($keyword) {
+                          $tagQuery->select(DB::raw(1))
+                                   ->from('tags_product')
+                                   ->join('tags', 'tags.id', '=', 'tags_product.tag_id')
+                                   ->whereColumn('tags_product.user_item_id', 'user_items.id')
+                                   ->where('tags.name', 'like', '%' . $keyword . '%');
+                      });
+                });
             })->when($rating, function ($query) use ($rating) {
                 return $query->where('user_items.rating', '>=', $rating);
             })
