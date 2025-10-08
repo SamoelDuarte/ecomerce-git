@@ -141,10 +141,28 @@ class ShopController extends Controller
             ->when(($min && $max), function ($query) use ($min, $max) {
                 return $query->whereBetween('user_items.current_price', [$min, $max]);
             })
-            ->when($request->search, function ($query) use ($request) {
-                return $query->where(function($q) use ($request) {
-                    $q->where('user_item_contents.title', 'like', '%' . $request->search . '%')
-                      ->orWhere('user_item_contents.summary', 'like', '%' . $request->search . '%');
+            ->when($request->search || $keyword, function ($query) use ($request, $keyword) {
+                // Usar search ou keyword dependendo do que foi enviado
+                $searchTerm = $request->search ?? $keyword;
+                
+                // Debug: Log da busca
+                \Log::info('Busca Shop por: ' . $searchTerm);
+                
+                return $query->where(function($q) use ($searchTerm) {
+                    // Buscar no título
+                    $q->where('user_item_contents.title', 'like', '%' . $searchTerm . '%')
+                      // Buscar no resumo
+                      ->orWhere('user_item_contents.summary', 'like', '%' . $searchTerm . '%')
+                      // Buscar na descrição
+                      ->orWhere('user_item_contents.description', 'like', '%' . $searchTerm . '%')
+                      // Buscar nas tags
+                      ->orWhereExists(function ($tagQuery) use ($searchTerm) {
+                          $tagQuery->select(DB::raw(1))
+                                   ->from('tags_product')
+                                   ->join('tags', 'tags.id', '=', 'tags_product.tag_id')
+                                   ->whereColumn('tags_product.user_item_id', 'user_items.id')
+                                   ->where('tags.name', 'like', '%' . $searchTerm . '%');
+                      });
                 });
             })
             ->select(
@@ -359,7 +377,16 @@ class ShopController extends Controller
                 return $query->whereBetween('user_items.current_price', [$min, $max]);
             })
             ->when($keyword, function ($query, $keyword) {
+                // Debug: Log da busca
+                \Log::info('Busca por keyword: ' . $keyword);
+                
+                // Teste simples - só buscar no título primeiro
                 return $query->where('user_item_contents.title', 'like', '%' . $keyword . '%');
+            })
+            // Se houver busca mas nenhum resultado, forçar resultado vazio
+            ->when($keyword && !request()->filled('category') && !request()->filled('subcategory'), function ($query) use ($keyword) {
+                // Esta condição já foi aplicada acima, não precisa fazer nada
+                return $query;
             })->when($rating, function ($query) use ($rating) {
                 return $query->where('user_items.rating', '>=', $rating);
             })
