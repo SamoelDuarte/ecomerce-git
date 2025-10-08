@@ -122,10 +122,15 @@
                         <input type="file" class="form-control" name="codeExcelInput" id="codeExcelInput"
                             accept=".xlsx,.csv">
 
+                       
+
+                        {{-- Feedback de validação --}}
+                        <div id="file-validation-feedback" class="mt-2"></div>
+
                         <div id="codeImportResult" class="mt-3 d-none">
                             <div class="alert alert-info">
                                 <p><strong>Total de Códigos:</strong> <span id="totalCodes">0</span></p>
-                                <p><strong>Variações encontradas:</strong></p>
+                                <p><strong>Códigos encontrados:</strong></p>
                                 <ul id="variationList" class="mb-0"></ul>
                             </div>
                         </div>
@@ -182,76 +187,280 @@
 <script>
     let parsedCodes = []; // armazenar para envio posterior
 
+    function downloadCodeTemplate() {
+        // Create workbook and worksheet
+        const workbook = XLSX.utils.book_new();
+        const ws_data = [
+            ['codigo'], // Header - apenas uma coluna
+            ['ABC123'], // Sample data
+            ['XYZ789'],
+            ['ENT456']
+        ];
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Códigos');
+        
+        // Save file
+        XLSX.writeFile(workbook, 'modelo_codigos.xlsx');
+    }
+
+    function showValidationError(message) {
+        const feedbackDiv = document.getElementById('file-validation-feedback');
+        if (feedbackDiv) {
+            feedbackDiv.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        } else {
+            alert(message);
+        }
+    }
+
+    function showValidationSuccess(validationResult) {
+        const feedbackDiv = document.getElementById('file-validation-feedback');
+        if (feedbackDiv) {
+            feedbackDiv.innerHTML = `
+                <div class="alert alert-success">
+                    ✅ <strong>Arquivo validado com sucesso!</strong><br>
+                    • Total de códigos processados: ${validationResult.totalCodes}<br>
+                    • Códigos únicos encontrados: ${validationResult.validLines}<br>
+                </div>
+            `;
+        }
+    }
+
+    // Função para validar dados com apenas uma coluna
+    function validateCsvDataOneColumn(dataRows) {
+        const result = {
+            isValid: true,
+            errors: [],
+            validLines: 0,
+            totalLines: dataRows.length,
+            totalCodes: 0,
+            duplicateCodes: []
+        };
+
+        const seenCodes = new Set();
+
+        dataRows.forEach((row, index) => {
+            const lineNumber = index + 2; // +2 porque removemos o cabeçalho e index começa em 0
+            const code = row[0] !== undefined && row[0] !== null ? row[0].toString().trim() : '';
+
+            // Validar campo obrigatório
+            if (!code) {
+                result.errors.push(`Linha ${lineNumber}: Código não pode estar vazio`);
+                result.isValid = false;
+                return;
+            }
+
+            // Verificar códigos duplicados
+            if (seenCodes.has(code.toLowerCase())) {
+                result.errors.push(`Linha ${lineNumber}: Código "${code}" já existe no arquivo`);
+                result.duplicateCodes.push(code);
+                result.isValid = false;
+                return;
+            }
+            seenCodes.add(code.toLowerCase());
+
+            result.validLines++;
+            result.totalCodes++;
+        });
+
+        return result;
+    }
+
+    function processValidFileOneColumn(dataRows, validationResult) {
+        const total = validationResult.totalCodes;
+
+        if (total === 0) {
+            alert('Nenhum código válido encontrado no arquivo.');
+            document.getElementById('codeExcelInput').value = '';
+            return;
+        }
+
+        // Preparar códigos para envio
+        parsedCodes = [];
+        dataRows.forEach(row => {
+            const code = row[0] !== undefined && row[0] !== null ? row[0].toString().trim() : '';
+            if (code) {
+                parsedCodes.push({ code });
+            }
+        });
+
+        // Atualiza na tela
+        document.getElementById('totalCodes').innerText = total;
+
+        // Não há variações, apenas mostra o total de códigos
+        const ul = document.getElementById('variationList');
+        ul.innerHTML = '<li>Códigos únicos encontrados: ' + total + '</li>';
+
+        // Mostra o resultado e o botão de enviar
+        document.getElementById('codeImportResult').classList.remove('d-none');
+        document.getElementById('sendCodesBtn').classList.remove('d-none');
+    }
+
     document.getElementById('codeExcelInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Debug completo do arquivo
+        console.log('=== DEBUG ARQUIVO SELECIONADO ===');
+        console.log('Nome:', file.name);
+        console.log('Tipo MIME:', file.type);
+        console.log('Tamanho:', file.size, 'bytes');
+
+        // Validação inicial do tipo de arquivo
+        const validExtensions = ['.csv', '.xls', '.xlsx'];
+        const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+        if (!validExtensions.includes(fileExtension)) {
+            const errorMsg = `Arquivo "${file.name}" não é suportado. Use apenas arquivos CSV (.csv) ou Excel (.xls, .xlsx)`;
+            console.error(errorMsg);
+            alert(errorMsg);
+            document.getElementById('codeExcelInput').value = '';
+            return;
+        }
+
+        // Mostrar feedback de processamento
+        const feedbackDiv = document.getElementById('file-validation-feedback');
+        if (feedbackDiv) {
+            feedbackDiv.innerHTML = '<div class="alert alert-info">🔄 Validando arquivo, aguarde...</div>';
+        }
+
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            let rows;
-            const isCSV = file.name.endsWith('.csv');
+            try {
+                const data = e.target.result;
+                let workbook;
+                let rows;
 
-            if (isCSV) {
-                const workbook = XLSX.read(e.target.result, {
-                    type: 'binary'
-                });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                rows = XLSX.utils.sheet_to_json(sheet, {
-                    header: 1
-                });
-            } else {
-                const workbook = XLSX.read(new Uint8Array(e.target.result), {
-                    type: 'array'
-                });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                rows = XLSX.utils.sheet_to_json(sheet, {
-                    header: 1
-                });
-            }
+                // Detecta tipo de arquivo
+                const isCSV = file.name.endsWith('.csv');
+                console.log('Tipo de arquivo:', isCSV ? 'CSV' : 'Excel');
 
-            const dataRows = rows.slice(1);
-            parsedCodes = [];
-            let total = 0;
-
-            dataRows.forEach(row => {
-                const code = row[0]?.toString().trim() || '';
-
-                if (code) {
-                    total++;
-                    parsedCodes.push({
-                        code
+                if (isCSV) {
+                    // Para CSV, lê como texto e processa diretamente
+                    workbook = XLSX.read(data, {
+                        type: 'string'
+                    });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    rows = XLSX.utils.sheet_to_json(sheet, {
+                        header: 1,
+                        defval: ''
+                    });
+                } else {
+                    // Se for Excel, lê como binary
+                    const binary = new Uint8Array(e.target.result);
+                    workbook = XLSX.read(binary, {
+                        type: 'array'
+                    });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    rows = XLSX.utils.sheet_to_json(sheet, {
+                        header: 1,
+                        defval: ''
                     });
                 }
-            });
 
-            // Mostrar resumo
-            document.getElementById('codeImportResult').classList.remove('d-none');
-            document.getElementById('sendCodesBtn').classList.remove('d-none');
-            document.getElementById('totalCodes').innerText = total;
+                // Validação básica do arquivo
+                if (!rows || rows.length === 0) {
+                    showValidationError('Arquivo vazio ou corrompido. Por favor, use o modelo CSV fornecido.');
+                    return;
+                }
 
-            const ul = document.getElementById('variationList');
-            ul.innerHTML = '';
-            const li = document.createElement('li');
-            li.innerText = `Códigos únicos encontrados: ${total}`;
-            ul.appendChild(li);
+                // Validação do cabeçalho - ACEITA APENAS UMA COLUNA
+                const header = rows[0];
+                
+                if (!header || header.length < 1) {
+                    showValidationError('Arquivo não possui o cabeçalho correto. O arquivo deve ter 1 coluna: codigo.');
+                    return;
+                }
+
+                // Normalizar cabeçalho para comparação (remove acentos, espaços, converte para minúsculas)
+                function normalizeHeader(text) {
+                    if (!text || text === null || text === undefined) return '';
+                    return text.toString()
+                        .toLowerCase()
+                        .trim()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                        .replace(/[^a-z0-9]/g, ''); // Remove caracteres especiais
+                }
+
+                const normalizedHeader = header.map(h => normalizeHeader(h));
+                
+                // Aceitar diferentes variações do cabeçalho (APENAS 1 COLUNA)
+                const validHeaderNames = ['codigo', 'code', 'key', 'chave', 'nome'];
+                
+                const headerValid = validHeaderNames.includes(normalizedHeader[0]);
+
+                if (!headerValid) {
+                    console.warn('Cabeçalho não reconhecido:', header);
+                    console.warn('Cabeçalho normalizado:', normalizedHeader);
+                    showValidationError(`Formato de arquivo inválido!\n\n` +
+                        `✅ Cabeçalho esperado (primeira linha):\n` +
+                        `   • codigo\n` +
+                        `   • code\n` +
+                        `   • key\n` +
+                        `   • chave\n` +
+                        `   • nome\n\n` +
+                        `❌ Cabeçalho encontrado: ${header[0] || 'vazio'}\n\n` +
+                        `DICA: O arquivo deve ter apenas UMA coluna com os códigos.`);
+                    return;
+                }
+
+                // Remove cabeçalho para processar apenas os dados
+                const dataRows = rows.slice(1).filter(row => row && row.length > 0 && row.some(cell => cell !== null && cell !== undefined && cell.toString().trim() !== ''));
+
+                if (dataRows.length === 0) {
+                    showValidationError('Nenhum dado encontrado no arquivo. Por favor, adicione códigos ao arquivo CSV.');
+                    return;
+                }
+
+                // Validação detalhada dos dados - ADAPTADA PARA UMA COLUNA
+                const validationResult = validateCsvDataOneColumn(dataRows);
+
+                if (!validationResult.isValid) {
+                    showValidationError(`Encontrados erros no arquivo:\n\n${validationResult.errors.join('\n')}\n\nPor favor, corrija os erros e tente novamente.`);
+                    return;
+                }
+
+                // Sucesso - mostrar resumo da validação
+                showValidationSuccess(validationResult);
+
+                // Continuar com o processamento original
+                processValidFileOneColumn(dataRows, validationResult);
+
+                // Adicionar flag para indicar que o arquivo foi validado com sucesso
+                document.getElementById('codeExcelInput').setAttribute('data-validated', 'true');
+
+            } catch (error) {
+                console.error('Erro ao processar arquivo:', error);
+                showValidationError('Erro ao processar o arquivo. Verifique se o arquivo não está corrompido e tente novamente.');
+                // Remover flag se houver erro
+                document.getElementById('codeExcelInput').removeAttribute('data-validated');
+            }
         };
 
-        if (file.name.endsWith('.csv')) {
-            reader.readAsBinaryString(file);
+        reader.onerror = function() {
+            showValidationError('Erro ao ler o arquivo. Tente novamente.');
+        };
+
+        // Ler arquivo de acordo com o tipo
+        const isCSV = file.name.endsWith('.csv');
+        if (isCSV) {
+            // Tentar diferentes encodings para CSV
+            reader.readAsText(file, 'UTF-8');
         } else {
-            reader.readAsArrayBuffer(file);
+            reader.readAsBinaryString(file);  // Excel como binary
         }
     });
 
     document.getElementById('sendCodesBtn').addEventListener('click', function() {
         if (!parsedCodes.length) return alert('Nenhum código para enviar.');
 
-        const itemId = {
-            {
-                $item_id
-            }
-        }; // você já tem essa variável na view
+        const itemId = {{ $item_id }}; // você já tem essa variável na view
 
         fetch("{{ route('user.item.code.import') }}", {
                 method: 'POST',
