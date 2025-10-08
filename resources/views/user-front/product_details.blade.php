@@ -148,25 +148,22 @@
                                     <div class="new-price-area d-flex color-primary">
                                         {{ $user_currency->symbol_position == 'left' ? $user_currency->symbol : '' }}
                                         <span class="new-price" id="details_new-price"
-                                            data-base_price="{{ currency_converter($minCodePrice) }}">
-                                            {{ currency_converter($minCodePrice) }}
-                                        </span>
-                                        <span class="mx-1">–</span>
-                                        <span class="new-price" id="details_max-price"
-                                            data-max_price="{{ currency_converter($maxCodePrice) }}">
-                                            {{ currency_converter($maxCodePrice) }}
+                                            data-base_price="{{ currency_converter($productPrice) }}">
+                                            {{ currency_converter($productPrice) }}
                                         </span>
                                         {{ $user_currency->symbol_position == 'right' ? $user_currency->symbol : '' }}
                                     </div>
 
+                                    @if ($product->item->previous_price && $product->item->previous_price > $product->item->current_price)
                                     <div class="old-price-area d-flex">
                                         {{ $user_currency->symbol_position == 'left' ? $user_currency->symbol : '' }}
                                         <span class="old-price" id="details_old-price"
-                                            data-old_price="{{ currency_converter($maxCodePrice) }}">
-                                            {{ currency_converter($maxCodePrice) }}
+                                            data-old_price="{{ currency_converter($product->item->previous_price) }}">
+                                            {{ currency_converter($product->item->previous_price) }}
                                         </span>
                                         {{ $user_currency->symbol_position == 'right' ? $user_currency->symbol : '' }}
                                     </div>
+                                    @endif
                                 @else
                                     @if ($flash_status == true)
                                         <div class="new-price-area d-flex color-primary">
@@ -399,42 +396,22 @@
                                         data-old-price="{{ $product->old_price ?? 0 }}">
                                     </div>
                                     @php
-                                        $groupedCodes = $product->item->digitalCodes
+                                        $totalCodes = $product->item->digitalCodes
                                             ->where('is_used', false)
-                                            ->groupBy('name');
-
+                                            ->count();
                                     @endphp
 
-                                    <ul class="product-list-group mb-20" id="variantListULDetails">
-                                        @foreach ($groupedCodes as $groupName => $codes)
-                                            @php
-
-                                                $firstCode = $codes->first(); // Pega o primeiro code do grupo
-                                                $price = $firstCode->price;
-                                                $stock = $codes->count();
-                                                $groupSlug = \Illuminate\Support\Str::slug($groupName, '_');
-                                                $mainId = 'detail_' . $groupSlug . '_' . $groupSlug;
-
-                                            @endphp
-
-                                            <li class="list-item" data-variant_name="{{ $groupName }}">
-                                                <ul class="custom-radio variantUL" id="variantUL">
-                                                    <li>
-                                                        <input id="radio_{{ $mainId }}" type="radio"
-                                                            name="{{ make_input_name('Digital Codes') }}[]"
-                                                            class="{{ $mainId }} product-variant input-radio"
-                                                            value="{{ $groupName }}:{{ $price }}:{{ $stock }}:0:0">
-
-                                                        <label class="form-radio-label" for="radio_{{ $mainId }}">
-                                                            <span class="details_view_variants_price color-primary">
-                                                                {{ $groupName }}
-                                                            </span>
-                                                        </label>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+                                    @if ($totalCodes > 0)
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i>
+                                            {{ $totalCodes }} {{ $totalCodes == 1 ? 'código digital disponível' : 'códigos digitais disponíveis' }}
+                                        </div>
+                                    @else
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Nenhum código digital disponível no momento
+                                        </div>
+                                    @endif
                                 @endif
 
                             </div>

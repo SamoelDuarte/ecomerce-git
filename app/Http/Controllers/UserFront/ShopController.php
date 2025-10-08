@@ -526,15 +526,13 @@ class ShopController extends Controller
         // Define se o produto é digital e se possui códigos
         $isDigital = $product->item->type == 'digital';
         $hasCodes = false;
-        $minCodePrice = 0;
-        $maxCodePrice = 0;
+        $productPrice = $product->item->current_price; // Usar o preço do produto
 
         if ($isDigital) {
             $codes  = $product->item->digitalCodes->where('is_used', false);
             if ($codes->count()) {
                 $hasCodes = true;
-                $minCodePrice = $codes->min('price');
-                $maxCodePrice = $codes->max('price');
+                // Agora todos os códigos têm o mesmo preço do produto
             }
         }
 
@@ -555,11 +553,10 @@ class ShopController extends Controller
             'product_variations' => ProductVariation::where('item_id', $product->item_id)->get(),
             'item_id' => $product->item_id,
 
-            // 👇 Variáveis para os preços dos códigos
+            // 👇 Variáveis para o produto digital
             'isDigital' => $isDigital,
             'hasCodes' => $hasCodes,
-            'minCodePrice' => $minCodePrice,
-            'maxCodePrice' => $maxCodePrice,
+            'productPrice' => $productPrice,
         ]);
     }
 

@@ -112,13 +112,10 @@ class ItemController extends Controller
         // Verifica se o item é digital com códigos
         $hasCodes = $item->type === 'digital' && $item->digitalCodes()->where('is_used', false)->count() > 0;
 
-        if ($hasCodes && !empty($variant)) {
-            // Pega o menor preço entre os códigos digitais selecionados
-            $prices = array_map(function ($v) {
-                return floatval($v['price']);
-            }, $variant);
-
-            $product_current_price = min($prices); // usa o menor preço entre os códigos
+        if ($hasCodes) {
+            // Para produtos digitais com códigos, usa sempre o preço do produto
+            $flash_info = flashAmountStatus($item->id, $item->current_price);
+            $product_current_price = $flash_info['amount'];
         } else {
             // Se não for digital com códigos, aplica lógica do flash
             $flash_info = flashAmountStatus($item->id, $item->current_price);

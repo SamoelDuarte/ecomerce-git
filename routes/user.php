@@ -202,7 +202,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
     Route::post('user/customer/ban', 'User\UserController@userban')->name('user.customer.ban');
     Route::get('register/customer/details/{id}', 'User\UserController@view')->name('register.customer.view');
     Route::post('register/customer/email', 'User\UserController@emailStatus')->name('register.customer.email');
-    Route::get('/ads-reports', 'User\PostController@viewReports')->name('user.ads-report');
+    // Route::get('/ads-reports', 'User\PostController@viewReports')->name('user.ads-report');
     Route::get('/register-user', 'User\UserController@registerUsers')->name('user.register-user');
     Route::get('register/customer/{id}/changePassword', 'User\UserController@changePassCstmr')->name('register.customer.changePass');
     Route::post('register/customer/updatePassword', 'User\UserController@updatePasswordCstmr')->name('register.customer.updatePassword');
