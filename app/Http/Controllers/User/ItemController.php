@@ -483,6 +483,9 @@ class ItemController extends Controller
 
         $data['currency'] = UserCurrency::where('user_id', $user_id)->where('is_default', 1)->first();
 
+        // Carregar tags do produto
+        $data['productTags'] = $data['item']->tags()->select('tags.id', 'tags.name', 'tags.slug')->get();
+
         return view('user.item.edit', $data);
     }
 
@@ -736,6 +739,10 @@ class ItemController extends Controller
                 $adContent->save();
             }
         }
+
+        // Processar e atualizar tags
+        $this->processTags($request, $item->id);
+
         Session::flash('success', __('Updated Successfully'));
         return "success";
     }

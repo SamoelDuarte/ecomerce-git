@@ -1,6 +1,85 @@
 @extends('user.layout')
 @section('styles')
     <link rel="stylesheet" href="{{ asset('assets/admin/css/cropper.css') }}">
+    <style>
+    .tags-input-container {
+        position: relative;
+    }
+
+    .tag-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+
+    .tag-suggestion-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .tag-suggestion-item:hover,
+    .tag-suggestion-item.selected {
+        background-color: #f8f9fa;
+    }
+
+    .tag-suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        min-height: 30px;
+    }
+
+    .tag-bubble {
+        display: inline-flex;
+        align-items: center;
+        background-color: #007bff;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 15px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .tag-remove {
+        margin-left: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+    }
+
+    .tag-remove:hover {
+        background: rgba(255,255,255,0.5);
+    }
+
+    .tag-create-new {
+        color: #28a745;
+        font-weight: 500;
+    }
+
+    .tag-create-new:before {
+        content: "+ ";
+    }
+    </style>
 @endsection
 @includeIf('user.partials.rtl-style')
 
@@ -425,9 +504,20 @@
                                         </div>
                                     </div>
 
-
-
-
+                                    <!-- Campo de Tags -->
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>{{ __('Tags') }}</label>
+                                            <div class="tags-input-container">
+                                                <input type="text" id="tagInput" class="form-control" 
+                                                    placeholder="Digite para buscar ou criar tags..." 
+                                                    autocomplete="off">
+                                                <div id="tagSuggestions" class="tag-suggestions"></div>
+                                                <div id="selectedTags" class="selected-tags mt-2"></div>
+                                                <input type="hidden" name="tags" id="tagsData">
+                                            </div>
+                                        </div>
+                                    </div>
 
                                 </div>
                                 <div id="accordion" class="mt-3">
@@ -620,6 +710,178 @@
 @endsection
 
 @section('scripts')
+    <script>
+        // ===== TAGS FUNCTIONALITY =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const tagInput = document.getElementById('tagInput');
+            const tagSuggestions = document.getElementById('tagSuggestions');
+            const selectedTags = document.getElementById('selectedTags');
+            const tagsData = document.getElementById('tagsData');
+            
+            let currentTags = [];
+            let currentSuggestionIndex = -1;
+            let searchTimeout;
+
+            // Carregar tags existentes do produto
+            @if(isset($productTags) && $productTags->count() > 0)
+                currentTags = @json($productTags->map(function($tag) {
+                    return [
+                        'id' => $tag->id,
+                        'name' => $tag->name,
+                        'slug' => $tag->slug
+                    ];
+                }));
+                renderTags();
+                updateTagsData();
+            @endif
+
+            function updateTagsData() {
+                tagsData.value = JSON.stringify(currentTags);
+            }
+
+            function addTag(tag) {
+                // Verifica se a tag já existe
+                if (currentTags.some(t => t.name.toLowerCase() === tag.name.toLowerCase())) {
+                    return;
+                }
+
+                currentTags.push(tag);
+                renderTags();
+                updateTagsData();
+                tagInput.value = '';
+                hideSuggestions();
+            }
+
+            function removeTag(index) {
+                currentTags.splice(index, 1);
+                renderTags();
+                updateTagsData();
+            }
+
+            function renderTags() {
+                selectedTags.innerHTML = '';
+                currentTags.forEach((tag, index) => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'tag-bubble';
+                    tagElement.innerHTML = `
+                        ${tag.name}
+                        <span class="tag-remove" onclick="removeTag(${index})">×</span>
+                    `;
+                    selectedTags.appendChild(tagElement);
+                });
+            }
+
+            function showSuggestions(suggestions, searchTerm) {
+                // Só mostrar sugestões se houver sugestões existentes
+                if (suggestions.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                tagSuggestions.innerHTML = '';
+                currentSuggestionIndex = -1;
+
+                // Adicionar apenas sugestões existentes (sem opção de criar nova)
+                suggestions.forEach((suggestion, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'tag-suggestion-item';
+                    item.textContent = suggestion.name;
+                    item.addEventListener('click', () => addTag(suggestion));
+                    tagSuggestions.appendChild(item);
+                });
+
+                tagSuggestions.style.display = 'block';
+            }
+
+            function hideSuggestions() {
+                tagSuggestions.style.display = 'none';
+                currentSuggestionIndex = -1;
+            }
+
+            function searchTags(term) {
+                if (term.length < 1) {
+                    hideSuggestions();
+                    return;
+                }
+
+                fetch(`{{ route('user.item.searchTags') }}?term=${encodeURIComponent(term)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        showSuggestions(data, term);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar tags:', error);
+                        hideSuggestions();
+                    });
+            }
+
+            // Event listeners
+            tagInput.addEventListener('input', function() {
+                const term = this.value.trim();
+                
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchTags(term);
+                }, 300); // Debounce de 300ms
+            });
+
+            tagInput.addEventListener('keydown', function(e) {
+                const suggestions = tagSuggestions.querySelectorAll('.tag-suggestion-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentSuggestionIndex = Math.min(currentSuggestionIndex + 1, suggestions.length - 1);
+                    updateSuggestionSelection(suggestions);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentSuggestionIndex = Math.max(currentSuggestionIndex - 1, -1);
+                    updateSuggestionSelection(suggestions);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentSuggestionIndex >= 0 && suggestions[currentSuggestionIndex]) {
+                        suggestions[currentSuggestionIndex].click();
+                    } else if (this.value.trim()) {
+                        // Criar nova tag
+                        addTag({
+                            id: null,
+                            name: this.value.trim(),
+                            slug: this.value.trim().toLowerCase().replace(/\s+/g, '-')
+                        });
+                    }
+                } else if (e.key === ' ' || e.key === 'Spacebar') {
+                    // Criar tag automaticamente quando pressionar espaço
+                    const currentText = this.value.trim();
+                    if (currentText) {
+                        e.preventDefault(); // Impede o espaço de ser adicionado
+                        addTag({
+                            id: null,
+                            name: currentText,
+                            slug: currentText.toLowerCase().replace(/\s+/g, '-')
+                        });
+                    }
+                } else if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+            });
+
+            function updateSuggestionSelection(suggestions) {
+                suggestions.forEach((item, index) => {
+                    item.classList.toggle('selected', index === currentSuggestionIndex);
+                });
+            }
+
+            // Fechar sugestões ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!tagInput.contains(e.target) && !tagSuggestions.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+
+            // Tornar funções globais para uso nos elementos
+            window.removeTag = removeTag;
+        });
+    </script>
+
     {{-- Importar SheetJS --}}
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <script>
