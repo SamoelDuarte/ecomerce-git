@@ -57,7 +57,6 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>{{ __('Nome') }}</th>
                                 <th>{{ __('Código') }}</th>
                                 <th>{{ __('Usado') }}</th>
                                 <th>{{ __('Data de Uso') }}</th>
@@ -69,9 +68,7 @@
                             @foreach ($codes as $key => $code)
                             <tr>
                                 <td>{{ $key + 1 }}</td>
-                                <td>{{ $code->name }}</td>
                                 <td>{{ $code->code }}</td>
-                                </td>
                                 <td>
                                     @if ($code->is_used)
                                     <span class="badge badge-danger">{{ __('Sim') }}</span>
@@ -158,12 +155,6 @@
                 </div>
 
                 <div class="modal-body">
-                    {{-- Nome do Código --}}
-                    <div class="form-group">
-                        <label for="codeName">{{ __('Nome') }} <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="codeName" class="form-control" required>
-                    </div>
-
                     {{-- Código --}}
                     <div class="form-group">
                         <label for="codeValue">{{ __('Código') }} <span class="text-danger">*</span></label>
@@ -221,22 +212,16 @@
 
             const dataRows = rows.slice(1);
             parsedCodes = [];
-            const variations = {};
             let total = 0;
 
             dataRows.forEach(row => {
-                const variation = row[0]?.toString().trim() || '';
-                const code = row[1]?.toString().trim() || '';
-                const value = row[2]?.toString().trim() || '';
+                const code = row[0]?.toString().trim() || '';
 
-                if (variation && code && value) {
+                if (code) {
                     total++;
                     parsedCodes.push({
-                        variation,
-                        code,
-                        price: value
+                        code
                     });
-                    variations[variation] = (variations[variation] || 0) + 1;
                 }
             });
 
@@ -247,11 +232,9 @@
 
             const ul = document.getElementById('variationList');
             ul.innerHTML = '';
-            Object.entries(variations).forEach(([variation, count]) => {
-                const li = document.createElement('li');
-                li.innerText = `${variation} → ${count} código(s)`;
-                ul.appendChild(li);
-            });
+            const li = document.createElement('li');
+            li.innerText = `Códigos únicos encontrados: ${total}`;
+            ul.appendChild(li);
         };
 
         if (file.name.endsWith('.csv')) {

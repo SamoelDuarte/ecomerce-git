@@ -1320,19 +1320,12 @@ class ItemController extends Controller
     public function storeCode(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
         ]);
 
-        // Buscar o preço do produto
-        $item = UserItem::findOrFail($id);
-        $productPrice = $item->current_price ?? 0;
-
         DigitalProductCode::create([
             'user_item_id' => $id,
-            'name' => $request->name,
             'code' => $request->code,
-            'price' => $productPrice,
             'is_used' => false,
         ]);
 
