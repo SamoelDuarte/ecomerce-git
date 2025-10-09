@@ -1468,10 +1468,11 @@ class ItemController extends Controller
                 }
             }
 
-            // Conectar tags ao produto (sincronizar)
+            // Sempre limpar tags antigas primeiro
+            DB::table('tags_product')->where('user_item_id', $itemId)->delete();
+            
+            // Conectar novas tags ao produto (se existirem)
             if (!empty($tagIds)) {
-                DB::table('tags_product')->where('user_item_id', $itemId)->delete();
-                
                 foreach ($tagIds as $tagId) {
                     DB::table('tags_product')->insert([
                         'tag_id' => $tagId,
