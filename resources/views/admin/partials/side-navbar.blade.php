@@ -271,10 +271,10 @@ $permissions = json_decode($permissions, true);
         </li>
         @endif
 
-    @if (empty($admin->role) || (!empty($permissions) && in_array('Settings', $permissions)))
-    {{-- Basic Settings --}}
-    <li
-      class="nav-item
+        @if (empty($admin->role) || (!empty($permissions) && in_array('Settings', $permissions)))
+        {{-- Basic Settings --}}
+        <li
+          class="nav-item
               @if (request()->path() == 'admin/general-settings') active
               @elseif(request()->path() == 'admin/social') active
               @elseif(request()->is('admin/social/*')) active
@@ -295,13 +295,13 @@ $permissions = json_decode($permissions, true);
               @elseif(request()->routeIs('admin.language.admin_dashboard.editKeyword')) active
               @elseif(request()->routeIs('admin.language.user_dashboard.editKeyword')) active
               @elseif(request()->routeIs('admin.language.user_frontend.editKeyword')) active @endif">
-      <a data-toggle="collapse" href="#basic">
-        <i class="la flaticon-settings"></i>
-        <p>{{ __('Settings') }}</p>
-        <span class="caret"></span>
-      </a>
-      <div
-        class="collapse
+          <a data-toggle="collapse" href="#basic">
+            <i class="la flaticon-settings"></i>
+            <p>{{ __('Settings') }}</p>
+            <span class="caret"></span>
+          </a>
+          <div
+            class="collapse
                 @if (request()->path() == 'admin/general-settings') show
                 @elseif(request()->path() == 'admin/social') show
                 @elseif(request()->is('admin/social/*')) show
@@ -323,159 +323,159 @@ $permissions = json_decode($permissions, true);
                 @elseif(request()->routeIs('admin.language.admin_dashboard.editKeyword')) show
               @elseif(request()->routeIs('admin.language.user_dashboard.editKeyword')) show
               @elseif(request()->routeIs('admin.language.user_frontend.editKeyword')) show @endif"
-        id="basic">
-        <ul class="nav nav-collapse">
-          <li class="@if (request()->path() == 'admin/general-settings') active @endif">
-            <a href="{{ route('admin.general-settings') }}">
-              <span class="sub-item">{{ __('General Settings') }}</span>
-            </a>
-          </li>
+            id="basic">
+            <ul class="nav nav-collapse">
+              <li class="@if (request()->path() == 'admin/general-settings') active @endif">
+                <a href="{{ route('admin.general-settings') }}">
+                  <span class="sub-item">Configuração de e-mail e notificação</span>
+                </a>
+              </li>
 
-          <li
-            class="submenu
+              <li
+                class="submenu
                     @if (request()->routeIs('admin.mail_from_admin')) selected
                     @elseif (request()->routeIs('admin.mail_to_admin')) selected
                     @elseif (request()->routeIs('admin.mail_templates')) selected
                     @elseif (request()->routeIs('admin.edit_mail_template')) selected @endif">
-            <a data-toggle="collapse" href="#emailset"
-              aria-expanded="{{ request()->path() == 'admin/mail-from-admin' || request()->path() == 'admin/mail-to-admin' || request()->routeIs('admin.mail_templates') || request()->routeIs('admin.edit_mail_template') ? 'true' : 'false' }}">
-              <span class="sub-item">{{ __('Email Settings') }}</span>
-              <span class="caret"></span>
-            </a>
-            <div
-              class="collapse {{ request()->path() == 'admin/mail-from-admin' || request()->path() == 'admin/mail-to-admin' || request()->routeIs('admin.mail_templates') || request()->routeIs('admin.edit_mail_template') ? 'show' : '' }}"
-              id="emailset">
-              <ul class="nav nav-collapse subnav">
-                <li class="@if (request()->path() == 'admin/mail-from-admin') active @endif">
-                  <a href="{{ route('admin.mailFromAdmin') }}">
-                    <span class="sub-item">{{ __('Mail from Admin') }}</span>
-                  </a>
-                </li>
-                <li class="@if (request()->path() == 'admin/mail-to-admin') active @endif">
-                  <a href="{{ route('admin.mailToAdmin') }}">
-                    <span class="sub-item">{{ __('Mail to Admin') }}</span>
-                  </a>
-                </li>
-                <li
-                  class="
+                <a data-toggle="collapse" href="#emailset"
+                  aria-expanded="{{ request()->path() == 'admin/mail-from-admin' || request()->path() == 'admin/mail-to-admin' || request()->routeIs('admin.mail_templates') || request()->routeIs('admin.edit_mail_template') ? 'true' : 'false' }}">
+                  <span class="sub-item">{{ __('Email Settings') }}</span>
+                  <span class="caret"></span>
+                </a>
+                <div
+                  class="collapse {{ request()->path() == 'admin/mail-from-admin' || request()->path() == 'admin/mail-to-admin' || request()->routeIs('admin.mail_templates') || request()->routeIs('admin.edit_mail_template') ? 'show' : '' }}"
+                  id="emailset">
+                  <ul class="nav nav-collapse subnav">
+                    <li class="@if (request()->path() == 'admin/mail-from-admin') active @endif">
+                      <a href="{{ route('admin.mailFromAdmin') }}">
+                        <span class="sub-item">Configuração de e-mail</span>
+                      </a>
+                    </li>
+                    <li class="@if (request()->path() == 'admin/mail-to-admin') active @endif">
+                      <a href="{{ route('admin.mailToAdmin') }}">
+                        <span class="sub-item">Notificação de e-mail e telefone</span>
+                      </a>
+                    </li>
+                    <li
+                      class="
                         @if (request()->routeIs('admin.mail_templates')) active
                         @elseif (request()->routeIs('admin.edit_mail_template')) active @endif">
-                  <a href="{{ route('admin.mail_templates') }}">
-                    <span class="sub-item">{{ __('Mail Templates') }}</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
+                      <a href="{{ route('admin.mail_templates') }}">
+                        <span class="sub-item">{{ __('Mail Templates') }}</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
 
-          <li
-            class="submenu
+              <li
+                class="submenu
                     @if (request()->path() == 'admin/gateways') selected
                     @elseif(request()->path() == 'admin/offline/gateways') selected @endif
                     ">
-            <a data-toggle="collapse" href="#payment-gateways"
-              aria-expanded="@if (request()->path() == 'admin/gateways') true
+                <a data-toggle="collapse" href="#payment-gateways"
+                  aria-expanded="@if (request()->path() == 'admin/gateways') true
                     @elseif(request()->path() == 'admin/offline/gateways') true @else false @endif">
-              <span class="sub-item">{{ __('Payment Gateways') }}</span>
-              <span class="caret"></span>
-            </a>
-            <div
-              class="collapse
+                  <span class="sub-item">{{ __('Payment Gateways') }}</span>
+                  <span class="caret"></span>
+                </a>
+                <div
+                  class="collapse
                       @if (request()->path() == 'admin/gateways') show
                     @elseif(request()->path() == 'admin/offline/gateways') show @endif
                       "
-              id="payment-gateways">
-              <ul class="nav nav-collapse subnav">
-                <li class="@if (request()->path() == 'admin/gateways') active @endif">
-                  <a href="{{ route('admin.gateway.index') }}">
-                    <span class="sub-item">{{ __('Online Gateways') }}</span>
-                  </a>
-                </li>
-                <li class="@if (request()->path() == 'admin/offline/gateways') active @endif">
-                  <a href="{{ route('admin.gateway.offline') . '?language=' . $default->code }}">
-                    <span class="sub-item">{{ __('Offline Gateways') }}</span>
-                  </a>
-                </li>
+                  id="payment-gateways">
+                  <ul class="nav nav-collapse subnav">
+                    <li class="@if (request()->path() == 'admin/gateways') active @endif">
+                      <a href="{{ route('admin.gateway.index') }}">
+                        <span class="sub-item">{{ __('Online Gateways') }}</span>
+                      </a>
+                    </li>
+                    <li class="@if (request()->path() == 'admin/offline/gateways') active @endif">
+                      <a href="{{ route('admin.gateway.offline') . '?language=' . $default->code }}">
+                        <span class="sub-item">{{ __('Offline Gateways') }}</span>
+                      </a>
+                    </li>
 
-              </ul>
-            </div>
-          </li>
+                  </ul>
+                </div>
+              </li>
 
-          <li
-            class="
+              <li
+                class="
                     @if (request()->path() == 'admin/languages') active
                     @elseif(request()->is('admin/language/*/edit')) active
                     @elseif(request()->is('admin/language/*/edit/keyword')) active
                     @elseif(request()->routeIs('admin.language.admin_dashboard.editKeyword')) active
               @elseif(request()->routeIs('admin.language.user_dashboard.editKeyword')) active
               @elseif(request()->routeIs('admin.language.user_frontend.editKeyword')) active @endif">
-            <a href="{{ route('admin.language.index') }}">
-              <span class="sub-item">{{ __('Languages') }}</span>
-            </a>
-          </li>
+                <a href="{{ route('admin.language.index') }}">
+                  <span class="sub-item">{{ __('Languages') }}</span>
+                </a>
+              </li>
 
-          <li class="@if (request()->path() == 'admin/script') active @endif">
-            <a href="{{ route('admin.script') }}">
-              <span class="sub-item">{{ __('Plugins') }}</span>
-            </a>
-          </li>
+              <li class="@if (request()->path() == 'admin/script') active @endif">
+                <a href="{{ route('admin.script') }}">
+                  <span class="sub-item">{{ __('Plugins') }}</span>
+                </a>
+              </li>
 
-        </ul>
-      </div>
-    </li>
-    @endif
+            </ul>
+          </div>
+        </li>
+        @endif
 
-    @if (empty($admin->role) || (!empty($permissions) && in_array('Admins Management', $permissions)))
-    {{-- Admins Management Page --}}
+        @if (empty($admin->role) || (!empty($permissions) && in_array('Admins Management', $permissions)))
+        {{-- Admins Management Page --}}
 
-    <li
-      class="nav-item
+        <li
+          class="nav-item
               @if (request()->path() == 'admin/users') active
               @elseif(request()->is('admin/user/*/edit')) active
               @elseif (request()->path() == 'admin/roles') active
               @elseif(request()->is('admin/role/*/permissions/manage')) active @endif">
-      <a data-toggle="collapse" href="#admins_management">
-        <i class="fas fa-users-cog"></i>
-        <p>{{ __('Admins Management') }}</p>
-        <span class="caret"></span>
-      </a>
-      <div
-        class="collapse
+          <a data-toggle="collapse" href="#admins_management">
+            <i class="fas fa-users-cog"></i>
+            <p>{{ __('Admins Management') }}</p>
+            <span class="caret"></span>
+          </a>
+          <div
+            class="collapse
                 @if (request()->path() == 'admin/users') show
                 @elseif(request()->is('admin/user/*/edit')) show
                 @elseif (request()->path() == 'admin/roles') show
                 @elseif(request()->is('admin/role/*/permissions/manage')) show @endif"
-        id="admins_management">
-        <ul class="nav nav-collapse">
+            id="admins_management">
+            <ul class="nav nav-collapse">
 
-          <li
-            class="@if (request()->path() == 'admin/roles') active
+              <li
+                class="@if (request()->path() == 'admin/roles') active
                   @elseif(request()->is('admin/role/*/permissions/manage')) active @endif">
-            <a href="{{ route('admin.role.index') }}">
-              <span class="sub-item">{{ __('Role & Permissions') }}</span>
-            </a>
-          </li>
+                <a href="{{ route('admin.role.index') }}">
+                  <span class="sub-item">{{ __('Role & Permissions') }}</span>
+                </a>
+              </li>
 
-          <li
-            class="@if (request()->path() == 'admin/users') active
+              <li
+                class="@if (request()->path() == 'admin/users') active
                     @elseif(request()->is('admin/user/*/edit')) active @endif">
-            <a href="{{ route('admin.user.index') }}">
-              <span class="sub-item">{{ __('Registerd Admins') }}</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </li>
-    @endif
+                <a href="{{ route('admin.user.index') }}">
+                  <span class="sub-item">{{ __('Registerd Admins') }}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        @endif
 
-    {{-- Cache Clear --}}
-    <li class="nav-item">
-      <a href="{{ route('admin.cache.clear') }}">
-        <i class="la flaticon-close"></i>
-        <p>{{ __('Clear Cache') }}</p>
-      </a>
-    </li>
-    </ul>
+        {{-- Cache Clear --}}
+        <li class="nav-item">
+          <a href="{{ route('admin.cache.clear') }}">
+            <i class="la flaticon-close"></i>
+            <p>{{ __('Clear Cache') }}</p>
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
-</div>
 </div>
