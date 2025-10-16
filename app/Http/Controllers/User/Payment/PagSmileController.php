@@ -78,7 +78,7 @@ class PagSmileController extends Controller
         $response = Http::withHeaders([
             'Content-Type'  => 'application/json; charset=UTF-8',
             'Authorization' => $authorization,
-        ])->post('https://gateway.pagsmile.com/trade/create', $payload);
+        ])->post('https://gateway-test.pagsmile.com/trade/create', $payload);
 
         //quero ver a respost em um dd
         if ($response->successful()) {
