@@ -49,17 +49,17 @@ class PagSmileController extends Controller
         Common::saveOrderedItems($order->id);
         // Gera um número único para o pedido combinando o ID com timestamp
         $uniqueOrderId = $order_id . '-' . time();
-        
+
         // Atualiza o pedido com o número único
         $order->unique_payment_id = $uniqueOrderId;
         $order->save();
-        
+
         // Payload para PagSmile
         $payload = [
             'app_id'            => $app_id,
             'out_trade_no'      => $uniqueOrderId, // Usa o número único do pedido
             'timestamp'         => $timestamp,
-            'notify_url'        => route('customer.itemcheckout.pagSmile.notify',getParam()),
+            'notify_url'        => route('customer.itemcheckout.pagSmile.notify', getParam()),
             'subject'           => $title,
             'body'              => $description,
             'order_amount'      => number_format($amount, 2, '.', ''),
@@ -78,7 +78,7 @@ class PagSmileController extends Controller
         $response = Http::withHeaders([
             'Content-Type'  => 'application/json; charset=UTF-8',
             'Authorization' => $authorization,
-        ])->post('https://gateway-test.pagsmile.com/trade/create', $payload);
+        ])->post('https://gateway.pagsmile.com/trade/create', $payload);
 
         //quero ver a respost em um dd
         if ($response->successful()) {
@@ -187,6 +187,6 @@ class PagSmileController extends Controller
 
     public function cancelPayment(Request $request)
     {
-      return redirect()->back()->with('error', 'Payment Cancelled.');
+        return redirect()->back()->with('error', 'Payment Cancelled.');
     }
 }
