@@ -104,17 +104,17 @@ class PagSmileController extends Controller
     ])->post($endpoint, $payload);
 
     // DEBUG: veja o payload enviado e a resposta (remova dd() em produção)
-    dd(vars: [
-        'endpoint' => $endpoint,
-        'headers' => [
-            'Authorization' => $authorization,
-            'Content-Type' => 'application/json'
-        ],
-        'payload' => $payload,
-        'status' => $response->status(),
-        'response' => $response->json(),
-        'token' => $security_key
-    ]);
+    // dd(vars: [
+    //     'endpoint' => $endpoint,
+    //     'headers' => [
+    //         'Authorization' => $authorization,
+    //         'Content-Type' => 'application/json'
+    //     ],
+    //     'payload' => $payload,
+    //     'status' => $response->status(),
+    //     'response' => $response->json(),
+    //     'token' => $security_key
+    // ]);
 
     // --- Depois de inspecionar com dd(), comente o dd() e trate a resposta ---
     if ($response->successful()) {
