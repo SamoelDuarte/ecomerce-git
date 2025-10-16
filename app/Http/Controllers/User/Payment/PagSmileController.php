@@ -37,7 +37,7 @@ class PagSmileController extends Controller
     $info = json_decode($config->information, true);
    
     $app_id = trim($info['APP ID'] ?? $info['app_id'] ?? '');
-    $security_key = trim($info['Security Key '] ?? $info['security_key'] ?? '');
+    $security_key = trim($info['Security Key ']);
 
     if (!$app_id || !$security_key) {
         \Log::error('PagSmile - credenciais ausentes', ['info' => $info]);
