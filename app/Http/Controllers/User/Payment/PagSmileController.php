@@ -54,8 +54,7 @@ class PagSmileController extends Controller
         $order->unique_payment_id = $uniqueOrderId;
         $order->save();
 
-        $signString = $app_id . $uniqueOrderId . number_format($amount, 2, '.', '') . 'BRL' . $security_key;
-        $signature = md5($signString);
+
         // Payload para PagSmile
         $payload = [
             'app_id' => $app_id,
@@ -74,8 +73,14 @@ class PagSmileController extends Controller
             'customer.email' => $email,
             'customer.name' => $request->name ?? 'Cliente',
             'timeout_express' => '90m',
-              'sign'              => $signature, // 🔹 adiciona aqui
         ];
+
+        ksort($payload); // ordena por chave
+        $signString = urldecode(http_build_query($payload)) . "&key=" . $security_key;
+        $signature = strtoupper(md5($signString));
+
+        // Adiciona no payload final
+        $payload['sign'] = $signature;
 
         // Requisição ao gateway PagSmile
         $response = Http::withHeaders([
