@@ -83,6 +83,9 @@ class PagSmileController extends Controller
             'Authorization' => $authorization,
         ])->post('https://gateway.pagsmile.com/trade/create', $payload);
 
+
+        dd($response->json());
+
         //quero ver a respost em um dd
         if ($response->successful()) {
             $data = $response->json();
