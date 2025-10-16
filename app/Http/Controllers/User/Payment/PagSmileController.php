@@ -36,7 +36,7 @@ class PagSmileController extends Controller
 
     $info = json_decode($config->information, true);
     $app_id = trim($info['APP ID'] ?? $info['app_id'] ?? '');
-    $security_key = trim($info['Security Key'] ?? $info['Security Key '] ?? $info['security_key'] ?? '');
+    $security_key = trim($info['Security Key']); // remove espaços
 
     if (!$app_id || !$security_key) {
         \Log::error('PagSmile - credenciais ausentes', ['info' => $info]);
@@ -103,7 +103,7 @@ class PagSmileController extends Controller
     ])->post($endpoint, $payload);
 
     // DEBUG: veja o payload enviado e a resposta (remova dd() em produção)
-    dd([
+    dd(vars: [
         'endpoint' => $endpoint,
         'headers' => [
             'Authorization' => $authorization,
@@ -111,7 +111,8 @@ class PagSmileController extends Controller
         ],
         'payload' => $payload,
         'status' => $response->status(),
-        'response' => $response->json()
+        'response' => $response->json(),
+        'token' => $security_key
     ]);
 
     // --- Depois de inspecionar com dd(), comente o dd() e trate a resposta ---
