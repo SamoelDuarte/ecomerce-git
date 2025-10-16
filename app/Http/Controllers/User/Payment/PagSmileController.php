@@ -41,7 +41,7 @@ class PagSmileController extends Controller
 
     if (!$app_id || !$security_key) {
         \Log::error('PagSmile - credenciais ausentes', ['info' => $info]);
-        return redirect()->back()->with(key: 'error', 'Configuração PagSmile inválida.')->withInput();
+        return redirect()->back()->with('error', 'Configuração PagSmile inválida.')->withInput();
     }
 
     // Gera order e unique id
