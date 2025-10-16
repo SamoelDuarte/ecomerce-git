@@ -95,7 +95,7 @@ class PagSmileController extends Controller
     $authorization = 'Basic ' . base64_encode("{$app_id}:{$security_key}");
 
     // Chamada: use gateway-test.pagsmile.com para sandbox, gateway.pagsmile.com para produção
-    $endpoint = 'https://gateway.pagsmile.com/trade/create'; // ajustar conforme ambiente
+    $endpoint = 'https://gateway-test.pagsmile.com/trade/create'; // ajustar conforme ambiente
 
     // Envia request
     $response = Http::withHeaders([
