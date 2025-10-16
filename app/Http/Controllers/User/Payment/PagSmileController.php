@@ -54,29 +54,32 @@ class PagSmileController extends Controller
         $order->unique_payment_id = $uniqueOrderId;
         $order->save();
 
+        $signString = $app_id . $uniqueOrderId . number_format($amount, 2, '.', '') . 'BRL' . $security_key;
+        $signature = md5($signString);
         // Payload para PagSmile
         $payload = [
-            'app_id'            => $app_id,
-            'out_trade_no'      => $uniqueOrderId, // Usa o número único do pedido
-            'timestamp'         => $timestamp,
-            'notify_url'        => route('customer.itemcheckout.pagSmile.notify', getParam()),
-            'subject'           => $title,
-            'body'              => $description,
-            'order_amount'      => number_format($amount, 2, '.', ''),
-            'order_currency'    => 'BRL',
-            'trade_type'        => 'WEB',
-            'return_url'        => $successUrl,
-            'cancel_url'        => $cancelUrl,
-            'version'           => '2.0',
-            'buyer_id'          => $email,
-            'customer.email'    => $email,
-            'customer.name'     => $request->name ?? 'Cliente',
-            'timeout_express'   => '90m'
+            'app_id' => $app_id,
+            'out_trade_no' => $uniqueOrderId, // Usa o número único do pedido
+            'timestamp' => $timestamp,
+            'notify_url' => route('customer.itemcheckout.pagSmile.notify', getParam()),
+            'subject' => $title,
+            'body' => $description,
+            'order_amount' => number_format($amount, 2, '.', ''),
+            'order_currency' => 'BRL',
+            'trade_type' => 'WEB',
+            'return_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'version' => '2.0',
+            'buyer_id' => $email,
+            'customer.email' => $email,
+            'customer.name' => $request->name ?? 'Cliente',
+            'timeout_express' => '90m',
+              'sign'              => $signature, // 🔹 adiciona aqui
         ];
 
         // Requisição ao gateway PagSmile
         $response = Http::withHeaders([
-            'Content-Type'  => 'application/json; charset=UTF-8',
+            'Content-Type' => 'application/json; charset=UTF-8',
             'Authorization' => $authorization,
         ])->post('https://gateway.pagsmile.com/trade/create', $payload);
 
