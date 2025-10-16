@@ -17,107 +17,131 @@ use Illuminate\Support\Facades\Session;
 class PagSmileController extends Controller
 {
     public function paymentProcess(Request $request, $amount, $email, $successUrl, $cancelUrl, $title, $description)
-    {
-        $user = getUser();
+{
+    $user = getUser();
 
-        // Armazena os dados na sessão para recuperar após o pagamento
-        Session::put('user_request', $request->all());
-        Session::put('user_success_url', $successUrl);
-        Session::put('user_cancel_url', $cancelUrl);
+    // Guarda dados da sessão
+    Session::put('user_request', $request->all());
+    Session::put('user_success_url', $successUrl);
+    Session::put('user_cancel_url', $cancelUrl);
 
-        $config = UserPaymentGeteway::where([
-            ['user_id', $user->id],
-            ['keyword', 'pagsmile']
-        ])->first();
+    $config = UserPaymentGeteway::where([
+        ['user_id', $user->id],
+        ['keyword', 'pagsmile']
+    ])->first();
 
-        if (!$config) {
-            return response()->json(['error' => 'Configuração PagSmile não encontrada.'], 400);
-        }
-
-        $info = json_decode($config->information, true);
-        $app_id = $info['APP ID'];
-        $security_key = trim($info['Security Key ']); // remove espaços se tiver
-
-        $authorization = 'Basic ' . base64_encode("{$app_id}:{$security_key}");
-        $timestamp = now()->format('Y-m-d H:i:s');
-
-        // Salva pedido com status pendente
-        $txnId = UserPermissionHelper::uniqidReal(8);
-        $chargeId = null; // ainda não temos o ID do gateway
-        $order = Common::saveOrder($request->all(), $txnId, $chargeId, 'Pending', 'online', $user->id);
-        $order_id = $order->id;
-        Common::saveOrderedItems($order->id);
-        // Gera um número único para o pedido combinando o ID com timestamp
-        $uniqueOrderId = $order_id . '-' . time();
-
-        // Atualiza o pedido com o número único
-        $order->unique_payment_id = $uniqueOrderId;
-        $order->save();
-
-
-        // Payload para PagSmile
-        $payload = [
-            'app_id' => $app_id,
-            'out_trade_no' => $uniqueOrderId, // Usa o número único do pedido
-            'timestamp' => $timestamp,
-            'notify_url' => route('customer.itemcheckout.pagSmile.notify', getParam()),
-            'subject' => $title,
-            'body' => $description,
-            'order_amount' => number_format($amount, 2, '.', ''),
-            'order_currency' => 'BRL',
-            'trade_type' => 'WEB',
-            'return_url' => $successUrl,
-            'cancel_url' => $cancelUrl,
-            'version' => '2.0',
-            'buyer_id' => $email,
-            'customer.email' => $email,
-            'customer.name' => $request->name ?? 'Cliente',
-            'timeout_express' => '90m',
-        ];
-
-        ksort($payload); // ordena por chave
-        $signString = urldecode(http_build_query($payload)) . "&key=" . $security_key;
-        $signature = strtoupper(md5($signString));
-
-        // Adiciona no payload final
-        $payload['sign'] = $signature;
-
-        // Requisição ao gateway PagSmile
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json; charset=UTF-8',
-            'Authorization' => $authorization,
-        ])->post('https://gateway.pagsmile.com/trade/create', $payload);
-
-
-        dd($response->json());
-
-        //quero ver a respost em um dd
-        if ($response->successful()) {
-            $data = $response->json();
-
-            if (isset($data['web_url'])) {
-                Session::forget('cart');
-                Session::forget('user_request');
-                Session::forget('user_amount');
-                return redirect()->away($data['web_url']);
-            }
-
-            \Log::error('PagSmile - URL de checkout não encontrada:', [
-                'response' => $data,
-                'payload' => $payload,
-                'order_id' => $order_id
-            ]);
-            return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
-        }
-
-        \Log::error('PagSmile - Erro na comunicação:', [
-            'status_code' => $response->status(),
-            'response' => $response->json(),
-            'payload' => $payload,
-            'order_id' => $order_id
-        ]);
-        return redirect()->back()->with('error', 'Erro ao comunicar com o gateway PagSmile.')->withInput();
+    if (!$config) {
+        return response()->json(['error' => 'Configuração PagSmile não encontrada.'], 400);
     }
+
+    $info = json_decode($config->information, true);
+    $app_id = trim($info['APP ID'] ?? $info['app_id'] ?? '');
+    $security_key = trim($info['Security Key'] ?? $info['Security Key '] ?? $info['security_key'] ?? '');
+
+    if (!$app_id || !$security_key) {
+        \Log::error('PagSmile - credenciais ausentes', ['info' => $info]);
+        return redirect()->back()->with('error', 'Configuração PagSmile inválida.')->withInput();
+    }
+
+    // Gera order e unique id
+    $txnId = UserPermissionHelper::uniqidReal(8);
+    $order = Common::saveOrder($request->all(), $txnId, null, 'Pending', 'online', $user->id);
+    $order_id = $order->id;
+    Common::saveOrderedItems($order->id);
+
+    $uniqueOrderId = $order_id . '-' . time();
+    $order->unique_payment_id = $uniqueOrderId;
+    $order->save();
+
+    // Timestamp conforme doc
+    $timestamp = now()->format('Y-m-d H:i:s');
+
+    // Monta payload conforme exemplo da doc (observe nomes: charset, app_id, out_trade_no, content, customer..., etc)
+    $payload = [
+        'charset'         => 'UTF-8',
+        'app_id'          => $app_id,
+        'out_trade_no'    => $uniqueOrderId,
+        'order_currency'  => 'BRL',
+        'order_amount'    => number_format($amount, 2, '.', ''),
+        'subject'         => $title,
+        'content'         => $description,              // ATT: usa "content" na doc, não "body"
+        'trade_type'      => 'WEB',
+        'timeout_express' => '90m',
+        'timestamp'       => $timestamp,
+        'notify_url'      => route('customer.itemcheckout.pagSmile.notify', getParam()),
+        'buyer_id'        => $email,
+        'version'         => '2.0',
+        // customer é um objeto conforme doc
+        'customer' => [
+            'identify' => [
+                'type'   => $request->identify_type ?? null, // opcional
+                'number' => $request->identify_number ?? null, // opcional
+            ],
+            'name'  => $request->name ?? 'Cliente',
+            'email' => $email,
+        ],
+        // opcional: regions, address
+        // 'regions' => ['BRA'],
+        // 'address' => ['zip_code' => '38082365'],
+    ];
+
+    // Remove chaves com null (se não tiver identify)
+    if (empty($payload['customer']['identify']['type']) && empty($payload['customer']['identify']['number'])) {
+        unset($payload['customer']['identify']);
+    }
+
+    // Monta Authorization header (Basic base64(app_id:security_key))
+    $authorization = 'Basic ' . base64_encode("{$app_id}:{$security_key}");
+
+    // Chamada: use gateway-test.pagsmile.com para sandbox, gateway.pagsmile.com para produção
+    $endpoint = 'https://gateway-test.pagsmile.com/trade/create'; // ajustar conforme ambiente
+
+    // Envia request
+    $response = Http::withHeaders([
+        'Content-Type'  => 'application/json',
+        'Authorization' => $authorization,
+    ])->post($endpoint, $payload);
+
+    // DEBUG: veja o payload enviado e a resposta (remova dd() em produção)
+    dd([
+        'endpoint' => $endpoint,
+        'headers' => [
+            'Authorization' => $authorization,
+            'Content-Type' => 'application/json'
+        ],
+        'payload' => $payload,
+        'status' => $response->status(),
+        'response' => $response->json()
+    ]);
+
+    // --- Depois de inspecionar com dd(), comente o dd() e trate a resposta ---
+    // if ($response->successful()) {
+    //    $data = $response->json();
+    //    // A doc retorna prepay_id ou web_url; verifique o campo retornado
+    //    if (isset($data['prepay_id'])) {
+    //        $prepay = $data['prepay_id'];
+    //        $checkoutUrl = "http://checkout.pagsmile.com?prepay_id={$prepay}";
+    //        // anexar return_url opcional:
+    //        if (!empty($successUrl)) {
+    //            $checkoutUrl .= '&return_url=' . urlencode($successUrl);
+    //        }
+    //        Session::forget('cart');
+    //        Session::forget('user_request');
+    //        return redirect()->away($checkoutUrl);
+    //    }
+    //    if (isset($data['web_url'])) {
+    //        Session::forget('cart');
+    //        Session::forget('user_request');
+    //        return redirect()->away($data['web_url']);
+    //    }
+    //    \Log::error('PagSmile - URL de checkout não encontrada:', ['response' => $data, 'payload' => $payload, 'order_id' => $order_id]);
+    //    return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
+    // }
+    //
+    // \Log::error('PagSmile - Erro na comunicação:', ['status_code' => $response->status(), 'response' => $response->json(), 'payload' => $payload, 'order_id' => $order_id]);
+    // return redirect()->back()->with('error', 'Erro ao comunicar com o gateway PagSmile.')->withInput();
+}
+
 
     public function successPayment(Request $request)
     {
