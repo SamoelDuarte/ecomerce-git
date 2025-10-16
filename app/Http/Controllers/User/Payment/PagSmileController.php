@@ -33,14 +33,15 @@ class PagSmileController extends Controller
     if (!$config) {
         return response()->json(['error' => 'Configuração PagSmile não encontrada.'], 400);
     }
-
+    
     $info = json_decode($config->information, true);
+    dd($info);  
     $app_id = trim($info['APP ID'] ?? $info['app_id'] ?? '');
-    $security_key = trim($info['Security Key']); // remove espaços
+    $security_key = trim(string: $info['Security Key']); // remove espaços
 
     if (!$app_id || !$security_key) {
         \Log::error('PagSmile - credenciais ausentes', ['info' => $info]);
-        return redirect()->back()->with('error', 'Configuração PagSmile inválida.')->withInput();
+        return redirect()->back()->with(key: 'error', 'Configuração PagSmile inválida.')->withInput();
     }
 
     // Gera order e unique id
