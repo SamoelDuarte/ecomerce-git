@@ -94,7 +94,7 @@ class PagSmileController extends Controller
     $authorization = 'Basic ' . base64_encode("{$app_id}:{$security_key}");
 
     // Chamada: use gateway-test.pagsmile.com para sandbox, gateway.pagsmile.com para produção
-    $endpoint = 'https://gateway-test.pagsmile.com/trade/create'; // ajustar conforme ambiente
+    $endpoint = 'https://gateway.pagsmile.com/trade/create'; // ajustar conforme ambiente
 
     // Envia request
     $response = Http::withHeaders([
@@ -103,43 +103,43 @@ class PagSmileController extends Controller
     ])->post($endpoint, $payload);
 
     // DEBUG: veja o payload enviado e a resposta (remova dd() em produção)
-    dd([
-        'endpoint' => $endpoint,
-        'headers' => [
-            'Authorization' => $authorization,
-            'Content-Type' => 'application/json'
-        ],
-        'payload' => $payload,
-        'status' => $response->status(),
-        'response' => $response->json()
-    ]);
+    // dd([
+    //     'endpoint' => $endpoint,
+    //     'headers' => [
+    //         'Authorization' => $authorization,
+    //         'Content-Type' => 'application/json'
+    //     ],
+    //     'payload' => $payload,
+    //     'status' => $response->status(),
+    //     'response' => $response->json()
+    // ]);
 
     // --- Depois de inspecionar com dd(), comente o dd() e trate a resposta ---
-    // if ($response->successful()) {
-    //    $data = $response->json();
-    //    // A doc retorna prepay_id ou web_url; verifique o campo retornado
-    //    if (isset($data['prepay_id'])) {
-    //        $prepay = $data['prepay_id'];
-    //        $checkoutUrl = "http://checkout.pagsmile.com?prepay_id={$prepay}";
-    //        // anexar return_url opcional:
-    //        if (!empty($successUrl)) {
-    //            $checkoutUrl .= '&return_url=' . urlencode($successUrl);
-    //        }
-    //        Session::forget('cart');
-    //        Session::forget('user_request');
-    //        return redirect()->away($checkoutUrl);
-    //    }
-    //    if (isset($data['web_url'])) {
-    //        Session::forget('cart');
-    //        Session::forget('user_request');
-    //        return redirect()->away($data['web_url']);
-    //    }
-    //    \Log::error('PagSmile - URL de checkout não encontrada:', ['response' => $data, 'payload' => $payload, 'order_id' => $order_id]);
-    //    return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
-    // }
-    //
-    // \Log::error('PagSmile - Erro na comunicação:', ['status_code' => $response->status(), 'response' => $response->json(), 'payload' => $payload, 'order_id' => $order_id]);
-    // return redirect()->back()->with('error', 'Erro ao comunicar com o gateway PagSmile.')->withInput();
+    if ($response->successful()) {
+       $data = $response->json();
+       // A doc retorna prepay_id ou web_url; verifique o campo retornado
+       if (isset($data['prepay_id'])) {
+           $prepay = $data['prepay_id'];
+           $checkoutUrl = "http://checkout.pagsmile.com?prepay_id={$prepay}";
+           // anexar return_url opcional:
+           if (!empty($successUrl)) {
+               $checkoutUrl .= '&return_url=' . urlencode($successUrl);
+           }
+           Session::forget('cart');
+           Session::forget('user_request');
+           return redirect()->away($checkoutUrl);
+       }
+       if (isset($data['web_url'])) {
+           Session::forget('cart');
+           Session::forget('user_request');
+           return redirect()->away($data['web_url']);
+       }
+       \Log::error('PagSmile - URL de checkout não encontrada:', ['response' => $data, 'payload' => $payload, 'order_id' => $order_id]);
+       return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
+    }
+    
+    \Log::error('PagSmile - Erro na comunicação:', ['status_code' => $response->status(), 'response' => $response->json(), 'payload' => $payload, 'order_id' => $order_id]);
+    return redirect()->back()->with('error', 'Erro ao comunicar com o gateway PagSmile.')->withInput();
 }
 
 
