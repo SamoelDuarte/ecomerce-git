@@ -133,21 +133,14 @@
 
               <div class="small">
                 <strong>{{ $keywords['Address'] ?? __('Address') }}: </strong>
-                <span class="{{ detectTextDirection($order->billing_address) }}"
-                  dir="{{ detectTextDirection($order->billing_address) }}">{{ $order->billing_address }}</span>
-              </div>
-
-              <div class="small">
-                <strong>{{ $keywords['City'] ?? __('City') }}: </strong>
-                <span class="{{ detectTextDirection($order->billing_city . ' ' . $order->billing_state) }}"
-                  dir="{{ detectTextDirection($order->billing_city . ' ' . $order->billing_state) }}">{{ $order->billing_city }},
-                  {{ $order->billing_state }}</span>
+                <span class="{{ detectTextDirection($address ?? '') }}"
+                  dir="{{ detectTextDirection($address ?? '') }}">{{ $address ?? '' }}</span>
               </div>
 
               <div class="small">
                 <strong>{{ $keywords['Country'] ?? __('Country') }}: </strong>
-                <span class="{{ detectTextDirection($order->billing_country) }}"
-                  dir="{{ detectTextDirection($order->billing_country) }}">{{ $order->billing_country }}</span>
+                <span class="{{ detectTextDirection($country ?? 'Brasil') }}"
+                  dir="{{ detectTextDirection($country ?? 'Brasil') }}">{{ $country ?? 'Brasil' }}</span>
               </div>
 
               <div class="small">

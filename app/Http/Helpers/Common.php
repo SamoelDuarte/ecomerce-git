@@ -54,12 +54,15 @@ class Common
     public static function makeInvoice($request, $key, $member, $password, $amount, $payment_method, $phone, $base_currency_text_position, $base_currency_symbol, $base_currency_text, $order_id, $package_title, $status)
     {
         $file_name = uniqid($key) . ".pdf";
+        // Monta endereço completo do usuário
+        $address = ($request['address'] ?? '') . ', ' . ($request['city'] ?? '') . ', ' . ($request['district'] ?? '') . ', ' . ($request['zip'] ?? '');
+        $country = 'Brasil';
         $pdf = PDF::setOptions([
             'isHtml5ParserEnabled' => true,
             'isRemoteEnabled' => true,
             'logOutputFile' => storage_path('logs/log.htm'),
             'tempDir' => storage_path('logs/')
-        ])->loadView('pdf.membership', compact('request', 'member', 'password', 'amount', 'payment_method', 'phone', 'base_currency_text_position', 'base_currency_symbol', 'base_currency_text', 'order_id', 'package_title', 'status'));
+        ])->loadView('pdf.membership', compact('request', 'member', 'password', 'amount', 'payment_method', 'phone', 'base_currency_text_position', 'base_currency_symbol', 'base_currency_text', 'order_id', 'package_title', 'status', 'address', 'country'));
         $output = $pdf->output();
         $dir = public_path('assets/front/invoices/');
         @mkdir($dir, '0775', true);
@@ -545,7 +548,12 @@ class Common
         $dir = public_path('assets/front/invoices/');
         $path = $dir . $fileName;
         @mkdir($dir, 0777, true);
+        // Monta endereço completo do pedido
+        $address = ($order->billing_street ?? '') . ', ' . ($order->billing_number_home ?? '') . ', ' . ($order->billing_neighborhood ?? '') . ', ' . ($order->billing_zip ?? '');
+        $country = 'Brasil';
         $data['order']  = $order;
+        $data['address'] = $address;
+        $data['country'] = $country;
         $pdf = PDF::setOptions([
             'isHtml5ParserEnabled' => true,
             'isRemoteEnabled' => true,
