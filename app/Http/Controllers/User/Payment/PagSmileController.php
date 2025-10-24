@@ -104,17 +104,7 @@ class PagSmileController extends Controller
     ])->post($endpoint, $payload);
 
     // DEBUG: veja o payload enviado e a resposta (remova dd() em produção)
-    // dd(vars: [
-    //     'endpoint' => $endpoint,
-    //     'headers' => [
-    //         'Authorization' => $authorization,
-    //         'Content-Type' => 'application/json'
-    //     ],
-    //     'payload' => $payload,
-    //     'status' => $response->status(),
-    //     'response' => $response->json(),
-    //     'token' => $security_key
-    // ]);
+   
 
     // --- Depois de inspecionar com dd(), comente o dd() e trate a resposta ---
     if ($response->successful()) {
@@ -140,6 +130,50 @@ class PagSmileController extends Controller
        return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
     }
     
+            // Envia email de atualização do pedido ao cliente
+            try {
+                $user = $order->user ?? User::find($order->user_id);
+                // Busca dados do cliente
+                $customer = $order->customer_id ? \App\Models\Customer::find($order->customer_id) : null;
+                if ($customer) {
+                    $f_name = $customer->first_name;
+                    $l_name = $customer->last_name;
+                    $email = $customer->email;
+                } else {
+                    $f_name = $order->billing_fname;
+                    $l_name = $order->billing_lname;
+                    $email = $order->billing_email;
+                }
+
+                // Remove invoice anterior e gera nova
+                @unlink(public_path('assets/front/invoices/') . $order->invoice_number);
+                $invoice = Common::generateInvoice($order, $user);
+                $order->update(['invoice_number' => $invoice]);
+
+                // Busca template de email
+                $mail_template = \App\Models\User\UserEmailTemplate::where([
+                    ['user_id', $user->id],
+                    ['email_type', 'product_order_status']
+                ])->first();
+                if ($mail_template) {
+                    $mail_subject = $mail_template->email_subject;
+                    $mail_body = $mail_template->email_body;
+
+                    $mail_body = str_replace('{customer_name}', $f_name . ' ' . $l_name, $mail_body);
+                    $mail_body = str_replace('{order_status}', $order->payment_status, $mail_body);
+                    $mail_body = str_replace('{website_title}', $user->shop_name ?? $user->username, $mail_body);
+
+                    $to = $email;
+                    $data = [];
+                    $data['recipient'] = $to;
+                    $data['subject'] = $mail_subject;
+                    $data['body'] = $mail_body;
+                    $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
+                    \App\Http\Helpers\BasicMailer::sendMailFromUser($user, $data);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Erro ao enviar email de atualização do pedido PagSmile', ['error' => $e->getMessage()]);
+            }
     \Log::error('PagSmile - Erro na comunicação:', ['status_code' => $response->status(), 'response' => $response->json(), 'payload' => $payload, 'order_id' => $order_id]);
     return redirect()->back()->with('error', 'Erro ao comunicar com o gateway PagSmile.')->withInput();
 }
