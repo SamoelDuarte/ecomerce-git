@@ -533,6 +533,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
             Route::get('/{status}/orders', 'User\ItemOrderController@statusList')->name('user.{status}.item.orders');
             Route::post('/orders/status', 'User\ItemOrderController@status')->name('user.item.orders.status');
             Route::get('/orders/details/{id}', 'User\ItemOrderController@details')->name('user.item.details');
+            Route::post('/orders/update-tracking/{id}', 'User\ItemOrderController@updateTracking')->name('user.item.update-tracking');
             Route::post('/order/delete', 'User\ItemOrderController@orderDelete')->name('user.item.order.delete');
             Route::post('/order/bulk-delete', 'User\ItemOrderController@bulkOrderDelete')->name('user.item.order.bulk.delete');
             Route::get('/orders/report', 'User\ItemOrderController@report')->name('user.orders.report');

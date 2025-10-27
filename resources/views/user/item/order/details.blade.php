@@ -177,6 +177,60 @@
 
         </div>
 
+        {{-- Card de Rastreamento --}}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title d-inline-block">Informações de Rastreamento</div>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('user.item.update-tracking', $order->id) }}" method="POST">
+                        @csrf
+                        
+                        <div class="form-group">
+                            <label for="tracking_code">Código de Rastreamento *</label>
+                            <input type="text" class="form-control" id="tracking_code" name="tracking_code" 
+                                   value="{{ $order->tracking_code }}" placeholder="Digite o código de rastreamento">
+                            @error('tracking_code')
+                                <p class="text-danger mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tracking_carrier">Nome da Transportadora *</label>
+                            <input type="text" class="form-control" id="tracking_carrier" name="tracking_carrier" 
+                                   value="{{ $order->tracking_carrier }}" placeholder="Ex: Correios, Jadlog, etc.">
+                            @error('tracking_carrier')
+                                <p class="text-danger mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tracking_url">Link de Rastreamento</label>
+                            <input type="url" class="form-control" id="tracking_url" name="tracking_url" 
+                                   value="{{ $order->tracking_url }}" placeholder="https://...">
+                            <small class="form-text text-muted">Opcional: Link completo para rastreamento</small>
+                            @error('tracking_url')
+                                <p class="text-danger mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save"></i> Salvar Informações de Rastreamento
+                        </button>
+                    </form>
+
+                    @if($order->tracking_code)
+                        <hr>
+                        <div class="mt-3">
+                            <strong><i class="fas fa-info-circle"></i> Última Atualização:</strong><br>
+                            {{ $order->tracking_updated_at ? $order->tracking_updated_at->format('d/m/Y H:i') : '-' }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -250,7 +304,7 @@
         </div>
 
 
-        <div class="col-md-4">
+        <div class="col-md-4" style="display: none;">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title d-inline-block">{{ __('Billing Details') }}</div>

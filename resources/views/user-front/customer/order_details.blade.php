@@ -209,7 +209,7 @@
 
                       <div class="col-lg-6">
                         <div class="row">
-                          <!--  Shipping Details-->
+                          <!--  Shipping Details / Detalhes de Entrega -->
                           <div class="col-md-12 mb-4">
                             <div class="main-info">
                               <div class="table_component" role="region" tabindex="0">
@@ -221,7 +221,7 @@
                                   <thead>
                                     <tr>
                                       <th class="text-center" colspan="2">
-                                        {{ $keywords['Shipping Details'] ?? __('Shipping Details') }}</th>
+                                        Detalhes de Entrega</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -258,13 +258,65 @@
                                       </td>
                                       <td> {{ $data->shipping_country }}</td>
                                     </tr>
+                                    
+                                    <!-- Informações de Rastreamento -->
+                                    @if(!empty($data->tracking_code) && trim($data->tracking_code) != '')
+                                    <tr>
+                                      <td colspan="2" style="background-color: #f8f9fa; padding: 8px;">
+                                        <strong><i class="fas fa-shipping-fast"></i> Informações de Rastreamento</strong>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td>
+                                        <p class="mb-0"><strong>Código:</strong></p>
+                                      </td>
+                                      <td>
+                                        <span>{{ $data->tracking_code }}</span>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td>
+                                        <p class="mb-0"><strong>Transportadora:</strong></p>
+                                      </td>
+                                      <td>{{ $data->tracking_carrier }}</td>
+                                    </tr>
+                                    @if(!empty($data->tracking_url) && trim($data->tracking_url) != '')
+                                    <tr>
+                                      <td>
+                                        <p class="mb-0"><strong>Rastrear:</strong></p>
+                                      </td>
+                                      <td>
+                                        <a href="{{ $data->tracking_url }}" target="_blank" class="btn btn-sm btn-success">
+                                          <i class="fas fa-external-link-alt"></i> Rastrear Agora
+                                        </a>
+                                      </td>
+                                    </tr>
+                                    @endif
+                                    <tr>
+                                      <td>
+                                        <p class="mb-0"><strong>Atualizado em:</strong></p>
+                                      </td>
+                                      <td>
+                                        <small class="text-muted">
+                                          {{ $data->tracking_updated_at ? $data->tracking_updated_at->format('d/m/Y H:i') : '-' }}
+                                        </small>
+                                      </td>
+                                    </tr>
+                                    @else
+                                    <tr>
+                                      <td colspan="2" style="background-color: #fff3cd; padding: 8px;">
+                                        <small class="text-muted"><i class="fas fa-info-circle"></i> Código de rastreamento ainda não disponível</small>
+                                      </td>
+                                    </tr>
+                                    @endif
                                   </tbody>
                                 </table>
                               </div>
                             </div>
                           </div>
+                          
                           <!--  Billing Details-->
-                          <div class="col-md-12">
+                          <div class="col-md-12" style="display: none">
                             <div class="main-info">
                               <div class="table_component" role="region" tabindex="0">
                                 <table>
