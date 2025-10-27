@@ -14,13 +14,22 @@ use Razorpay\Api\Errors\SignatureVerificationError;
 
 class RazorpayController extends Controller
 {
+    public $keyId = null;
+    public $keySecret = null;
+    public $api = null;
+
     public function __construct()
     {
-        $data = UserPaymentGeteway::where('keyword', 'razorpay')->where('user_id', getUser()->id)->first();
-        $paydata = $data->convertAutoData();
-        $this->keyId = $paydata['key'];
-        $this->keySecret = $paydata['secret'];
-        $this->api = new Api($this->keyId, $this->keySecret);
+        $user = getUser();
+        if ($user) {
+            $data = UserPaymentGeteway::where('keyword', 'razorpay')->where('user_id', $user->id)->first();
+            if ($data) {
+                $paydata = $data->convertAutoData();
+                $this->keyId = $paydata['key'];
+                $this->keySecret = $paydata['secret'];
+                $this->api = new Api($this->keyId, $this->keySecret);
+            }
+        }
     }
 
 

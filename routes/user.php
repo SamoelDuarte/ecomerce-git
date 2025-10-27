@@ -394,14 +394,14 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
 
 
     //user achievements
-    Route::group(['middleware' => 'checkUserPermission:Achievements'], function () {
-        Route::get('/achievements', 'User\AchievementController@index')->name('user.achievement.index');
-        Route::post('/achievement/store', 'User\AchievementController@store')->name('user.achievement.store');
-        Route::get('/achievement/{id}/edit', 'User\AchievementController@edit')->name('user.achievement.edit');
-        Route::post('/achievement/update', 'User\AchievementController@update')->name('user.achievement.update');
-        Route::post('/achievement/delete', 'User\AchievementController@delete')->name('user.achievement.delete');
-        Route::post('/achievement/bulk-delete', 'User\AchievementController@bulkDelete')->name('user.achievement.bulk.delete');
-    });
+    // Route::group(['middleware' => 'checkUserPermission:Achievements'], function () {
+    //     Route::get('/achievements', 'User\AchievementController@index')->name('user.achievement.index');
+    //     Route::post('/achievement/store', 'User\AchievementController@store')->name('user.achievement.store');
+    //     Route::get('/achievement/{id}/edit', 'User\AchievementController@edit')->name('user.achievement.edit');
+    //     Route::post('/achievement/update', 'User\AchievementController@update')->name('user.achievement.update');
+    //     Route::post('/achievement/delete', 'User\AchievementController@delete')->name('user.achievement.delete');
+    //     Route::post('/achievement/bulk-delete', 'User\AchievementController@bulkDelete')->name('user.achievement.bulk.delete');
+    // });
 
 
     Route::prefix('membership')->middleware('checkpermission:Membership')->group(function () {
@@ -524,7 +524,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
             Route::get('/{id}/images', 'User\ItemController@images')->name('user.item.images');
         });
 
-        Route::post('/orders/mail', 'Admin\ItemOrderController@mail')->name('user.orders.mail');
+        // Route::post('/orders/mail', 'Admin\ItemOrderController@mail')->name('user.orders.mail');
 
         // Product Order
         Route::prefix('orders')->group(function () {
