@@ -299,7 +299,7 @@ class CustomerController extends Controller
 
         // Send Mail using lojista's SMTP
         $mailSent = BasicMailer::sendMailFromUser($parentUser, $data);
-        
+
         if ($mailSent) {
             // store user email in session to use it later
             $user->verification_token = $token;
@@ -435,7 +435,7 @@ class CustomerController extends Controller
     {
         // Get parent user settings since this is a front-end user
         $parentUser = User::findOrFail($user_id);
-        
+
         // Get mail template information from db
         $mailTemplate = UserEmailTemplate::where([['email_type', 'email_verification'], ['user_id', $user_id]])->first();
 
@@ -634,10 +634,32 @@ class CustomerController extends Controller
             "shipping_email" => 'required',
             "shipping_number" => 'required',
             "shipping_city" => 'required',
-            "shipping_address" => 'required',
+            "shipping_state" => 'required',
+            "shipping_zip" => 'required',
+            "shipping_street" => 'required',
+            "shipping_number_address" => 'required',
+            "shipping_neighborhood" => 'required',
             "shipping_country" => 'required',
         ]);
-        Auth::guard('customer')->user()->update($request->all());
+        
+        $customerId = Auth::guard('customer')->user()->id;
+        
+        // Atualizar usando o modelo diretamente
+        Customer::where('id', $customerId)->update([
+            'shipping_fname' => $request->shipping_fname,
+            'shipping_lname' => $request->shipping_lname,
+            'shipping_email' => $request->shipping_email,
+            'shipping_number' => $request->shipping_number,
+            'shipping_city' => $request->shipping_city,
+            'shipping_state' => $request->shipping_state,
+            'shipping_zip' => $request->shipping_zip,
+            'shipping_street' => $request->shipping_street,
+            'shipping_number_address' => $request->shipping_number_address,
+            'shipping_neighborhood' => $request->shipping_neighborhood,
+            'shipping_reference' => $request->shipping_reference,
+            'shipping_country' => $request->shipping_country,
+        ]);
+        
         Session::flash('success', $keywords['Updated successfully'] ?? __('Updated successfully'));
         return back();
     }
@@ -660,10 +682,32 @@ class CustomerController extends Controller
             "billing_email" => 'required',
             "billing_number" => 'required',
             "billing_city" => 'required',
-            "billing_address" => 'required',
+            "billing_state" => 'required',
+            "billing_zip" => 'required',
+            "billing_street" => 'required',
+            "billing_number_home" => 'required',
+            "billing_neighborhood" => 'required',
             "billing_country" => 'required',
         ]);
-        Auth::guard('customer')->user()->update($request->all());
+        
+        $customerId = Auth::guard('customer')->user()->id;
+        
+        // Atualizar usando o modelo diretamente
+        Customer::where('id', $customerId)->update([
+            'billing_fname' => $request->billing_fname,
+            'billing_lname' => $request->billing_lname,
+            'billing_email' => $request->billing_email,
+            'billing_number' => $request->billing_number,
+            'billing_city' => $request->billing_city,
+            'billing_state' => $request->billing_state,
+            'billing_zip' => $request->billing_zip,
+            'billing_street' => $request->billing_street,
+            'billing_number_home' => $request->billing_number_home,
+            'billing_neighborhood' => $request->billing_neighborhood,
+            'billing_reference' => $request->billing_reference,
+            'billing_country' => $request->billing_country,
+        ]);
+        
         Session::flash('success', $keywords['Updated successfully'] ?? __('Updated successfully'));
         return back();
     }

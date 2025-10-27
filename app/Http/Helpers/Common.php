@@ -3,6 +3,7 @@
 namespace App\Http\Helpers;
 
 use PDF;
+use App\Models\Customer;
 use App\Models\Language;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
@@ -376,6 +377,64 @@ class Common
         $order->created_at = $now;
         $order->updated_at = $now;
         $order->save();
+
+        // Atualizar o perfil do cliente com os dados do checkout
+        if (Auth::guard('customer')->check()) {
+            $customerId = Auth::guard('customer')->user()->id;
+            
+            $updateData = [
+                // Billing
+                'billing_fname' => $request['billing_fname'] ?? null,
+                'billing_lname' => $request['billing_lname'] ?? null,
+                'billing_email' => $request['billing_email'] ?? null,
+                'billing_city' => $request['billing_city'] ?? null,
+                'billing_state' => $request['billing_state'] ?? null,
+                'billing_number' => $request['billing_number'] ?? null,
+                'billing_zip' => $request['billing_zip'] ?? null,
+                'billing_street' => $request['billing_street'] ?? null,
+                'billing_number_home' => $request['billing_number_home'] ?? null,
+                'billing_neighborhood' => $request['billing_neighborhood'] ?? null,
+                'billing_reference' => $request['billing_reference'] ?? null,
+                'billing_country' => $request['billing_country'] ?? 'BR',
+            ];
+            
+            // Shipping (se preenchido, senão usa billing)
+            if (!empty($request['shipping_fname'])) {
+                $updateData = array_merge($updateData, [
+                    'shipping_fname' => $request['shipping_fname'] ?? null,
+                    'shipping_lname' => $request['shipping_lname'] ?? null,
+                    'shipping_email' => $request['shipping_email'] ?? null,
+                    'shipping_city' => $request['shipping_city'] ?? null,
+                    'shipping_state' => $request['shipping_state'] ?? null,
+                    'shipping_number' => $request['shipping_number'] ?? null,
+                    'shipping_zip' => $request['shipping_zip'] ?? null,
+                    'shipping_street' => $request['shipping_street'] ?? null,
+                    'shipping_number_address' => $request['shipping_number_address'] ?? null,
+                    'shipping_neighborhood' => $request['shipping_neighborhood'] ?? null,
+                    'shipping_reference' => $request['shipping_reference'] ?? null,
+                    'shipping_country' => $request['shipping_country'] ?? 'BR',
+                ]);
+            } else {
+                // Usar dados de billing para shipping se não preenchido
+                $updateData = array_merge($updateData, [
+                    'shipping_fname' => $request['billing_fname'] ?? null,
+                    'shipping_lname' => $request['billing_lname'] ?? null,
+                    'shipping_email' => $request['billing_email'] ?? null,
+                    'shipping_city' => $request['billing_city'] ?? null,
+                    'shipping_state' => $request['billing_state'] ?? null,
+                    'shipping_number' => $request['billing_number'] ?? null,
+                    'shipping_zip' => $request['billing_zip'] ?? null,
+                    'shipping_street' => $request['billing_street'] ?? null,
+                    'shipping_number_address' => $request['billing_number_home'] ?? null,
+                    'shipping_neighborhood' => $request['billing_neighborhood'] ?? null,
+                    'shipping_reference' => $request['billing_reference'] ?? null,
+                    'shipping_country' => $request['shipping_country'] ?? 'BR',
+                ]);
+            }
+            
+            // Atualizar o perfil do cliente
+            Customer::where('id', $customerId)->update($updateData);
+        }
 
         return $order;
     }

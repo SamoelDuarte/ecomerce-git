@@ -86,16 +86,61 @@
                         <div class="col-lg-6">
                           <div class="form-group mb-30">
                             <input type="text" class="form-control"
-                              placeholder=" {{ $keywords['Country'] ?? __('Country') }} " name="billing_country"
-                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_country) }}">
-                            @error('contact_number')
+                              placeholder="CEP" name="billing_zip"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_zip) }}">
+                            @error('billing_zip')
                               <p class="mb-3 text-danger">{{ $message }}</p>
                             @enderror
                           </div>
                         </div>
-                        <div class="col-lg-12">
+                        <div class="col-lg-6">
                           <div class="form-group mb-30">
-                            <textarea name="billing_address" class="form-control" placeholder=" {{ $keywords['Address'] ?? __('Address') }} ">{{ convertUtf8(Auth::guard('customer')->user()->billing_address) }}</textarea>
+                            <input type="text" class="form-control"
+                              placeholder="Rua / Logradouro" name="billing_street"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_street) }}">
+                            @error('billing_street')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder="Número" name="billing_number_home"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_number_home) }}">
+                            @error('billing_number_home')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder="Bairro" name="billing_neighborhood"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_neighborhood) }}">
+                            @error('billing_neighborhood')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder=" {{ $keywords['Country'] ?? __('Country') }} " name="billing_country"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_country) }}">
+                            @error('billing_country')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder="Referência / Complemento" name="billing_reference"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->billing_reference) }}">
+                            @error('billing_reference')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
                           </div>
                         </div>
                         <div class="col-lg-12 mb-15">

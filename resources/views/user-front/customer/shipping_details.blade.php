@@ -87,6 +87,46 @@
                         <div class="col-lg-6">
                           <div class="form-group mb-30">
                             <input type="text" class="form-control"
+                              placeholder="CEP" name="shipping_zip"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->shipping_zip) }}">
+                            @error('shipping_zip')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder="Rua / Logradouro" name="shipping_street"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->shipping_street) }}">
+                            @error('shipping_street')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder="Número" name="shipping_number_address"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->shipping_number_address) }}">
+                            @error('shipping_number_address')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
+                              placeholder="Bairro" name="shipping_neighborhood"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->shipping_neighborhood) }}">
+                            @error('shipping_neighborhood')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
+                          </div>
+                        </div>
+                        <div class="col-lg-6">
+                          <div class="form-group mb-30">
+                            <input type="text" class="form-control"
                               placeholder="{{ $keywords['Country'] ?? __('Country') }}" name="shipping_country"
                               value="{{ convertUtf8(Auth::guard('customer')->user()->shipping_country) }}">
                             @error('shipping_country')
@@ -94,9 +134,14 @@
                             @enderror
                           </div>
                         </div>
-                        <div class="col-lg-12">
+                        <div class="col-lg-6">
                           <div class="form-group mb-30">
-                            <textarea name="shipping_address" class="form-control" placeholder="{{ $keywords['Address'] ?? __('Address') }}">{{ convertUtf8(Auth::guard('customer')->user()->shipping_address) }}</textarea>
+                            <input type="text" class="form-control"
+                              placeholder="Referência / Complemento" name="shipping_reference"
+                              value="{{ convertUtf8(Auth::guard('customer')->user()->shipping_reference) }}">
+                            @error('shipping_reference')
+                              <p class="mb-3 text-danger">{{ $message }}</p>
+                            @enderror
                           </div>
                         </div>
                         <div class="col-lg-12 mb-15">
