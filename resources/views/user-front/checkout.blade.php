@@ -675,5 +675,47 @@ $anetSrc = 'https://js.authorize.net/v1/Accept.js';
 <script type="text/javascript" src="{{ $anetSrc }}" charset="utf-8"></script>
 @endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-<script src="{{ asset('assets/user-front/js/user-checkout.js?v=1.0.4') }}"></script>
+
+<script>
+    // IMPORTANTE: Executar ANTES do user-checkout.js para garantir que os dados sejam copiados
+    $(document).ready(function() {
+        // Usar captura de evento para executar ANTES de outros listeners
+        var form = document.getElementById('userOrderForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Se o checkbox "Ship to different address" NÃO estiver marcado,
+                // copiar dados de billing para shipping antes de enviar
+                if (!$('#differentaddress').is(':checked')) {
+                    console.log('Copiando dados de billing para shipping...');
+                    
+                    // Tornar o collapse visível temporariamente para garantir que os campos sejam enviados
+                    $('#collapseAddress').addClass('show');
+                    
+                    // Copiar todos os dados
+                    $('input[name="shipping_fname"]').val($('input[name="billing_fname"]').val());
+                    $('input[name="shipping_lname"]').val($('input[name="billing_lname"]').val());
+                    $('input[name="shipping_email"]').val($('input[name="billing_email"]').val());
+                    $('input[name="shipping_number"]').val($('input[name="billing_number"]').val());
+                    $('input[name="shipping_city"]').val($('input[name="billing_city"]').val());
+                    $('input[name="shipping_state"]').val($('input[name="billing_state"]').val());
+                    $('input[name="shipping_zip"]').val($('input[name="billing_zip"]').val());
+                    $('input[name="shipping_street"]').val($('input[name="billing_street"]').val());
+                    $('input[name="shipping_number_address"]').val($('input[name="billing_number_home"]').val());
+                    $('input[name="shipping_neighborhood"]').val($('input[name="billing_neighborhood"]').val());
+                    $('input[name="shipping_reference"]').val($('input[name="billing_reference"]').val());
+                    $('input[name="shipping_country"]').val('BR');
+                    
+                    console.log('Dados copiados com sucesso!');
+                    console.log('Billing Nome:', $('input[name="billing_fname"]').val());
+                    console.log('Shipping Nome (copiado):', $('input[name="shipping_fname"]').val());
+                    console.log('Billing CEP:', $('input[name="billing_zip"]').val());
+                    console.log('Shipping CEP (copiado):', $('input[name="shipping_zip"]').val());
+                }
+            }, true); // true = usar capture phase (executa antes)
+        }
+    });
+</script>
+
+<script src="{{ asset('assets/user-front/js/user-checkout.js?v=1.0.5') }}"></script>
 @endsection

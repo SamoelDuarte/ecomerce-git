@@ -552,9 +552,13 @@ class CustomerController extends Controller
             $proPic = $request->file('image');
             $picName = Uploader::upload_picture($directory, $proPic);
         }
-        $authUser->update($request->except('image') + [
-            'image' => $request->exists('image') ? $picName : $authUser->image
-        ]);
+        
+        $customerId = $authUser->id;
+        $updateData = $request->except('image', '_token');
+        $updateData['image'] = $request->hasFile('image') ? $picName : $authUser->image;
+        
+        Customer::where('id', $customerId)->update($updateData);
+        
         Session::flash('success', $keywords['Updated successfully'] ?? __('Updated successfully'));
         return redirect()->back();
     }
@@ -602,10 +606,14 @@ class CustomerController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator);
         }
+        
         $user = Auth::guard('customer')->user();
-        $user->update([
+        $customerId = $user->id;
+        
+        Customer::where('id', $customerId)->update([
             'password' => Hash::make($request->new_password)
         ]);
+        
         Session::flash('success', $keywords['Updated successfully'] ?? __('Updated successfully'));
         return redirect()->back();
     }
