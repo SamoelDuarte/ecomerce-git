@@ -128,37 +128,28 @@
                             {{ textPrice($order->currency_text_position, $order->currency_code, round($order->total, 2)) }}
                           </td>
                           <td>
-                            @if ($order->order_status != 'rejected')
-                              <form id="statusForm{{ $order->id }}" class="d-inline-block"
-                                action="{{ route('user.item.orders.status') }}" method="post">
-                                @csrf
-                                <input type="hidden" name="order_id" value="{{ $order->id }}">
-                                <select
-                                  class="w-min-max-100 form-control form-control-sm
-                              @if ($order->order_status == 'pending') bg-warning
-                              @elseif ($order->order_status == 'processing')
-                                bg-primary
-                              @elseif ($order->order_status == 'completed')
-                                bg-success
-                              @elseif ($order->order_status == 'rejected')
-                                bg-danger @endif
-                              "
-                                  name="order_status"
-                                  onchange="document.getElementById('statusForm{{ $order->id }}').submit();">
-                                  <option value="pending" {{ $order->order_status == 'pending' ? 'selected' : '' }}>
-                                    {{ __('Pending') }}</option>
-                                  <option value="processing"
-                                    {{ $order->order_status == 'processing' ? 'selected' : '' }}>
-                                    {{ __('Processing') }}</option>
-                                  <option value="completed" {{ $order->order_status == 'completed' ? 'selected' : '' }}>
-                                    {{ __('Completed') }}</option>
-                                  <option value="rejected" {{ $order->order_status == 'rejected' ? 'selected' : '' }}>
-                                    {{ __('Rejected') }}</option>
-                                </select>
-                              </form>
-                            @else
-                              <span class="badge badge-danger">{{ __('Rejected') }}</span>
-                            @endif
+                            @php
+                              $allStatuses = \App\Models\User\OrderStatus::orderBy('order')->get();
+                              $statusColors = [
+                                  'pending' => 'bg-warning',
+                                  'faturado' => 'bg-info',
+                                  'separacao' => 'bg-primary',
+                                  'transporte' => 'bg-secondary',
+                                  'concluido' => 'bg-success',
+                                  'cancelado' => 'bg-danger',
+                              ];
+                              $currentStatus = $order->status;
+                              $colorClass = $currentStatus && isset($statusColors[$currentStatus->code]) ? $statusColors[$currentStatus->code] : '';
+                            @endphp
+                            <form id="statusForm{{ $order->id }}" class="d-inline-block" action="{{ route('user.item.orders.status') }}" method="post">
+                              @csrf
+                              <input type="hidden" name="order_id" value="{{ $order->id }}">
+                              <select class="form-control form-control-sm {{ $colorClass }}" name="order_status_id" onchange="document.getElementById('statusForm{{ $order->id }}').submit();">
+                                @foreach ($allStatuses as $status)
+                                  <option value="{{ $status->id }}" {{ $order->order_status_id == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                @endforeach
+                              </select>
+                            </form>
                           </td>
 
                           <td>

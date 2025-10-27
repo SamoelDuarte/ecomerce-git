@@ -292,62 +292,28 @@
                                                                 ({{ $order->currency_code }})
                                                             </td>
                                                             <td >
-                                                                @if ($order->order_status != 'rejected')
-                                                                    <form id="statusForm{{ $order->id }}"
-                                                                        class="d-inline-block"
-                                                                        action="{{ route('user.item.orders.status') }}"
-                                                                        method="post">
-                                                                        @csrf
-                                                                        <input type="hidden" name="order_id"
-                                                                            value="{{ $order->id }}">
-                                                                        <select
-                                                                            class=" form-control form-control-sm
-                                                      @if ($order->order_status == 'pedido_realizado') bg-light
-                                                      @elseif ($order->order_status == 'pagamento_aprovado') bg-info
-                                                      @elseif ($order->order_status == 'separacao') bg-primary
-                                                      @elseif ($order->order_status == 'faturado') bg-warning
-                                                      @elseif ($order->order_status == 'transporte') bg-secondary
-                                                      @elseif ($order->order_status == 'entregue') bg-success
-                                                      @elseif ($order->order_status == 'cancelado') bg-danger @endif"
-                                                                            name="order_status"
-                                                                            onchange="document.getElementById('statusForm{{ $order->id }}').submit();">
-
-                                                                            <option value="pedido_realizado"
-                                                                                {{ $order->order_status == 'pedido_realizado' ? 'selected' : '' }}>
-                                                                                Pedido Realizado
-                                                                            </option>
-                                                                            <option value="pagamento_aprovado"
-                                                                                {{ $order->order_status == 'pagamento_aprovado' ? 'selected' : '' }}>
-                                                                                Pagamento Aprovado
-                                                                            </option>
-                                                                            <option value="separacao"
-                                                                                {{ $order->order_status == 'separacao' ? 'selected' : '' }}>
-                                                                                Pedido em Separação
-                                                                            </option>
-                                                                            <option value="faturado"
-                                                                                {{ $order->order_status == 'faturado' ? 'selected' : '' }}>
-                                                                                Pedido Faturado
-                                                                            </option>
-                                                                            <option value="transporte"
-                                                                                {{ $order->order_status == 'transporte' ? 'selected' : '' }}>
-                                                                                Pedido em Transporte
-                                                                            </option>
-                                                                            <option value="entregue"
-                                                                                {{ $order->order_status == 'entregue' ? 'selected' : '' }}>
-                                                                                Entregue
-                                                                            </option>
-                                                                            <option value="cancelado"
-                                                                                {{ $order->order_status == 'cancelado' ? 'selected' : '' }}>
-                                                                                Pedido Cancelado
-                                                                            </option>
-                                                                        </select>
-
-
-                                                                    </form>
-                                                                @else
-                                                                    <span
-                                                                        class="badge badge-danger">{{ __('Rejected') }}</span>
-                                                                @endif
+                                                                @php
+                                                                    $allStatuses = \App\Models\User\OrderStatus::orderBy('order')->get();
+                                                                    $statusColors = [
+                                                                        'pending' => 'bg-warning',
+                                                                        'faturado' => 'bg-info',
+                                                                        'separacao' => 'bg-primary',
+                                                                        'transporte' => 'bg-secondary',
+                                                                        'concluido' => 'bg-success',
+                                                                        'cancelado' => 'bg-danger',
+                                                                    ];
+                                                                    $currentStatus = $order->status;
+                                                                    $colorClass = $currentStatus && isset($statusColors[$currentStatus->code]) ? $statusColors[$currentStatus->code] : '';
+                                                                @endphp
+                                                                <form id="statusForm{{ $order->id }}" class="d-inline-block" action="{{ route('user.item.orders.status') }}" method="post">
+                                                                    @csrf
+                                                                    <input type="hidden" name="order_id" value="{{ $order->id }}">
+                                                                    <select class="form-control form-control-sm {{ $colorClass }}" name="order_status_id" onchange="document.getElementById('statusForm{{ $order->id }}').submit();">
+                                                                        @foreach ($allStatuses as $status)
+                                                                            <option value="{{ $status->id }}" {{ $order->order_status_id == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </form>
 
                                                             </td>
                                                             <td>

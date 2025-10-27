@@ -26,6 +26,23 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ItemOrderController extends Controller
 {
+    // Handles dynamic status routes: /user/orders/{status}/orders
+    public function statusList(Request $request, $status)
+    {
+        $search = $request->search;
+        $statusModel = \App\Models\User\OrderStatus::where('code', $status)->first();
+        if (!$statusModel) {
+            abort(404);
+        }
+        $data['orders'] = \App\Models\User\UserOrder::where('order_status_id', $statusModel->id)
+            ->when($search, function ($query, $search) {
+                return $query->where('order_number', $search);
+            })
+            ->where('user_id', \Auth::guard('web')->user()->id)
+            ->orderBy('id', 'DESC')
+            ->paginate(10);
+        return view('user.item.order.index', $data);
+    }
     public function all(Request $request)
     {
         $search = $request->search;
@@ -106,7 +123,26 @@ class ItemOrderController extends Controller
                     }
                 }
             }
-            $po->order_status = $request->order_status;
+           
+            // Update both order_status_id and order_status (for legacy compatibility)
+            if ($request->has('order_status_id')) {
+                $po->order_status_id = $request->order_status_id;
+                $status = \App\Models\User\OrderStatus::find($request->order_status_id);
+                //  dd($status->code);
+                if ($status) {
+                    $po->order_status = $status->code;
+                    // Se status for 'concluido', também aprova o pagamento
+                    if ($status->code === 'concluido' || $status->code === 'aprovado') {
+                        $po->payment_status = 'Completed';
+                    }
+                }
+            } else if ($request->has('order_status')) {
+                $po->order_status = $request->order_status;
+                // Se status for 'concluido', também aprova o pagamento
+                if ($request->order_status === 'concluido' || $request->order_status === 'aprovado') {
+                    $po->payment_status = 'Completed';
+                }
+            }
             $po->save();
 
             //get customer information
@@ -122,7 +158,7 @@ class ItemOrderController extends Controller
             }
 
             //reove pervious invoice and generate a new
-            @unlink(public_path('assets/front/invoices/') . $po->invoice_number);
+            @unlink(filename: public_path('assets/front/invoices/') . $po->invoice_number);
             $invoice = Common::generateInvoice($po, $root_user);
             $po->update(['invoice_number' => $invoice]);
 

@@ -259,47 +259,42 @@
 
 
                 <li class="submenu">
+                  @php
+                    $orderStatusRoutes = [
+                      'user.all.item.orders',
+                      'user.item.details',
+                      'user.orders.report',
+                    ];
+                    foreach (\App\Models\User\OrderStatus::all() as $status) {
+                      $orderStatusRoutes[] = 'user.' . $status->code . '.item.orders';
+                    }
+                    $isOrderActive = false;
+                    foreach ($orderStatusRoutes as $route) {
+                      if (request()->routeIs($route)) {
+                        $isOrderActive = true;
+                        break;
+                      }
+                    }
+                  @endphp
                   <a data-toggle="collapse" href="#manageOrders"
-                    aria-expanded="{{ request()->routeIs('user.all.item.orders') || request()->routeIs('user.pending.item.orders') || request()->routeIs('user.processing.item.orders') || request()->routeIs('user.completed.item.orders') || request()->routeIs('user.rejected.item.orders') || request()->routeIs('user.item.details') || request()->routeIs('user.orders.report') ? 'true' : 'false' }}">
+                    aria-expanded="{{ $isOrderActive ? 'true' : 'false' }}">
                     <span class="sub-item">{{ __('Orders') }}</span>
                     <span class="caret"></span>
                   </a>
-                  <div
-                    class="collapse
-                      @if (request()->routeIs('user.all.item.orders')) show
-                      @elseif(request()->routeIs('user.pending.item.orders')) show
-                      @elseif(request()->routeIs('user.processing.item.orders')) show
-                      @elseif(request()->routeIs('user.completed.item.orders')) show
-                      @elseif(request()->routeIs('user.rejected.item.orders')) show
-                      @elseif(request()->routeIs('user.item.details')) show
-                      @elseif(request()->routeIs('user.orders.report')) show @endif"
-                    id="manageOrders">
+                  <div class="collapse{{ $isOrderActive ? ' show' : '' }}" id="manageOrders">
                     <ul class="nav nav-collapse subnav">
                       <li class="@if (request()->routeIs('user.all.item.orders')) active @endif">
                         <a href="{{ route('user.all.item.orders') }}">
                           <span class="sub-item">{{ __('All Orders') }}</span>
                         </a>
                       </li>
-                      <li class="@if (request()->routeIs('user.pending.item.orders')) active @endif">
-                        <a href="{{ route('user.pending.item.orders') }}">
-                          <span class="sub-item">{{ __('Pending Orders') }}</span>
-                        </a>
-                      </li>
-                      <li class="@if (request()->routeIs('user.processing.item.orders')) active @endif">
-                        <a href="{{ route('user.processing.item.orders') }}">
-                          <span class="sub-item">{{ __('Processing Orders') }}</span>
-                        </a>
-                      </li>
-                      <li class="@if (request()->routeIs('user.completed.item.orders')) active @endif">
-                        <a href="{{ route('user.completed.item.orders') }}">
-                          <span class="sub-item">{{ __('Completed Orders') }}</span>
-                        </a>
-                      </li>
-                      <li class="@if (request()->routeIs('user.rejected.item.orders')) active @endif">
-                        <a href="{{ route('user.rejected.item.orders') }}">
-                          <span class="sub-item">{{ __('Rejected Orders') }}</span>
-                        </a>
-                      </li>
+                      @foreach(\App\Models\User\OrderStatus::orderBy('order')->get() as $status)
+                        <li class="@if (request()->routeIs('user.'.$status->code.'.item.orders')) active @endif">
+                          <a href="{{ route('user.{status}.item.orders', ['status' => $status->code]) }}">
+                            <span class="sub-item">{{ $status->name }} {{ __('Orders') }}</span>
+                          </a>
+                        </li>
+                      @endforeach
                       <li class="@if (request()->routeIs('user.orders.report')) active @endif">
                         <a href="{{ route('user.orders.report') }}">
                           <span class="sub-item">{{ __('Sales Report') }}</span>
