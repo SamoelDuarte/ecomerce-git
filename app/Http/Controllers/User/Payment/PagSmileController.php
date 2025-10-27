@@ -56,7 +56,8 @@ class PagSmileController extends Controller
 
     // Timestamp conforme doc
     $timestamp = now()->format('Y-m-d H:i:s');
-
+  $notifyUrl = route('customer.itemcheckout.pagSmile.notify', getParam());
+    \Log::info('PagSmile notify_url gerada:', ['notify_url' => $notifyUrl]);
     // Monta payload conforme exemplo da doc (observe nomes: charset, app_id, out_trade_no, content, customer..., etc)
     $payload = [
         'charset'         => 'UTF-8',
@@ -69,7 +70,7 @@ class PagSmileController extends Controller
         'trade_type'      => 'WEB',
         'timeout_express' => '90m',
         'timestamp'       => $timestamp,
-        'notify_url'      => route('customer.itemcheckout.pagSmile.notify', getParam()),
+        'notify_url'      => $notifyUrl,
         'buyer_id'        => $email,
         'version'         => '2.0',
         // customer é um objeto conforme doc
