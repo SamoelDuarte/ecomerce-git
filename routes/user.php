@@ -529,10 +529,8 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'Demo',
         // Product Order
         Route::prefix('orders')->group(function () {
             Route::get('/all/orders', 'User\ItemOrderController@all')->name('user.all.item.orders');
-            Route::get('/pending/orders', 'User\ItemOrderController@pending')->name('user.pending.item.orders');
-            Route::get('/processing/orders', 'User\ItemOrderController@processing')->name('user.processing.item.orders');
-            Route::get('/completed/orders', 'User\ItemOrderController@completed')->name('user.completed.item.orders');
-            Route::get('/rejected/orders', 'User\ItemOrderController@rejected')->name('user.rejected.item.orders');
+            // Dynamic order status route
+            Route::get('/{status}/orders', 'User\ItemOrderController@statusList')->name('user.{status}.item.orders');
             Route::post('/orders/status', 'User\ItemOrderController@status')->name('user.item.orders.status');
             Route::get('/orders/details/{id}', 'User\ItemOrderController@details')->name('user.item.details');
             Route::post('/order/delete', 'User\ItemOrderController@orderDelete')->name('user.item.order.delete');
