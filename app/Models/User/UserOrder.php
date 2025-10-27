@@ -12,6 +12,10 @@ class UserOrder extends Model
     use HasFactory;
     protected $guarded = [];
 
+    protected $casts = [
+        'tracking_updated_at' => 'datetime',
+    ];
+
     public function orderitems()
     {
         return $this->hasMany(UserOrderItem::class);

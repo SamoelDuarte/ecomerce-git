@@ -189,6 +189,91 @@ class ItemOrderController extends Controller
         return view('user.item.order.details', compact('order', 'itemLang'));
     }
 
+    public function updateTracking(Request $request, $id)
+    {
+        $request->validate([
+            'tracking_code' => 'required|string|max:255',
+            'tracking_carrier' => 'required|string|max:255',
+            'tracking_url' => 'nullable|url|max:500',
+        ]);
+
+        $order = UserOrder::findOrFail($id);
+        
+        // Verificar se os dados mudaram
+        $hasChanged = (
+            $order->tracking_code != $request->tracking_code ||
+            $order->tracking_carrier != $request->tracking_carrier ||
+            $order->tracking_url != $request->tracking_url
+        );
+
+        // Atualizar informações de rastreamento
+        $order->tracking_code = $request->tracking_code;
+        $order->tracking_carrier = $request->tracking_carrier;
+        $order->tracking_url = $request->tracking_url;
+        $order->tracking_updated_at = now();
+        $order->save();
+
+        // Enviar email para o cliente se houver mudanças
+        if ($hasChanged) {
+            $this->sendTrackingEmail($order);
+        }
+
+        Session::flash('success', 'Informações de rastreamento atualizadas com sucesso!');
+        return back();
+    }
+
+    private function sendTrackingEmail($order)
+    {
+        try {
+            $customer = Customer::find($order->customer_id);
+            if (!$customer || !$customer->email) {
+                return;
+            }
+
+            $user = Auth::guard('web')->user();
+            
+            // Buscar template de email
+            $emailTemplate = UserEmailTemplate::where('user_id', $user->id)
+                ->where('email_type', 'order_status_change')
+                ->first();
+
+            if (!$emailTemplate) {
+                return;
+            }
+
+            // Preparar dados para o email
+            $subject = 'Código de Rastreamento Atualizado - Pedido #' . $order->order_number;
+            
+            $body = '<p><strong>Olá ' . $customer->first_name . ',</strong></p>';
+            $body .= '<p>Seu pedido foi atualizado! O código de rastreamento foi inserido.</p>';
+            $body .= '<p><strong>Detalhes do Rastreamento:</strong></p>';
+            $body .= '<ul>';
+            $body .= '<li><strong>Número do Pedido:</strong> ' . $order->order_number . '</li>';
+            $body .= '<li><strong>Código de Rastreamento:</strong> ' . $order->tracking_code . '</li>';
+            $body .= '<li><strong>Transportadora:</strong> ' . $order->tracking_carrier . '</li>';
+            
+            if ($order->tracking_url) {
+                $body .= '<li><strong>Link para Rastreio:</strong> <a href="' . $order->tracking_url . '" target="_blank">' . $order->tracking_url . '</a></li>';
+            }
+            
+            $body .= '</ul>';
+            $body .= '<p>Você pode acompanhar o status do seu pedido a qualquer momento no painel do cliente.</p>';
+            $body .= '<p>Obrigado por sua compra!</p>';
+
+            // Enviar email
+            $mailer = new BasicMailer();
+            $mailer->sendMail(
+                $customer->email,
+                $subject,
+                $body,
+                $user
+            );
+        } catch (\Exception $e) {
+            // Log error but don't fail the update
+            \Log::error('Falha ao enviar email de rastreamento: ' . $e->getMessage());
+        }
+    }
+
 
     public function bulkOrderDelete(Request $request)
     {
