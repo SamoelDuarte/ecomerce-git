@@ -232,15 +232,6 @@ class ItemOrderController extends Controller
 
             $user = Auth::guard('web')->user();
             
-            // Buscar template de email
-            $emailTemplate = UserEmailTemplate::where('user_id', $user->id)
-                ->where('email_type', 'order_status_change')
-                ->first();
-
-            if (!$emailTemplate) {
-                return;
-            }
-
             // Preparar dados para o email
             $subject = 'Código de Rastreamento Atualizado - Pedido #' . $order->order_number;
             
@@ -260,14 +251,16 @@ class ItemOrderController extends Controller
             $body .= '<p>Você pode acompanhar o status do seu pedido a qualquer momento no painel do cliente.</p>';
             $body .= '<p>Obrigado por sua compra!</p>';
 
-            // Enviar email
-            $mailer = new BasicMailer();
-            $mailer->sendMail(
-                $customer->email,
-                $subject,
-                $body,
-                $user
-            );
+            // Preparar dados para envio via SMTP da loja
+            $mailData = [
+                'recipient' => $customer->email,
+                'subject' => $subject,
+                'body' => $body,
+            ];
+
+            // Enviar email usando SMTP do vendedor
+            BasicMailer::sendMailFromUser($user, $mailData);
+            
         } catch (\Exception $e) {
             // Log error but don't fail the update
             \Log::error('Falha ao enviar email de rastreamento: ' . $e->getMessage());
