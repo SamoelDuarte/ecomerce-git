@@ -37,35 +37,22 @@
                             </td>
                             <td>
                               @php
-                              $statusClass = '';
-                              switch ($order->order_status) {
-                                case 'Pedido Realizado':
-                                $statusClass = 'pending';
-                                break;
-                                case 'Pagamento Aprovado':
-                                $statusClass = 'processing';
-                                break;
-                                case 'Pedido Separação':
-                                $statusClass = 'processing';
-                                break;
-                                case 'Pedido Faturado':
-                                $statusClass = 'processing';
-                                break;
-                                case 'Pedido em transporte':
-                                $statusClass = 'processing';
-                                break;
-                                case 'Pedido Entregue':
-                                $statusClass = 'completed';
-                                break;
-                                case 'Pedido Cancelado':
-                                $statusClass = 'rejected';
-                                break;
-                                default:
-                                $statusClass = 'pending';
-                              }
+                                $statusColors = [
+                                  'pending' => 'bg-warning text-dark',
+                                  'aprovado' => 'bg-info text-dark',
+                                  'faturado' => 'bg-primary text-white',
+                                  'separacao' => 'bg-secondary text-white',
+                                  'transporte' => 'bg-dark text-white',
+                                  'concluido' => 'bg-success text-white',
+                                  'cancelado' => 'bg-danger text-white',
+                                ];
+                                $statusObj = $order->status;
+                                $statusCode = $statusObj ? $statusObj->code : 'pending';
+                                $statusName = $statusObj ? $statusObj->name : ($order->order_status ?? '');
+                                $colorClass = $statusColors[$statusCode] ?? 'bg-secondary text-white';
                               @endphp
-                              <span class="{{ $statusClass }}">
-                              {{ $order->order_status }}
+                              <span class="badge {{ $colorClass }}" style="font-size: 1em; padding: 0.5em 1em;">
+                                {{ $statusName }}
                               </span>
                             </td>
                             <td><a target="_blank"

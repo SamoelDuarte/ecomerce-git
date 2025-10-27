@@ -22,34 +22,26 @@
                 <div class="order-details radius-md">
                   <div class="progress-area-step">
                     <ul class="progress-steps">
-                      <li class="{{ $data->order_status == 'Pedido Realizado' ? 'active' : '' }}">
-                        <div class="icon">1</div>
-                        <div class="progress-title">Pedido Realizado</div>
-                      </li>
-                      <li class="{{ $data->order_status == 'Pagamento Aprovado' ? 'active' : '' }}">
-                        <div class="icon">2</div>
-                        <div class="progress-title">Pagamento Aprovado</div>
-                      </li>
-                      <li class="{{ $data->order_status == 'Pedido Separação' ? 'active' : '' }}">
-                        <div class="icon">3</div>
-                        <div class="progress-title">Pedido Separação</div>
-                      </li>
-                      <li class="{{ $data->order_status == 'Pedido Faturado' ? 'active' : '' }}">
-                        <div class="icon">4</div>
-                        <div class="progress-title">Pedido Faturado</div>
-                      </li>
-                      <li class="{{ $data->order_status == 'Pedido em transporte' ? 'active' : '' }}">
-                        <div class="icon">5</div>
-                        <div class="progress-title">Pedido em transporte</div>
-                      </li>
-                      <li class="{{ $data->order_status == 'Entregue' ? 'active' : '' }}">
-                        <div class="icon">6</div>
-                        <div class="progress-title">Entregue</div>
-                      </li>
-                      <li class="{{ $data->order_status == 'Pedido Cancelado' ? 'active' : '' }}">
-                        <div class="icon">7</div>
-                        <div class="progress-title">Pedido Cancelado</div>
-                      </li>
+                      @php
+                        $statusSteps = [
+                          'pending' => ['label' => 'Pedido Realizado', 'icon' => 1],
+                          'aprovado' => ['label' => 'Pagamento Aprovado', 'icon' => 2],
+                          'faturado' => ['label' => 'Pedido Faturado', 'icon' => 3],
+                          'separacao' => ['label' => 'Pedido em Separação', 'icon' => 4],
+                          'transporte' => ['label' => 'Pedido em transporte', 'icon' => 5],
+                          'concluido' => ['label' => 'Entregue', 'icon' => 6],
+                          'cancelado' => ['label' => 'Pedido Cancelado', 'icon' => 7],
+                        ];
+                        $currentStatus = $data->status ? $data->status->code : 'pending';
+                        $stepIndex = 1;
+                        foreach ($statusSteps as $code => $step) {
+                          $active = $currentStatus == $code ? 'active' : '';
+                      @endphp
+                        <li class="{{ $active }}">
+                          <div class="icon">{{ $step['icon'] }}</div>
+                          <div class="progress-title">{{ $step['label'] }}</div>
+                        </li>
+                      @php $stepIndex++; } @endphp
                     </ul>
                   </div>
                   <div class="view-order-page pb-70">
@@ -189,7 +181,24 @@
                                     <p class="mb-0">{{ $keywords['Order Status'] ?? __('Order Status') }} : </p>
                                   </td>
                                   <td>
-                                    <p class="mb-0"> {{ $keywords[$data->order_status] ?? __($data->order_status) }}
+                                    @php
+                                      $statusColors = [
+                                        'pending' => 'bg-warning text-dark',
+                                        'aprovado' => 'bg-info text-dark',
+                                        'faturado' => 'bg-primary text-white',
+                                        'separacao' => 'bg-secondary text-white',
+                                        'transporte' => 'bg-dark text-white',
+                                        'concluido' => 'bg-success text-white',
+                                        'cancelado' => 'bg-danger text-white',
+                                      ];
+                                      $statusObj = $data->status;
+                                      $statusCode = $statusObj ? $statusObj->code : ($data->order_status ?? 'pending');
+                                      $statusName = $statusObj ? $statusObj->name : ($data->order_status ?? '');
+                                      $colorClass = $statusColors[$statusCode] ?? 'bg-secondary text-white';
+                                    @endphp
+                                    <span class="badge {{ $colorClass }}" style="font-size: 1em; padding: 0.5em 1em;">
+                                      {{ $statusName }}
+                                    </span>
                                     </p>
                                   </td>
                                 </tr>

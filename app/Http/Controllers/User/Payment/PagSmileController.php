@@ -208,6 +208,12 @@ class PagSmileController extends Controller
         switch ($status) {
             case 'SUCCESS':
                 $order->payment_status = 'Completed';
+                // Atualiza status do pedido para 'aprovado' (ou 'concluido' se preferir)
+                $aprovadoStatus = \App\Models\User\OrderStatus::where('code', 'aprovado')->first();
+                if ($aprovadoStatus) {
+                    $order->order_status_id = $aprovadoStatus->id;
+                    $order->order_status = $aprovadoStatus->code;
+                }
                 break;
 
             case 'CANCEL':
@@ -218,11 +224,21 @@ class PagSmileController extends Controller
             case 'REFUND_REFUSED':
             case 'REFUND_REVOKE':
                 $order->payment_status = 'Cancelled';
+                $canceladoStatus = \App\Models\User\OrderStatus::where('code', 'cancelado')->first();
+                if ($canceladoStatus) {
+                    $order->order_status_id = $canceladoStatus->id;
+                    $order->order_status = $canceladoStatus->code;
+                }
                 break;
 
             case 'REFUSED':
             case 'REFUSE_FAILED':
                 $order->payment_status = 'Rejected';
+                $rejeitadoStatus = \App\Models\User\OrderStatus::where('code', 'cancelado')->first();
+                if ($rejeitadoStatus) {
+                    $order->order_status_id = $rejeitadoStatus->id;
+                    $order->order_status = $rejeitadoStatus->code;
+                }
                 break;
 
             case 'DISPUTE':
@@ -234,6 +250,11 @@ class PagSmileController extends Controller
             case 'REFUND_VERIFYING':
             case 'REFUND_PROCESSING':
                 $order->payment_status = 'Pending';
+                $pendenteStatus = \App\Models\User\OrderStatus::where('code', 'pending')->first();
+                if ($pendenteStatus) {
+                    $order->order_status_id = $pendenteStatus->id;
+                    $order->order_status = $pendenteStatus->code;
+                }
                 break;
 
             default:

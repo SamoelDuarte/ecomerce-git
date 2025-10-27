@@ -34,7 +34,14 @@
                       <span>{{ Auth::guard('customer')->user()->billing_country }}</span>
                     </li>
                     <li><span>{{ $keywords['Address'] ?? __('Address') }} :</span>
-                      <span>{{ Auth::guard('customer')->user()->billing_address }}</span>
+                      <span>
+                        {{ Auth::guard('customer')->user()->billing_street }}
+                        {{ Auth::guard('customer')->user()->billing_number_home ? ', ' . Auth::guard('customer')->user()->billing_number_home : '' }}
+                        {{ Auth::guard('customer')->user()->billing_neighborhood ? ' - ' . Auth::guard('customer')->user()->billing_neighborhood : '' }}<br>
+                        {{ Auth::guard('customer')->user()->billing_zip }}
+                        {{ Auth::guard('customer')->user()->billing_reference ? ' (' . Auth::guard('customer')->user()->billing_reference . ')' : '' }}<br>
+                        {{ Auth::guard('customer')->user()->billing_city }} - {{ Auth::guard('customer')->user()->billing_country }}
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -107,23 +114,24 @@
                                   {{ userSymbolPrice($order->total, $order->currency_position, $order->currency_sign) }}
                                 </td>
                                 <td>
-                                  @if ($order->order_status == 'pending')
-                                    <span
-                                      class="pending">{{ $keywords[ucfirst($order->order_status)] ?? __('Pending') }}
-                                    </span>
-                                  @elseif ($order->order_status == 'rejected')
-                                    <span class="rejected">
-                                      {{ $keywords[ucfirst($order->order_status)] ?? __('Rejected') }}
-                                    </span>
-                                  @elseif ($order->order_status == 'processing')
-                                    <span class="processing">
-                                      {{ $keywords[ucfirst($order->order_status)] ?? __('Processing') }}
-                                    </span>
-                                  @elseif ($order->order_status == 'completed')
-                                    <span class="completed">
-                                      {{ $keywords[ucfirst($order->order_status)] ?? __('Completed') }}
-                                    </span>
-                                  @endif
+                                  @php
+                                    $statusColors = [
+                                      'pending' => 'bg-warning text-dark',
+                                      'aprovado' => 'bg-info text-dark',
+                                      'faturado' => 'bg-primary text-white',
+                                      'separacao' => 'bg-secondary text-white',
+                                      'transporte' => 'bg-dark text-white',
+                                      'concluido' => 'bg-success text-white',
+                                      'cancelado' => 'bg-danger text-white',
+                                    ];
+                                    $statusObj = $order->status;
+                                    $statusCode = $statusObj ? $statusObj->code : ($order->order_status ?? 'pending');
+                                    $statusName = $statusObj ? $statusObj->name : ($order->order_status ?? '');
+                                    $colorClass = $statusColors[$statusCode] ?? 'bg-secondary text-white';
+                                  @endphp
+                                  <span class="badge {{ $colorClass }}" style="font-size: 1em; padding: 0.5em 1em;">
+                                    {{ $statusName }}
+                                  </span>
                                 </td>
                                 <td><a href="{{ route('customer.orders-details', ['id' => $order->id, getParam()]) }}"
                                     class="btn base-bg" class="btn">{{ $keywords['Details'] ?? __('Details') }} </a>
