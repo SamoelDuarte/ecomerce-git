@@ -18,28 +18,19 @@ class MyfatoorahController extends Controller
     public function __construct()
     {
         $myfatoorah_user = Session::get('myfatoorah_user');
-        $paydata = null;
-        $currency = null;
-        if ($myfatoorah_user) {
-            $paymentMethod = UserPaymentGeteway::where([['keyword', 'myfatoorah'], ['user_id', $myfatoorah_user->id]])->first();
-            if ($paymentMethod) {
-                $paydata = json_decode($paymentMethod->information, true);
-                $currency  = Common::getUserCurrentCurrency($myfatoorah_user->id);
-            }
-        }
+        $paymentMethod = UserPaymentGeteway::where([['keyword', 'myfatoorah'], ['user_id', $myfatoorah_user->id]])->first();
+        $paydata = json_decode($paymentMethod->information, true);
 
-        if ($paydata && $currency) {
-            Config::set('myfatorah.token', $paydata['token']);
-            Config::set('myfatorah.DisplayCurrencyIso', $currency->name);
-            Config::set('myfatorah.CallBackUrl', route('myfatoorah.success'));
-            Config::set('myfatorah.ErrorUrl', route('myfatoorah.cancel'));
-            if ($paydata['sandbox_status'] == 1) {
-                $this->myfatoorah = MyFatoorah::getInstance(true);
-            } else {
-                $this->myfatoorah = MyFatoorah::getInstance(false);
-            }
+        $currency  = Common::getUserCurrentCurrency($myfatoorah_user->id);
+
+        Config::set('myfatorah.token', $paydata['token']);
+        Config::set('myfatorah.DisplayCurrencyIso', $currency->name);
+        Config::set('myfatorah.CallBackUrl', route('myfatoorah.success'));
+        Config::set('myfatorah.ErrorUrl', route('myfatoorah.cancel'));
+        if ($paydata['sandbox_status'] == 1) {
+            $this->myfatoorah = MyFatoorah::getInstance(true);
         } else {
-            $this->myfatoorah = null;
+            $this->myfatoorah = MyFatoorah::getInstance(false);
         }
     }
 

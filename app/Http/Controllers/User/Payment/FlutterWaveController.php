@@ -13,20 +13,15 @@ use App\Models\User\UserOrder;
 
 class FlutterWaveController extends Controller
 {
-    public $public_key = null;
-    private $secret_key = null;
+    public $public_key;
+    private $secret_key;
 
     public function __construct()
     {
-        $user = getUser();
-        if ($user) {
-            $data = UserPaymentGeteway::where('keyword', 'flutterwave')->where('user_id', $user->id)->first();
-            if ($data) {
-                $paydata = $data->convertAutoData();
-                $this->public_key = $paydata['public_key'];
-                $this->secret_key = $paydata['secret_key'];
-            }
-        }
+        $data = UserPaymentGeteway::where('keyword', 'flutterwave')->where('user_id', getUser()->id)->first();
+        $paydata = $data->convertAutoData();
+        $this->public_key = $paydata['public_key'];
+        $this->secret_key = $paydata['secret_key'];
     }
 
     public function paymentProcess(Request $request, $_amount, $_email, $_item_number, $_successUrl, $_cancelUrl, $currency)

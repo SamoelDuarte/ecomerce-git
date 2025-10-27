@@ -29,24 +29,19 @@ class PaypalController extends Controller
 
     public function __construct()
     {
-        $user = getUser();
-        if ($user) {
-            $data = UserPaymentGeteway::where('keyword', 'paypal')->where('user_id', $user->id)->first();
-            if ($data) {
-                $paydata = $data->convertAutoData();
-                $paypal_conf = Config::get('paypal');
-                $paypal_conf['client_id'] = $paydata['client_id'];
-                $paypal_conf['secret'] = $paydata['client_secret'];
-                $paypal_conf['settings']['mode'] = $paydata['sandbox_check'] == 1 ? 'sandbox' : 'live';
-                $this->_api_context = new ApiContext(
-                    new OAuthTokenCredential(
-                        $paypal_conf['client_id'],
-                        $paypal_conf['secret']
-                    )
-                );
-                $this->_api_context->setConfig($paypal_conf['settings']);
-            }
-        }
+        $data = UserPaymentGeteway::where('keyword', 'paypal')->where('user_id', getUser()->id)->first();
+        $paydata = $data->convertAutoData();
+        $paypal_conf = Config::get('paypal');
+        $paypal_conf['client_id'] = $paydata['client_id'];
+        $paypal_conf['secret'] = $paydata['client_secret'];
+        $paypal_conf['settings']['mode'] = $paydata['sandbox_check'] == 1 ? 'sandbox' : 'live';
+        $this->_api_context = new ApiContext(
+            new OAuthTokenCredential(
+                $paypal_conf['client_id'],
+                $paypal_conf['secret']
+            )
+        );
+        $this->_api_context->setConfig($paypal_conf['settings']);
     }
 
     public function paymentProcess(Request $request, $_amount, $_title, $_success_url, $_cancel_url, $currency_code)

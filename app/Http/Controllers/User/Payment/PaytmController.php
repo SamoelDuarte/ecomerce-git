@@ -16,22 +16,14 @@ class PaytmController extends Controller
 {
     public function __construct()
     {
-        $user = getUser();
-        $paydata = null;
-        if ($user) {
-            $data = UserPaymentGeteway::where('keyword', 'paytm')->where('user_id', $user->id)->first();
-            if ($data) {
-                $paydata = $data->convertAutoData();
-                Config::set('services.paytm-wallet.env', $paydata['environment']);
-                Config::set('services.paytm-wallet.merchant_id', $paydata['merchant']);
-                Config::set('services.paytm-wallet.merchant_key', $paydata['secret']);
-            }
-        }
-        if ($paydata) {
-            Config::set('services.paytm-wallet.merchant_website', $paydata['website']);
-            Config::set('services.paytm-wallet.industry_type', $paydata['industry']);
-            Config::set('services.paytm-wallet.channel', 'WEB');
-        }
+        $data = UserPaymentGeteway::where('keyword', 'paytm')->where('user_id', getUser()->id)->first();
+        $paydata = $data->convertAutoData();
+        Config::set('services.paytm-wallet.env', $paydata['environment']);
+        Config::set('services.paytm-wallet.merchant_id', $paydata['merchant']);
+        Config::set('services.paytm-wallet.merchant_key', $paydata['secret']);
+        Config::set('services.paytm-wallet.merchant_website', $paydata['website']);
+        Config::set('services.paytm-wallet.industry_type', $paydata['industry']);
+        Config::set('services.paytm-wallet.channel', 'WEB');
     }
 
     public function paymentProcess(Request $request, $_amount, $_item_number, $_callback_url)

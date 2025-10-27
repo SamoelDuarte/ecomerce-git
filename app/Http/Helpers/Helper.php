@@ -651,8 +651,8 @@ if (!function_exists('getUser')) {
             $host = str_replace('www.', '', $host);
             // if current URL is a path based URL
             if ($host == env('WEBSITE_HOST')) {
-                $path = isset($parsedUrl['path']) ? explode('/', $parsedUrl['path']) : [];
-                $username = isset($path[1]) ? $path[1] : null;
+                $path = explode('/', $parsedUrl['path']);
+                $username = $path[1];
             }
             // if the current URL is a subdomain
             else {
@@ -670,10 +670,7 @@ if (!function_exists('getUser')) {
                             ->where('start_date', '<=', Carbon::now()->format('Y-m-d'))
                             ->where('expire_date', '>=', Carbon::now()->format('Y-m-d'));
                     })
-                    ->first();
-                if (!$user) {
-                    return null;
-                }
+                    ->firstOrFail();
 
 
                 // if the current url is a subdomain
@@ -710,11 +707,13 @@ if (!function_exists('getUser')) {
                 $q->where('status', '=', 1)
                     ->where('start_date', '<=', Carbon::now()->format('Y-m-d'))
                     ->where('expire_date', '>=', Carbon::now()->format('Y-m-d'));
-            })->first();
+            })->firstOrFail();
 
-        if (!$user || !cPackageHasCdomain($user)) {
-            return null;
+        if (!cPackageHasCdomain($user)) {
+            return view('errors.404');
         }
+
+
 
         return $user;
     }
