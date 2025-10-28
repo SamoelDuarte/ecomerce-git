@@ -275,6 +275,40 @@ class PagSmileController extends Controller
             $order->save();
             sleep(1);
             Common::OrderCompletedMail($order, $user);
+
+            // Envia e-mail com códigos digitais se houver produto digital
+            $digitalCodes = [];
+            foreach ($order->orderitems as $item) {
+                if ($item->item && $item->item->type == 'digital' && !empty($item->codes)) {
+                    $codesArr = json_decode($item->codes, true);
+                    if (is_array($codesArr) && count($codesArr) > 0) {
+                        $digitalCodes[] = [
+                            'product' => $item->title,
+                            'codes' => $codesArr
+                        ];
+                    }
+                }
+            }
+            if (count($digitalCodes) > 0) {
+                $customerEmail = $order->billing_email;
+                $customerName = trim($order->billing_fname . ' ' . $order->billing_lname);
+                $subject = 'Seu(s) código(s) digital(is) do pedido #' . $order->order_number;
+                $body = "Olá {$customerName},<br><br>Segue abaixo o(s) código(s) digital(is) do seu pedido:<br><ul>";
+                foreach ($digitalCodes as $prod) {
+                    $body .= "<li><strong>{$prod['product']}:</strong><ul>";
+                    foreach ($prod['codes'] as $code) {
+                        $body .= "<li>{$code['code']}</li>";
+                    }
+                    $body .= "</ul></li>";
+                }
+                $body .= "</ul><br>Obrigado por sua compra!";
+                $mailData = [
+                    'recipient' => $customerEmail,
+                    'subject' => $subject,
+                    'body' => $body
+                ];
+                \App\Http\Helpers\BasicMailer::sendMailFromUser($user, $mailData);
+            }
         }
 
         return response('success', 200);

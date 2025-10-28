@@ -143,7 +143,44 @@ class ItemOrderController extends Controller
                     $po->payment_status = 'Completed';
                 }
             }
+
             $po->save();
+
+            // Envia e-mail com códigos digitais se houver produto digital e pagamento aprovado
+            if ($po->payment_status === 'Completed') {
+                $digitalCodes = [];
+                foreach ($po->orderitems as $item) {
+                    if ($item->item && $item->item->type == 'digital' && !empty($item->codes)) {
+                        $codesArr = json_decode($item->codes, true);
+                        if (is_array($codesArr) && count($codesArr) > 0) {
+                            $digitalCodes[] = [
+                                'product' => $item->title,
+                                'codes' => $codesArr
+                            ];
+                        }
+                    }
+                }
+                if (count($digitalCodes) > 0) {
+                    $customerEmail = $po->billing_email;
+                    $customerName = trim($po->billing_fname . ' ' . $po->billing_lname);
+                    $subject = 'Seu(s) código(s) digital(is) do pedido #' . $po->order_number;
+                    $body = "Olá {$customerName},<br><br>Segue abaixo o(s) código(s) digital(is) do seu pedido:<br><ul>";
+                    foreach ($digitalCodes as $prod) {
+                        $body .= "<li><strong>{$prod['product']}:</strong><ul>";
+                        foreach ($prod['codes'] as $code) {
+                            $body .= "<li>{$code['code']}</li>";
+                        }
+                        $body .= "</ul></li>";
+                    }
+                    $body .= "</ul><br>Obrigado por sua compra!";
+                    $mailData = [
+                        'recipient' => $customerEmail,
+                        'subject' => $subject,
+                        'body' => $body
+                    ];
+                    \App\Http\Helpers\BasicMailer::sendMailFromUser($root_user, $mailData);
+                }
+            }
 
             //get customer information
             $customer = Customer::where('id', $po->customer_id)->first();
