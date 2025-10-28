@@ -689,7 +689,8 @@ class Common
         $data['recipient'] = $order->billing_email;
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
-        $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
+            $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
+            \Log::info('OrderCompletedMail - Invoice path:', ['invoice_path' => $data['invoice'], 'invoice_number' => $order->invoice_number]);
        
         try {
             BasicMailer::sendMailFromUser($user, $data);
