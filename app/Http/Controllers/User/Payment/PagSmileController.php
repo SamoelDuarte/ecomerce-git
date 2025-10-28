@@ -187,7 +187,6 @@ class PagSmileController extends Controller
     public function notifyPayment(Request $request)
     {
         $payload = $request->all();
-        \Log::info('Webhook PagSmile recebido:', $payload);
 
         $uniqueOrderId = $payload['out_trade_no'] ?? null;
         $status = $payload['trade_status'] ?? null;
