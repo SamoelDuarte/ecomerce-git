@@ -645,7 +645,15 @@ class Common
 
         $mailBody = str_replace('{shipping_fname}', $order->shipping_fname, $mailBody);
         $mailBody = str_replace('{shipping_lname}', $order->shipping_lname, $mailBody);
-        $mailBody = str_replace('{shipping_address}', $order->shipping_address, $mailBody);
+        // Monta endereço de envio conforme colunas reais
+        $shipping_address = trim(
+            ($order->shipping_street ?? '') . ', ' .
+            ($order->shipping_number_address ?? '') . ', ' .
+            ($order->shipping_neighborhood ?? '') . ', ' .
+            ($order->shipping_zip ?? '') .
+            (!empty($order->shipping_reference) ? ' - ' . $order->shipping_reference : '')
+        );
+        $mailBody = str_replace('{shipping_address}', $shipping_address, $mailBody);
         $mailBody = str_replace('{shipping_city}', $order->shipping_city, $mailBody);
         $mailBody = str_replace('{shipping_country}', $order->shipping_country, $mailBody);
         $mailBody = str_replace('{shipping_number}', $order->shipping_number, $mailBody);

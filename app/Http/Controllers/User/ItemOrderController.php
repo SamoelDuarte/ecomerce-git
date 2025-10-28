@@ -168,7 +168,16 @@ class ItemOrderController extends Controller
             $mail_body = $mail_template->email_body;
 
             $mail_body = str_replace('{customer_name}', $f_name . ' ' . $l_name, $mail_body);
-            $mail_body = str_replace('{order_status}', $request->order_status, $mail_body);
+            // Get status name from normalized table
+            $statusName = '';
+            if ($request->has('order_status_id')) {
+                $statusObj = \App\Models\User\OrderStatus::find($request->order_status_id);
+                $statusName = $statusObj ? $statusObj->name : ($request->order_status ?? '');
+            } else if ($request->has('order_status')) {
+                $statusObj = \App\Models\User\OrderStatus::where('code', $request->order_status)->first();
+                $statusName = $statusObj ? $statusObj->name : $request->order_status;
+            }
+            $mail_body = str_replace('{order_status}', $statusName, $mail_body);
             $mail_body = str_replace('{website_title}', $root_user->shop_name ?? $root_user->username, $mail_body);
 
             $to = $email;
