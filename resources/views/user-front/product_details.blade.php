@@ -389,8 +389,11 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($isDigital && $hasCodes)
-                                    <div id="productDetails" data-is-digital="{{ $isDigital ? '1' : '0' }}"
+                             
+
+                            </div>
+                               @if ($isDigital)
+                                    <div id="productDetails" class="mt-4" data-is-digital="{{ $isDigital ? '1' : '0' }}"
                                         data-has-codes="{{ $hasCodes ? '1' : '0' }}"
                                         data-new-price="{{ $product->price }}"
                                         data-old-price="{{ $product->old_price ?? 0 }}">
@@ -401,20 +404,23 @@
                                             ->count();
                                     @endphp
 
-                                    @if ($totalCodes > 0)
+
+                                    @if (isset($totalCodes) && $totalCodes > 0)
                                         <div class="alert alert-info">
                                             <i class="fas fa-info-circle"></i>
                                             {{ $totalCodes }} {{ $totalCodes == 1 ? 'código digital disponível' : 'códigos digitais disponíveis' }}
                                         </div>
-                                    @else
+                                    @elseif (isset($totalCodes) && $totalCodes < 1)
                                         <div class="alert alert-warning">
                                             <i class="fas fa-exclamation-triangle"></i>
-                                            Nenhum código digital disponível no momento
+                                            Produto não disponível no momento
                                         </div>
+                                        <style>
+                                            .product-price, .product-action { display: none !important; }
+                                        </style>
                                     @endif
+                                    
                                 @endif
-
-                            </div>
 
 
                         </div>
