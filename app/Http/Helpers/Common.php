@@ -332,6 +332,7 @@ class Common
 
 
         $order->order_status = $order_status;
+        $order->order_status_id = 1;
         $order->gateway_type = $gtype;
         if (is_array($request)) {
             if (array_key_exists('conversation_id', $request)) {
