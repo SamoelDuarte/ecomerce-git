@@ -4,6 +4,7 @@ namespace App\Http\Helpers;
 
 use Config;
 use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Str;
@@ -43,6 +44,7 @@ class BasicMailer
         });
         return true;
       } catch (\Exception $e) {
+        Log::info('Mail sending error: ' . $e->getMessage());
         Session::flash('warning', 'Mail could not be sent. Mailer Error: ' . Str::limit($e->getMessage(), 120));
         return false;
       }
