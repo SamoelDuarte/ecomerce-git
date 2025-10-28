@@ -628,71 +628,70 @@ class Common
 
     public static function OrderCompletedMail($order, $user)
     {
+        // first, get the mail template information from db
+        $mailTemplate = UserEmailTemplate::where([['email_type', 'product_order'], ['user_id', $user->id]])->first();
+        $mailSubject = $mailTemplate->email_subject;
+        $mailBody = $mailTemplate->email_body;
+
+        // second, send a password reset link to user via email
+        $info = DB::table('basic_extendeds')
+            ->select('is_smtp', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
+            ->first();
+
+        $website_title = $user->shop_name;
+        $link = '<a href=' . route('customer.orders-details', ['id' => $order->id, $user->username]) . '>Order Details</a>';
+        $mailBody = str_replace('{customer_name}', $order->billing_fname . ' ' . $order->billing_lname, $mailBody);
+        $mailBody = str_replace('{order_number}', $order->order_number, $mailBody);
+
+        $mailBody = str_replace('{shipping_fname}', $order->shipping_fname, $mailBody);
+        $mailBody = str_replace('{shipping_lname}', $order->shipping_lname, $mailBody);
+        // Monta endereço de envio conforme colunas reais
+        $shipping_address = trim(
+            ($order->shipping_street ?? '') . ', ' .
+            ($order->shipping_number_address ?? '') . ', ' .
+            ($order->shipping_neighborhood ?? '') . ', ' .
+            ($order->shipping_zip ?? '') .
+            (!empty($order->shipping_reference) ? ' - ' . $order->shipping_reference : '')
+        );
+       
+        $mailBody = str_replace('{shipping_address}', $shipping_address, $mailBody);
+        // Monta endereço de cobrança conforme colunas reais
+        $billing_address = trim(
+            ($order->billing_street ?? '') . ', ' .
+            ($order->billing_number_home ?? '') . ', ' .
+            ($order->billing_neighborhood ?? '') . ', ' .
+            ($order->billing_zip ?? '') .
+            (!empty($order->billing_reference) ? ' - ' . $order->billing_reference : '')
+        );
+        $mailBody = str_replace('{billing_address}', $billing_address, $mailBody);
+        $mailBody = str_replace('{billing_country}', 'Brasil', $mailBody);
+        $mailBody = str_replace('{shipping_city}', $order->shipping_city, $mailBody);
+        $mailBody = str_replace('{shipping_country}', $order->shipping_country, $mailBody);
+        $mailBody = str_replace('{shipping_number}', $order->shipping_number, $mailBody);
+
+        $mailBody = str_replace('{billing_fname}', $order->billing_fname, $mailBody);
+        $mailBody = str_replace('{billing_lname}', $order->billing_lname, $mailBody);
+        $mailBody = str_replace('{billing_city}', $order->billing_city, $mailBody);
+        $mailBody = str_replace('{billing_number}', $order->billing_number, $mailBody);
+        $mailBody = str_replace('{order_link}', $link, $mailBody);
+        $mailBody = str_replace('{website_title}', $website_title, $mailBody);
+
+        $data = [];
+        $data['smtp_status'] = $info->is_smtp;
+        $data['smtp_host'] = $info->smtp_host;
+        $data['smtp_port'] = $info->smtp_port;
+        $data['encryption'] = $info->encryption;
+        $data['smtp_username'] = $info->smtp_username;
+        $data['smtp_password'] = $info->smtp_password;
+
+        //mail info in array
+        $data['from_mail'] = $info->from_mail;
+        $data['recipient'] = $order->billing_email;
+        $data['subject'] = $mailSubject;
+        $data['body'] = $mailBody;
+        $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
+       
         try {
-            // first, get the mail template information from db
-            $mailTemplate = UserEmailTemplate::where([['email_type', 'product_order'], ['user_id', $user->id]])->first();
-            $mailSubject = $mailTemplate->email_subject;
-            $mailBody = $mailTemplate->email_body;
-
-            // second, send a password reset link to user via email
-            $info = DB::table('basic_extendeds')
-                ->select('is_smtp', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
-                ->first();
-
-            $website_title = $user->shop_name;
-            $link = '<a href=' . route('customer.orders-details', ['id' => $order->id, $user->username]) . '>Order Details</a>';
-            $mailBody = str_replace('{customer_name}', $order->billing_fname . ' ' . $order->billing_lname, $mailBody);
-            $mailBody = str_replace('{order_number}', $order->order_number, $mailBody);
-
-            $mailBody = str_replace('{shipping_fname}', $order->shipping_fname, $mailBody);
-            $mailBody = str_replace('{shipping_lname}', $order->shipping_lname, $mailBody);
-            // Monta endereço de envio conforme colunas reais
-            $shipping_address = trim(
-                ($order->shipping_street ?? '') . ', ' .
-                ($order->shipping_number_address ?? '') . ', ' .
-                ($order->shipping_neighborhood ?? '') . ', ' .
-                ($order->shipping_zip ?? '') .
-                (!empty($order->shipping_reference) ? ' - ' . $order->shipping_reference : '')
-            );
-
-            $mailBody = str_replace('{shipping_address}', $shipping_address, $mailBody);
-            // Monta endereço de cobrança conforme colunas reais
-            $billing_address = trim(
-                ($order->billing_street ?? '') . ', ' .
-                ($order->billing_number_home ?? '') . ', ' .
-                ($order->billing_neighborhood ?? '') . ', ' .
-                ($order->billing_zip ?? '') .
-                (!empty($order->billing_reference) ? ' - ' . $order->billing_reference : '')
-            );
-            $mailBody = str_replace('{billing_address}', $billing_address, $mailBody);
-            $mailBody = str_replace('{billing_country}', 'Brasil', $mailBody);
-            $mailBody = str_replace('{shipping_city}', $order->shipping_city, $mailBody);
-            $mailBody = str_replace('{shipping_country}', $order->shipping_country, $mailBody);
-            $mailBody = str_replace('{shipping_number}', $order->shipping_number, $mailBody);
-
-            $mailBody = str_replace('{billing_fname}', $order->billing_fname, $mailBody);
-            $mailBody = str_replace('{billing_lname}', $order->billing_lname, $mailBody);
-            $mailBody = str_replace('{billing_city}', $order->billing_city, $mailBody);
-            $mailBody = str_replace('{billing_number}', $order->billing_number, $mailBody);
-            $mailBody = str_replace('{order_link}', $link, $mailBody);
-            $mailBody = str_replace('{website_title}', $website_title, $mailBody);
-
-            $data = [];
-            $data['smtp_status'] = $info->is_smtp;
-            $data['smtp_host'] = $info->smtp_host;
-            $data['smtp_port'] = $info->smtp_port;
-            $data['encryption'] = $info->encryption;
-            $data['smtp_username'] = $info->smtp_username;
-            $data['smtp_password'] = $info->smtp_password;
-
-            //mail info in array
-            $data['from_mail'] = $info->from_mail;
-            $data['recipient'] = $order->billing_email;
-            $data['subject'] = $mailSubject;
-            $data['body'] = $mailBody;
-            $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
-
-
             BasicMailer::sendMailFromUser($user, $data);
         } catch (\Exception $e) {
             \Log::error('OrderCompletedMail - Falha ao enviar e-mail: ' . $e->getMessage(), [

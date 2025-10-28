@@ -271,6 +271,7 @@ class PagSmileController extends Controller
         if ($status == 'SUCCESS') {
             $user = $order->user ?? User::find($order->user_id);
             Common::generateInvoice($order, $user);
+            sleep(3);
             Common::OrderCompletedMail($order, $user);
         }
 
