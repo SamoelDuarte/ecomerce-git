@@ -105,9 +105,9 @@ class Common
         }
 
         //cartTotal
-        $cartTotal =  Self::cartTotal($user_id);
+        $cartTotal = self::cartTotal($user_id);
         //tax
-        $tax =  Self::tax($user_id);
+        $tax = self::tax($user_id);
 
         $total = round(($cartTotal - coupon()) + $shippig_charge + $tax, 2);
 
@@ -120,7 +120,7 @@ class Common
         $bex = UserShopSetting::where('user_id', $user_id)->first();
         $tax = $bex->tax;
         if (session()->has('cart') && !empty(session()->get('cart'))) {
-            $cartSubTotal =  Self::cartSubTotal($user_id);
+            $cartSubTotal = self::cartSubTotal($user_id);
             $tax = ($cartSubTotal * $tax) / 100;
         }
 
@@ -131,7 +131,7 @@ class Common
     {
         $coupon = session()->has('user_coupon') && !empty(session()->get('user_coupon')) ? session()->get('user_coupon') : 0;
         //cartTotal
-        $cartTotal =  Self::cartTotal($user_id);
+        $cartTotal = self::cartTotal($user_id);
         $subTotal = $cartTotal - $coupon;
 
         return round($subTotal, 2);
@@ -269,7 +269,7 @@ class Common
 
         $coupon_amount = session()->get('user_coupon');
         $total = $total - session()->get('user_coupon');
-        
+
         // Dados do frete do Frenet
         $shippig_charge = $shipping_service_price;
         $shipping_method = $request['shipping_service_name'] ?? null;
@@ -344,9 +344,9 @@ class Common
             $conversation_id = null;
         }
         $order->conversation_id = $conversation_id;
-        $order->cart_total = Self::cartTotal($user->id);
-        $order->tax = Self::tax($user->id);
-        $order->tax_percentage = Self::tax_percentage($user->id);
+        $order->cart_total = self::cartTotal($user->id);
+        $order->tax = self::tax($user->id);
+        $order->tax_percentage = self::tax_percentage($user->id);
         $order->discount = $coupon_amount;
         $order->total = $total;
         $order->shipping_method = $shipping_method;
@@ -354,7 +354,7 @@ class Common
         if ($gtype == 'online') {
             $order->method = $request['payment_method'];
         } elseif ($gtype == 'offline') {
-            $gateway =  UserOfflineGateway::where([['user_id', $user->id], ['name', $request['payment_method']]])
+            $gateway = UserOfflineGateway::where([['user_id', $user->id], ['name', $request['payment_method']]])
                 ->first();
             $order->method = $gateway->name;
             if ($request->hasFile('receipt')) {
@@ -382,7 +382,7 @@ class Common
         // Atualizar o perfil do cliente com os dados do checkout
         if (Auth::guard('customer')->check()) {
             $customerId = Auth::guard('customer')->user()->id;
-            
+
             $updateData = [
                 // Billing
                 'billing_fname' => $request['billing_fname'] ?? null,
@@ -398,7 +398,7 @@ class Common
                 'billing_reference' => $request['billing_reference'] ?? null,
                 'billing_country' => $request['billing_country'] ?? 'BR',
             ];
-            
+
             // Shipping (se preenchido, senão usa billing)
             if (!empty($request['shipping_fname'])) {
                 $updateData = array_merge($updateData, [
@@ -432,7 +432,7 @@ class Common
                     'shipping_country' => $request['shipping_country'] ?? 'BR',
                 ]);
             }
-            
+
             // Atualizar o perfil do cliente
             Customer::where('id', $customerId)->update($updateData);
         }
@@ -463,14 +463,14 @@ class Common
 
                 foreach ($codigos as $codigo) {
                     $codesArray[] = [
-                        'code'  => $codigo->code
+                        'code' => $codigo->code
                     ];
 
                     // Atualiza como usado
                     $codigo->update([
-                        'is_used'  => 1,
+                        'is_used' => 1,
                         'order_id' => $orderId,
-                        'used_at'  => now(),
+                        'used_at' => now(),
                     ]);
                 }
 
@@ -540,24 +540,24 @@ class Common
                 ->value('timezone');
 
             UserOrderItem::insert([
-                'user_order_id'   => $orderId,
-                'customer_id'     => Auth::guard('customer')->check()
+                'user_order_id' => $orderId,
+                'customer_id' => Auth::guard('customer')->check()
                     ? Auth::guard('customer')->user()->id
                     : 9999999,
-                'user_id'         => $user->id,
-                'item_id'         => $item->id,
-                'title'           => $itemcontent->title,
-                'sku'             => $item->sku,
-                'qty'             => $qty[$key],
-                'variations'      => $variations[$key],
-                'codes'           => $codesList[$key],
-                'category'        => $itemcontent->category_id,
-                'price'           => $item_price,
-                'previous_price'  => $item->previous_price,
-                'image'           => $item->thumbnail,
-                'summary'         => $itemcontent->summary ?? '',
-                'description'     => $itemcontent->description ?? '',
-                'created_at'      => Carbon::now($timeZone),
+                'user_id' => $user->id,
+                'item_id' => $item->id,
+                'title' => $itemcontent->title,
+                'sku' => $item->sku,
+                'qty' => $qty[$key],
+                'variations' => $variations[$key],
+                'codes' => $codesList[$key],
+                'category' => $itemcontent->category_id,
+                'price' => $item_price,
+                'previous_price' => $item->previous_price,
+                'image' => $item->thumbnail,
+                'summary' => $itemcontent->summary ?? '',
+                'description' => $itemcontent->description ?? '',
+                'created_at' => Carbon::now($timeZone),
             ]);
         }
     }
@@ -572,7 +572,7 @@ class Common
         $dir = public_path('assets/front/invoices/');
         $path = $dir . $fileName;
         @mkdir($dir, 0777, true);
-        $data['order']  = $order;
+        $data['order'] = $order;
         $pdf = PDF::setOptions([
             'isHtml5ParserEnabled' => true,
             'isRemoteEnabled' => true,
@@ -611,7 +611,7 @@ class Common
         // Monta endereço completo do pedido
         $address = ($order->billing_street ?? '') . ', ' . ($order->billing_number_home ?? '') . ', ' . ($order->billing_neighborhood ?? '') . ', ' . ($order->billing_zip ?? '');
         $country = 'Brasil';
-        $data['order']  = $order;
+        $data['order'] = $order;
         $data['address'] = $address;
         $data['country'] = $country;
         $pdf = PDF::setOptions([
@@ -689,6 +689,7 @@ class Common
             (!empty($order->billing_reference) ? ' - ' . $order->billing_reference : '')
         );
         $mailBody = str_replace('{billing_address}', $billing_address, $mailBody);
+        $mailBody = str_replace('{billing_country}', 'Brasil', $mailBody);
         $mailBody = str_replace('{shipping_city}', $order->shipping_city, $mailBody);
         $mailBody = str_replace('{shipping_country}', $order->shipping_country, $mailBody);
         $mailBody = str_replace('{shipping_number}', $order->shipping_number, $mailBody);
@@ -743,7 +744,7 @@ class Common
         } else {
             $userCurrentLang = UserLanguage::where('is_default', 1)->where('user_id', $userId)->first();
         }
-        
+
         // Se ainda não encontrou idioma, criar um idioma padrão para o usuário
         if (!$userCurrentLang) {
             $userCurrentLang = UserLanguage::create([
@@ -756,7 +757,7 @@ class Common
                 'keywords' => json_encode([])
             ]);
         }
-        
+
         return $userCurrentLang;
     }
 
