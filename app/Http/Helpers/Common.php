@@ -284,13 +284,13 @@ class Common
         $timeZone = DB::table('user_basic_settings')->where('user_id', $user->id)->value('timezone');
         $now = Carbon::now($timeZone);
 
-        $order_status = 'Pedido Realizado';
+        $order_status = 'Pagamento Pendente';
         $cart = session()->get('cart', []);
         if (count($cart) == 1) {
             foreach ($cart as $itemCart)
                 $itemType = UserItem::where([['user_id', $user->id], ['id', $itemCart['id']]])->pluck('type')->first();
             if ($itemType == 'digital') {
-                $order_status = 'Pedido Realizado';
+                $order_status = 'Pagamento Pendente';
             }
         }
 
