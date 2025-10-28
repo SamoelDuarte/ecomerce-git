@@ -507,10 +507,39 @@ class CustomerController extends Controller
         $customer = Auth::guard('customer')->user();
         $data['authUser'] = $customer;
         $customer_id = $customer->id;
-        $data['orders'] = UserOrder::where('customer_id', $customer_id)->orderBy('created_at', 'desc')->limit(5)->get();
-        $data['pending_orders'] = UserOrder::where([['customer_id', $customer_id], ['order_status', 'pending']])->count();
-        $data['processing_orders'] = UserOrder::where([['customer_id', $customer_id], ['order_status', 'processing']])->count();
-        $data['completed_orders'] = UserOrder::where([['customer_id', $customer_id], ['order_status', 'completed']])->count();
+
+        // Get status IDs for summary
+        $realizadoStatus = \App\Models\User\OrderStatus::where('code', 'pending')->first();
+        $concluidoStatus = \App\Models\User\OrderStatus::where('code', 'concluido')->first();
+        $processingStatuses = \App\Models\User\OrderStatus::whereNotIn('code', ['pending', 'concluido'])->get();
+
+        // Pending: order placed (Pedido Realizado)
+        $data['pending_orders'] = $realizadoStatus
+            ? \App\Models\User\UserOrder::where('customer_id', $customer_id)
+                ->where('order_status_id', $realizadoStatus->id)
+                ->count()
+            : 0;
+
+        // Processing: payment approved but not completed
+            $processingStatusIds = $processingStatuses->pluck('id')->toArray();
+            $data['processing_orders'] = count($processingStatusIds) > 0
+                ? \App\Models\User\UserOrder::where('customer_id', $customer_id)
+                    ->whereIn('order_status_id', $processingStatusIds)
+                    ->count()
+                : 0;
+
+        // Completed: order completed
+        $data['completed_orders'] = $concluidoStatus
+            ? \App\Models\User\UserOrder::where('customer_id', $customer_id)
+                ->where('order_status_id', $concluidoStatus->id)
+                ->count()
+            : 0;
+
+        // Recent orders (limit 5)
+        $data['orders'] = \App\Models\User\UserOrder::where('customer_id', $customer_id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
 
         return view('user-front.customer.dashboard', $data);
     }
