@@ -45,28 +45,33 @@
                     </ul>
                   </div>
                   <div class="view-order-page pb-70">
-                    <div class="order-info-area">
-                      <div class="row align-items-center">
-                        <div class="col-lg-8">
-                          <div class="order-info mb-20">
-                            <h4>{{ $keywords['Order'] ?? __('Order') }}{{ $data->order_id }}
-                              [{{ $data->order_number }}] </h4>
-                            <p class="m-0">
-                              {{ $keywords['Order Date'] ?? __('Order Date') }} :
-                              {{ $data->created_at->format('jS, M Y') }}
-                            </p>
+                    @php
+                        $status = strtolower($data->payment_status);
+                    @endphp
+                    @if ($status == 'completed')
+                        <div class="order-info-area">
+                          <div class="row align-items-center">
+                            <div class="col-lg-8">
+                              <div class="order-info mb-20">
+                                <h4>{{ $keywords['Order'] ?? __('Order') }}{{ $data->order_id }}
+                                  [{{ $data->order_number }}] </h4>
+                                <p class="m-0">
+                                  {{ $keywords['Order Date'] ?? __('Order Date') }} :
+                                  {{ $data->created_at->format('jS, M Y') }}
+                                </p>
+                              </div>
+                            </div>
+                            <div class="col-lg-4">
+                              <div class="prinit mb-20">
+                                <a href="{{ asset('assets/front/invoices/' . $data->invoice_number) }}"
+                                  download="{{ $data->invoice_number }}.pdf" id="print-click" class="btn btn-md radius-sm"><i
+                                    class="fas fa-download"></i>{{ $keywords['Download Invoice'] ?? __('Download Invoice') }}
+                                </a>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div class="col-lg-4">
-                          <div class="prinit mb-20">
-                            <a href="{{ asset('assets/front/invoices/' . $data->invoice_number) }}"
-                              download="{{ $data->invoice_number }}.pdf" id="print-click" class="btn btn-md radius-sm"><i
-                                class="fas fa-download"></i>{{ $keywords['Download Invoice'] ?? __('Download Invoice') }}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    @endif
                   </div>
                   <div class="billing-add-area mb-40">
                     <div class="row">
