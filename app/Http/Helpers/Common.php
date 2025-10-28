@@ -605,7 +605,7 @@ class Common
     {
         $data['userBs'] = BasicSetting::where('user_id', $user->id)->first();
         $fileName = \Str::random(4) . time() . '.pdf';
-        $dir = public_path('assets/front/invoices/');
+        $dir = public_path(path: 'assets/front/invoices/');
         $path = $dir . $fileName;
         @mkdir($dir, 0777, true);
         // Monta endereço completo do pedido

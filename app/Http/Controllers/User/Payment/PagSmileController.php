@@ -270,8 +270,10 @@ class PagSmileController extends Controller
         // Lógica adicional apenas para sucesso
         if ($status == 'SUCCESS') {
             $user = $order->user ?? User::find($order->user_id);
-            Common::generateInvoice($order, $user);
-            sleep(3);
+            $invoiceFile = Common::generateInvoice($order, $user);
+            $order->invoice_number = $invoiceFile;
+            $order->save();
+            sleep(1);
             Common::OrderCompletedMail($order, $user);
         }
 
