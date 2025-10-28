@@ -445,20 +445,35 @@
                                 @endif
                               @endif
 
-                              <!--- donwload file or link for digtal product -->
-                              @if ($order->item->type == 'digital' && $order->item->download_link != null)
-                                <a href="{{ $order->item->download_link }}"
-                                  class="digital-donwload-btn btn btn-primary btn-sm border-0">{{ $keywords['Download'] ?? __('Download') }}</a>
-                              @else
-                                <form action="{{ route('user-digital-download') }}" method="POST">
-                                  @csrf
-                                  <input type="hidden" name="product_id" value="{{ $order->item->id }}">
-                                  @if ($order->item->type == 'digital')
-                                    <button type="submit"
-                                      class="digital-donwload-btn btn btn-primary btn-sm border-0">{{ $keywords['Download'] ?? __('Download') }}</button>
-                                  @endif
-                                </form>
-                              @endif
+                {{-- Produto digital: exibe código apenas se pagamento aprovado --}}
+        @if ($order->item->type == 'digital')
+          @php
+            $status = strtolower($data->payment_status);
+            $codes = [];
+            if (!empty($order->codes)) {
+              $decoded = json_decode($order->codes, true);
+              if (is_array($decoded)) {
+                $codes = $decoded;
+              }
+            }
+          @endphp
+          @if ($status == 'aprovado' || $status == 'completed' || $status == 'paid')
+            @if (count($codes) > 0)
+              <div class="digital-codes-box mt-2">
+                <strong>Código(s) do pedido:</strong>
+                <ul class="list-unstyled mb-0">
+                  @foreach ($codes as $code)
+                    <li class="code-item"><span class="badge bg-success">{{ $code['code'] }}</span></li>
+                  @endforeach
+                </ul>
+              </div>
+            @else
+              <span class="text-warning">Nenhum código digital vinculado ao pedido.</span>
+            @endif
+          @else
+            <span class="text-info">O código digital será liberado após aprovação do pagamento.</span>
+          @endif
+        @endif
                             </td>
                             <td class="text-center">
                               <p class="mb-0">{{ $order->qty }}</p>
