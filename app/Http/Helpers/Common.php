@@ -653,32 +653,7 @@ class Common
             ($order->shipping_zip ?? '') .
             (!empty($order->shipping_reference) ? ' - ' . $order->shipping_reference : '')
         );
-        \Log::info('DEBUG OrderCompletedMail - Dados do pedido:', [
-            'order_id' => $order->id,
-            'billing_fname' => $order->billing_fname,
-            'billing_lname' => $order->billing_lname,
-            'billing_email' => $order->billing_email,
-            'billing_city' => $order->billing_city,
-            'billing_state' => $order->billing_state,
-            'billing_number' => $order->billing_number,
-            'billing_street' => $order->billing_street,
-            'billing_number_home' => $order->billing_number_home,
-            'billing_neighborhood' => $order->billing_neighborhood,
-            'billing_zip' => $order->billing_zip,
-            'billing_reference' => $order->billing_reference,
-            'shipping_fname' => $order->shipping_fname,
-            'shipping_lname' => $order->shipping_lname,
-            'shipping_email' => $order->shipping_email,
-            'shipping_city' => $order->shipping_city,
-            'shipping_state' => $order->shipping_state,
-            'shipping_number' => $order->shipping_number,
-            'shipping_street' => $order->shipping_street,
-            'shipping_number_address' => $order->shipping_number_address,
-            'shipping_neighborhood' => $order->shipping_neighborhood,
-            'shipping_zip' => $order->shipping_zip,
-            'shipping_reference' => $order->shipping_reference,
-            'shipping_address_montado' => $shipping_address,
-        ]);
+       
         $mailBody = str_replace('{shipping_address}', $shipping_address, $mailBody);
         // Monta endereço de cobrança conforme colunas reais
         $billing_address = trim(
@@ -715,17 +690,19 @@ class Common
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
         $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
-        \Log::info('DEBUG OrderCompletedMail - Dados do e-mail enviado:', [
-            'recipient' => $data['recipient'],
-            'subject' => $data['subject'],
-            'body' => $data['body'],
-            'invoice' => $data['invoice'],
-            'smtp_host' => $data['smtp_host'],
-            'smtp_port' => $data['smtp_port'],
-            'smtp_username' => $data['smtp_username'],
-            'smtp_status' => $data['smtp_status'],
-        ]);
-        BasicMailer::sendMailFromUser($user, $data);
+       
+        try {
+            BasicMailer::sendMailFromUser($user, $data);
+        } catch (\Exception $e) {
+            \Log::error('OrderCompletedMail - Falha ao enviar e-mail: ' . $e->getMessage(), [
+                'order_id' => $order->id,
+                'recipient' => $data['recipient'],
+                'subject' => $data['subject'],
+                'smtp_host' => $data['smtp_host'],
+                'smtp_port' => $data['smtp_port'],
+                'smtp_username' => $data['smtp_username'],
+            ]);
+        }
         return;
     }
 
