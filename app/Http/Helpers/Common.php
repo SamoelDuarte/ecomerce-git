@@ -679,7 +679,16 @@ class Common
             'shipping_reference' => $order->shipping_reference,
             'shipping_address_montado' => $shipping_address,
         ]);
-    $mailBody = str_replace('{shipping_address}', $shipping_address, $mailBody);
+        $mailBody = str_replace('{shipping_address}', $shipping_address, $mailBody);
+        // Monta endereço de cobrança conforme colunas reais
+        $billing_address = trim(
+            ($order->billing_street ?? '') . ', ' .
+            ($order->billing_number_home ?? '') . ', ' .
+            ($order->billing_neighborhood ?? '') . ', ' .
+            ($order->billing_zip ?? '') .
+            (!empty($order->billing_reference) ? ' - ' . $order->billing_reference : '')
+        );
+        $mailBody = str_replace('{billing_address}', $billing_address, $mailBody);
         $mailBody = str_replace('{shipping_city}', $order->shipping_city, $mailBody);
         $mailBody = str_replace('{shipping_country}', $order->shipping_country, $mailBody);
         $mailBody = str_replace('{shipping_number}', $order->shipping_number, $mailBody);
