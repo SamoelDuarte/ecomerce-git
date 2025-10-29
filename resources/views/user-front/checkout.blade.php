@@ -513,7 +513,7 @@ $user_currency = user_currency(Session::get('user_curr'));
                     {{-- Seção de Métodos de Entrega via Frenet --}}
                     @php
                         $onlyDigital = onlyDigitalItemsInCart();
-                        \Log::info('Checkout - onlyDigitalItemsInCart resultado:', ['onlyDigital' => $onlyDigital]);
+                   
                     @endphp
                     @if (!$onlyDigital)
                     <div class="col-12 mb-5">

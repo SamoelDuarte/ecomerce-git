@@ -73,6 +73,7 @@ class PagSmileController extends Controller
         'notify_url'      => $notifyUrl,
         'buyer_id'        => $email,
         'version'         => '2.0',
+        'return_url'      => $successUrl,
         // customer é um objeto conforme doc
         'customer' => [
             'identify' => [
@@ -109,26 +110,34 @@ class PagSmileController extends Controller
 
     // --- Depois de inspecionar com dd(), comente o dd() e trate a resposta ---
     if ($response->successful()) {
-       $data = $response->json();
-       // A doc retorna prepay_id ou web_url; verifique o campo retornado
-       if (isset($data['prepay_id'])) {
-           $prepay = $data['prepay_id'];
-           $checkoutUrl = "http://checkout.pagsmile.com?prepay_id={$prepay}";
-           // anexar return_url opcional:
-           if (!empty($successUrl)) {
-               $checkoutUrl .= '&return_url=' . urlencode($successUrl);
-           }
-           Session::forget('cart');
-           Session::forget('user_request');
-           return redirect()->away($checkoutUrl);
-       }
-       if (isset($data['web_url'])) {
-           Session::forget('cart');
-           Session::forget('user_request');
-           return redirect()->away($data['web_url']);
-       }
-       \Log::error('PagSmile - URL de checkout não encontrada:', ['response' => $data, 'payload' => $payload, 'order_id' => $order_id]);
-       return redirect()->back()->with('error', 'Erro: URL de checkout não encontrada.')->withInput();
+        $data = $response->json();
+        // A doc retorna prepay_id ou web_url; verifique o campo retornado
+        if (isset($data['prepay_id'])) {
+            $prepay = $data['prepay_id'];
+            $checkoutUrl = "http://checkout.pagsmile.com?prepay_id={$prepay}";
+            // anexar return_url opcional:
+            if (!empty($successUrl)) {
+                $checkoutUrl .= '&return_url=' . urlencode($successUrl);
+            }
+            Session::forget('cart');
+            Session::forget('user_request');
+            return redirect()->away($checkoutUrl);
+        }
+        if (isset($data['web_url'])) {
+            Session::forget('cart');
+            Session::forget('user_request');
+            return redirect()->away($data['web_url']);
+        }
+        // Se resposta não for sucesso, exibe erro ao usuário
+        $errorMsg = $data['msg'] ?? 'Erro: URL de checkout não encontrada.';
+        \Log::error('PagSmile - Falha ao abrir checkout:', ['response' => $data, 'payload' => $payload, 'order_id' => $order_id]);
+        return redirect()->back()->with('error', $errorMsg)->withInput();
+    } else {
+        // Se não for sucesso, exibe erro ao usuário
+        $data = $response->json();
+        $errorMsg = $data['msg'] ?? 'Erro ao comunicar com o gateway PagSmile.';
+        \Log::error('PagSmile - Erro na comunicação:', ['status_code' => $response->status(), 'response' => $data, 'payload' => $payload, 'order_id' => $order_id]);
+        return redirect()->back()->with('error', $errorMsg)->withInput();
     }
     
             // Envia email de atualização do pedido ao cliente
@@ -182,6 +191,14 @@ class PagSmileController extends Controller
 
     public function successPayment(Request $request)
     {
+        // Loga todos os dados recebidos do return_url para análise futura
+        \Log::info('PagSmile return_url recebido em successPayment', [
+            'query' => $request->query(),
+            'post' => $request->post(),
+            'all' => $request->all(),
+            'fullUrl' => $request->fullUrl(),
+        ]);
+        // Pode exibir uma tela genérica de processamento
         return redirect()->route('customer.success.page', getParam());
     }
     public function notifyPayment(Request $request)

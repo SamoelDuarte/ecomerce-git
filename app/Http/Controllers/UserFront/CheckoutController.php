@@ -264,9 +264,9 @@ class CheckoutController extends Controller
             $user = Auth::guard('web')->user();
             $session = Session::all();
 
-            \Log::info('Debug calcularEntrega - início');
-            \Log::info('CEP recebido: ' . $request->cep);
-            \Log::info('Session cart: ', session('cart', []));
+            // \Log::info('Debug calcularEntrega - início');
+            // \Log::info('CEP recebido: ' . $request->cep);
+            // \Log::info('Session cart: ', session('cart', []));
 
             if (!session('cart') || empty(session('cart'))) {
                 return response()->json(['error' => 'Carrinho vazio'], 400);
