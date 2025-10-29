@@ -13,7 +13,7 @@ class OrderStatusSeeder extends Seeder
         DB::table('order_statuses')->updateOrInsert(
             ['code' => 'rejected'],
             [
-                'name' => 'Pagamento Recusado',
+                'name' => 'Recusado',
                 'code' => 'rejected',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
