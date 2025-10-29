@@ -10,7 +10,11 @@
         <div class="success-icon-area">
           @includeIf('user-front.partials.success-svg')
         </div>
-        <div class="container py-5">
+       
+        
+      </div>
+    </div>
+     <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card shadow-sm">
@@ -24,9 +28,6 @@
                 </div>
             </div>
         </div>
-        
-      </div>
-    </div>
   </div>
 
   <!--====== Purchase Success Section End ======-->
