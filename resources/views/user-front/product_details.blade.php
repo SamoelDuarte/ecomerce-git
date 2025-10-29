@@ -357,13 +357,53 @@
                                     <input type="hidden" name="final-price" id="details_final-price"
                                         class="form-control final-price">
 
+
+@if ($isDigital)
+    @php
+        $totalCodes = $product->item->digitalCodes
+            ->where('is_used', false)
+            ->count();
+    @endphp
+@endif
+
                                     <button class="btn btn-sm btn-primary radius-sm" type="button"
                                         aria-label="Add to cart" data-bs-toggle="tooltip" data-placement="top"
                                         title="{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}"
-                                        onclick="addToCartDetails2()">
+                                        onclick="validateDigitalStockAndAddToCart()">
                                         <i class="fas fa-cart-plus"></i><span>{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}
                                         </span>
                                     </button>
+
+@if ($isDigital)
+    <script>
+        function validateDigitalStockAndAddToCart() {
+            var totalCodes = {{ $totalCodes ?? 0 }};
+            console.log('DEBUG totalCodes:', totalCodes);
+            var qtyInput = document.querySelector('.quantity_field');
+            var qty = qtyInput ? parseInt(qtyInput.value) : 1;
+            console.log('DEBUG qty:', qty);
+            var alertBox = document.getElementById('digital-stock-alert');
+            if (qty > totalCodes) {
+                if (!alertBox) {
+                    var container = document.querySelector('.product-single-details');
+                    var div = document.createElement('div');
+                    div.id = 'digital-stock-alert';
+                    div.className = 'alert alert-danger mt-3';
+                    div.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Estoque indisponível para a quantidade selecionada.';
+                    container.insertBefore(div, container.firstChild);
+                } else {
+                    alertBox.style.display = 'block';
+                }
+                return false;
+            } else {
+                if (alertBox) {
+                    alertBox.style.display = 'none';
+                }
+                addToCartDetails2();
+            }
+        }
+    </script>
+@endif
 
                                     <div class="d-flex align-items-center flex-wrap gap-10 mt-20">
                                         <span
