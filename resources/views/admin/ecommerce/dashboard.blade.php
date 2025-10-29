@@ -22,13 +22,13 @@
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.ecommerce') }}" class="mb-3" id="ecommerceFilter">
                     <div class="row g-2">
-                        <div class="col-md-2">
-                            <input type="date" name="start_date" class="form-control form-control-sm"
-                                value="{{ $filters['start_date'] ?? '' }}" placeholder="Data Início">
+                        <div class="col-md-3">
+                            <input type="datetime-local" name="start_date" class="form-control form-control-sm"
+                                value="{{ $filters['start_date'] ?? '' }}" placeholder="Data/Hora Início">
                         </div>
-                        <div class="col-md-2">
-                            <input type="date" name="end_date" class="form-control form-control-sm"
-                                value="{{ $filters['end_date'] ?? '' }}" placeholder="Data Fim">
+                        <div class="col-md-3">
+                            <input type="datetime-local" name="end_date" class="form-control form-control-sm"
+                                value="{{ $filters['end_date'] ?? '' }}" placeholder="Data/Hora Fim">
                         </div>
                         <div class="col-md-3">
                             <select name="user_id" class="form-control form-control-sm">

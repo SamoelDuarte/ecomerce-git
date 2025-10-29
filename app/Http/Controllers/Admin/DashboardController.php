@@ -469,16 +469,25 @@ class DashboardController extends Controller
   public function ecommerce(Request $request)
   {
     // Validação dos filtros
+
     $request->validate([
-      'start_date' => 'nullable|date',
-      'end_date' => 'nullable|date|after_or_equal:start_date',
+      'start_date' => 'nullable|date_format:Y-m-d\TH:i',
+      'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
       'user_id' => 'nullable|exists:users,id',
       'order_status' => 'nullable|in:completed,pending,processing,rejected'
     ]);
 
-    // Filtros de período
-    $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
-    $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
+    // Filtros de período (datetime)
+    $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d 00:00'));
+    $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d 23:59'));
+
+    // Ajusta formato para o Eloquent (se vier do input datetime-local)
+    if ($request->filled('start_date')) {
+      $startDate = str_replace('T', ' ', $request->get('start_date'));
+    }
+    if ($request->filled('end_date')) {
+      $endDate = str_replace('T', ' ', $request->get('end_date'));
+    }
     
     // Filtros por loja/usuário
     $userId = $request->get('user_id');
