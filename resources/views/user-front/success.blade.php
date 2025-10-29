@@ -7,9 +7,9 @@
   <div class="purchase-message pb-100 pt-200">
     <div class="container mx-auto">
       <div class="purchase-success text-center">
-        <div class="success-icon-area">
+        {{-- <div class="success-icon-area">
           @includeIf('user-front.partials.success-svg')
-        </div>
+        </div> --}}
        
         
       </div>
