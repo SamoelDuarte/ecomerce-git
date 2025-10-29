@@ -191,19 +191,14 @@ class PagSmileController extends Controller
 
     public function successPayment(Request $request)
     {
-        // Loga todos os dados recebidos do return_url para análise futura
-        \Log::info('PagSmile return_url recebido em successPayment', [
-            'query' => $request->query(),
-            'post' => $request->post(),
-            'all' => $request->all(),
-            'fullUrl' => $request->fullUrl(),
-        ]);
+       
         // Pode exibir uma tela genérica de processamento
         return redirect()->route('customer.success.page', getParam());
     }
     public function notifyPayment(Request $request)
     {
         $payload = $request->all();
+            \Log::warning('Webhook PagSmile payload', $payload);
 
         $uniqueOrderId = $payload['out_trade_no'] ?? null;
         $status = $payload['trade_status'] ?? null;

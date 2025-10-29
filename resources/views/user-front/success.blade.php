@@ -19,8 +19,21 @@
         <p class="mb-3 description">
           {{ $keywords['We_have_sent_you_a_mail_with_an_invoice'] ?? __('We have sent you a mail with an invoice') . '.' }}
         </p>
-        <a href="{{ route('front.user.shop', getParam()) }}"
-          class="btn btn-md btn-primary radius-sm">{{ $keywords['Back to Shop'] ?? __('Back to Shop') }}</a>
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <h2 class="mb-4 text-success">Pedido Recebido!</h2>
+                            <p class="lead mb-3">Seu pedido foi registrado com <strong>sucesso</strong>.</p>
+                            <p class="mb-3">Você pode acompanhar o status do seu pedido no <strong>painel de pedidos</strong> do site.</p>
+                            <p class="mb-3">Assim que o pagamento for aprovado, você receberá um e-mail com a confirmação e, se for produto digital, com os códigos de acesso.</p>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
       </div>
     </div>
   </div>
