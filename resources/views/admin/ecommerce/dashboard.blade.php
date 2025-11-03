@@ -396,15 +396,11 @@
                                         $currentStatus = $order->status;
                                         $colorClass = $currentStatus && isset($statusColors[$currentStatus->code]) ? $statusColors[$currentStatus->code] : 'bg-secondary text-white';
                                     @endphp
-                                    <form id="adminStatusForm{{ $order->id }}" class="d-inline-block" action="{{ route('user.item.orders.status') }}" method="post">
-                                        @csrf
-                                        <input type="hidden" name="order_id" value="{{ $order->id }}">
-                                        <select class="form-control form-control-sm border-0 {{ $colorClass }}" style="cursor: pointer; font-weight: 500;" name="order_status_id" onchange="document.getElementById('adminStatusForm{{ $order->id }}').submit();">
-                                            @foreach ($allStatuses as $status)
-                                                <option value="{{ $status->id }}" {{ $order->order_status_id == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </form>
+                                    <select class="form-control form-control-sm border-0 {{ $colorClass }}" style="cursor: pointer; font-weight: 500;" onchange="updateOrderStatus(this, {{ $order->id }})">
+                                        @foreach ($allStatuses as $status)
+                                            <option value="{{ $status->id }}" {{ $order->order_status_id == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </td>
                                  <td>
                                     <div style="font-size: 11px; max-width: 220px;">
@@ -785,6 +781,52 @@
                 }
             });
         }
+
+        // Função para atualizar status do pedido via AJAX
+        window.updateOrderStatus = function(selectElement, orderId) {
+            const statusId = selectElement.value;
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         document.querySelector('input[name="_token"]')?.value;
+
+            if (!token) {
+                console.error('CSRF token não encontrado');
+                return;
+            }
+
+            fetch('{{ route("admin.order.status.update") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    order_status_id: statusId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensagem de sucesso
+                    alert('Status atualizado com sucesso!');
+                    // Recarregar página após 1 segundo
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Erro ao atualizar: ' + data.message);
+                    // Reverter select para valor anterior
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar status do pedido');
+                // Reverter select para valor anterior
+                window.location.reload();
+            });
+        };
     });
 </script>
 @endsection

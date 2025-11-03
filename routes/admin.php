@@ -25,6 +25,9 @@ Route::domain($domain)->group(function () {
             Route::get('/dashboard/export', 'Admin\DashboardController@exportData')->name('admin.dashboard.export');
             Route::get('/ecommerce', 'Admin\DashboardController@ecommerce')->name('admin.ecommerce');
             Route::get('/ecommerce/export', 'Admin\DashboardController@exportEcommerceData')->name('admin.ecommerce.export');
+            
+            // Admin Order Status Update Route
+            Route::post('/order/status', 'Admin\OrderController@updateStatus')->name('admin.order.status.update');
         });
 
 
