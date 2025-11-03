@@ -546,6 +546,10 @@ class DashboardController extends Controller
     // Últimos pedidos com filtros e nome da loja
     $ordersListQuery = UserOrder::with(['user' => function($query) {
         $query->select('id', 'username', 'shop_name', 'email');
+      }, 'orderitems' => function($query) {
+        $query->select('id', 'user_order_id', 'title', 'qty');
+      }, 'status' => function($query) {
+        $query->select('id', 'name', 'code');
       }])
       ->whereBetween('created_at', [$startDate, $endDate]);
     
@@ -754,7 +758,7 @@ class DashboardController extends Controller
       default:
         $data = $this->getGeneralEcommerceData($startDate, $endDate, $userId, $orderStatus);
         $filename = 'relatorio_ecommerce_geral_' . now()->format('Y-m-d_H-i-s');
-        $headers = ['Número Pedido', 'Loja', 'Cliente', 'Total (R$)', 'Status Pedido', 'Status Pagamento', 'Data'];
+        $headers = ['Número Pedido', 'Loja', 'Itens', 'Endereço Entrega', 'Total (R$)', 'Status Pedido', 'Status Pagamento', 'Data'];
         break;
     }
 
@@ -828,6 +832,10 @@ class DashboardController extends Controller
   {
     $ordersQuery = UserOrder::with(['user' => function($query) {
         $query->select('id', 'username', 'shop_name', 'email');
+      }, 'orderitems' => function($query) {
+        $query->select('id', 'user_order_id', 'title', 'qty');
+      }, 'status' => function($query) {
+        $query->select('id', 'name', 'code');
       }])
       ->whereBetween('created_at', [$startDate, $endDate]);
     
@@ -892,10 +900,29 @@ class DashboardController extends Controller
           ];
         } else {
           // Relatório geral
+          $items = '';
+          if (isset($item->orderitems) && $item->orderitems->count() > 0) {
+            $items = implode(' | ', $item->orderitems->map(function($oi) {
+              return $oi->title . ' (x' . $oi->qty . ')';
+            })->toArray());
+          }
+          
+          $address = '';
+          if ($item->shipping_street) {
+            $address = $item->shipping_street . ', ' . $item->shipping_number_address;
+            if ($item->shipping_neighborhood) {
+              $address .= ' - ' . $item->shipping_neighborhood;
+            }
+            if ($item->shipping_zip) {
+              $address .= ' - CEP: ' . $item->shipping_zip;
+            }
+          }
+          
           $row = [
             $item->order_number ?: 'N/A',
             $item->user->username ?: 'Sem nome',
-            $item->billing_fname . ' ' . $item->billing_lname ?: 'N/A',
+            $items ?: 'Sem itens',
+            $address ?: 'Sem endereço',
             number_format($item->total, 2, ',', '.'),
             ucfirst($item->order_status),
             $item->payment_status ?: 'N/A',

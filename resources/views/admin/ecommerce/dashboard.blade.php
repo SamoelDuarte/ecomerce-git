@@ -336,7 +336,7 @@
 
 <div class="row">
     {{-- Lista de Pedidos Recentes --}}
-    <div class="col-lg-6">
+    <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
                 <div class="card-head-row">
@@ -355,8 +355,10 @@
                             <tr>
                                 <th>Número</th>
                                 <th>Loja</th>
+                                <th>Itens</th>
                                 <th>Total</th>
                                 <th>Status</th>
+                                  <th>Endereço Entrega</th>
                                 <th>Data</th>
                                 <th>Ações</th>
                             </tr>
@@ -366,6 +368,19 @@
                             <tr>
                                 <td>#{{ $order->order_number }}</td>
                                 <td>{{ $order->user->username }}</td>
+                                <td>
+                                    <div style="font-size: 12px; max-width: 200px;">
+                                        @forelse($order->orderitems as $item)
+                                            <div class="mb-1">
+                                                <strong>{{ $item->title }}</strong> 
+                                                <span class="badge badge-info">{{ $item->qty }}x</span>
+                                            </div>
+                                        @empty
+                                            <span class="text-muted">Sem itens</span>
+                                        @endforelse
+                                    </div>
+                                </td>
+                               
                                 <td>R$ {{ number_format($order->total, 2, ',', '.') }}</td>
                                 <td>
                                     @php
@@ -390,6 +405,24 @@
                                             @endforeach
                                         </select>
                                     </form>
+                                </td>
+                                 <td>
+                                    <div style="font-size: 11px; max-width: 220px;">
+                                        @if($order->shipping_street)
+                                            <strong>{{ $order->shipping_street }}, {{ $order->shipping_number_address }}</strong><br>
+                                            @if($order->shipping_neighborhood)
+                                                <strong>Bairro:</strong> {{ $order->shipping_neighborhood }}<br>
+                                            @endif
+                                            @if($order->shipping_zip)
+                                                <strong>CEP:</strong> {{ $order->shipping_zip }}<br>
+                                            @endif
+                                            @if($order->shipping_reference)
+                                                <strong>Ref:</strong> {{ $order->shipping_reference }}
+                                            @endif
+                                        @else
+                                            <span class="text-muted">Sem endereço</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
@@ -554,6 +587,20 @@
 @section('scripts')
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .table-responsive .table td {
+        vertical-align: middle;
+    }
+    .table-responsive .table td div[style*="max-width"] {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+    }
+    .table-responsive .table .badge {
+        white-space: nowrap;
+        margin-left: 4px;
+    }
+</style>
 <script>
     $(document).ready(function() {
         // Dados dos gráficos do controller

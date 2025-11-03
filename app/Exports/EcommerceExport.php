@@ -62,10 +62,29 @@ class EcommerceExport implements FromCollection, WithHeadings, WithMapping, With
 
             case 'general':
             default:
+                $items = '';
+                if (isset($item->orderitems) && $item->orderitems->count() > 0) {
+                    $items = implode(' | ', $item->orderitems->map(function($oi) {
+                        return $oi->title . ' (x' . $oi->qty . ')';
+                    })->toArray());
+                }
+                
+                $address = '';
+                if ($item->shipping_street) {
+                    $address = $item->shipping_street . ', ' . $item->shipping_number_address;
+                    if ($item->shipping_neighborhood) {
+                        $address .= ' - ' . $item->shipping_neighborhood;
+                    }
+                    if ($item->shipping_zip) {
+                        $address .= ' - CEP: ' . $item->shipping_zip;
+                    }
+                }
+                
                 return [
                     $item->order_number ?: 'N/A',
                     $item->user->shop_name ?: ($item->user->username ?: 'Sem nome'),
-                    ($item->billing_fname . ' ' . $item->billing_lname) ?: 'N/A',
+                    $items ?: 'Sem itens',
+                    $address ?: 'Sem endereço',
                     'R$ ' . number_format($item->total, 2, ',', '.'),
                     ucfirst($item->order_status),
                     $item->payment_status ?: 'N/A',
