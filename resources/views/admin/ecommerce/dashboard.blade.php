@@ -368,13 +368,28 @@
                                 <td>{{ $order->user->username }}</td>
                                 <td>R$ {{ number_format($order->total, 2, ',', '.') }}</td>
                                 <td>
-                                    <span class="badge 
-                                                @if($order->order_status == 'pending') badge-warning
-                                                @elseif($order->order_status == 'processing') badge-primary
-                                                @elseif($order->order_status == 'completed') badge-success
-                                                @else badge-danger @endif">
-                                        {{ ucfirst($order->order_status) }}
-                                    </span>
+                                    @php
+                                        $allStatuses = \App\Models\User\OrderStatus::orderBy('order')->get();
+                                        $statusColors = [
+                                            'pending' => 'bg-warning text-dark',
+                                            'faturado' => 'bg-info text-white',
+                                            'separacao' => 'bg-primary text-white',
+                                            'transporte' => 'bg-secondary text-white',
+                                            'concluido' => 'bg-success text-white',
+                                            'cancelado' => 'bg-danger text-white',
+                                        ];
+                                        $currentStatus = $order->status;
+                                        $colorClass = $currentStatus && isset($statusColors[$currentStatus->code]) ? $statusColors[$currentStatus->code] : 'bg-secondary text-white';
+                                    @endphp
+                                    <form id="adminStatusForm{{ $order->id }}" class="d-inline-block" action="{{ route('user.item.orders.status') }}" method="post">
+                                        @csrf
+                                        <input type="hidden" name="order_id" value="{{ $order->id }}">
+                                        <select class="form-control form-control-sm border-0 {{ $colorClass }}" style="cursor: pointer; font-weight: 500;" name="order_status_id" onchange="document.getElementById('adminStatusForm{{ $order->id }}').submit();">
+                                            @foreach ($allStatuses as $status)
+                                                <option value="{{ $status->id }}" {{ $order->order_status_id == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
                                 </td>
                                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
