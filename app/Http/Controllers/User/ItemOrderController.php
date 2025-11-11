@@ -102,8 +102,21 @@ class ItemOrderController extends Controller
             $user_id = $root_user->id;
             $po = UserOrder::find($request->order_id);
 
-            //add to stock if order is rejected
-            if ($request->order_status == 'rejected') {
+            // Verificar se o status será "Pedido Cancelado"
+            $isCancelled = false;
+            if ($request->has('order_status_id')) {
+                $status = \App\Models\User\OrderStatus::find($request->order_status_id);
+                if ($status && ($status->code === 'cancelado' || $status->name === 'Pedido Cancelado')) {
+                    $isCancelled = true;
+                }
+            } else if ($request->has('order_status')) {
+                if ($request->order_status === 'cancelado' || $request->order_status === 'Pedido Cancelado') {
+                    $isCancelled = true;
+                }
+            }
+
+            //add to stock if order is rejected or cancelled
+            if ($request->order_status == 'rejected' || $isCancelled) {
                 //get order items
                 $order_items = UserOrderItem::where([['user_order_id', $po->id], ['user_id', $user_id]])->get();
                 foreach ($order_items as $order_item) {
@@ -120,6 +133,27 @@ class ItemOrderController extends Controller
                         $product = UserItem::where('id', $order_item->item_id)->first();
                         $product->stock = $product->stock + $order_item->qty;
                         $product->save();
+                    }
+                    
+                    // Se for produto digital, liberar os códigos de volta
+                    if ($order_item->item && $order_item->item->type == 'digital' && !empty($order_item->codes)) {
+                        $codesArr = json_decode($order_item->codes, true);
+                        if (is_array($codesArr) && count($codesArr) > 0) {
+                            foreach ($codesArr as $codeData) {
+                                // Marcar código como disponível novamente
+                                \DB::table('digital_product_codes')
+                                    ->where('code', $codeData['code'])
+                                    ->where('user_item_id', $order_item->item_id)
+                                    ->update([
+                                        'is_used' => false,
+                                        'order_id' => null,
+                                        'used_at' => null
+                                    ]);
+                            }
+                        }
+                        // Limpar códigos do order_item
+                        $order_item->codes = null;
+                        $order_item->save();
                     }
                 }
             }
