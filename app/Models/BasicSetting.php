@@ -45,6 +45,7 @@ class BasicSetting extends Model
         'about_testimonial_section_status',
         'about_blog_section_status',
         'about_additional_section_status',
+        'show_billing_details',
     ];
 
     public function language()

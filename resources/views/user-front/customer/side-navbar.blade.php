@@ -1,5 +1,6 @@
 @php
   $shopSettings = App\Models\User\UserShopSetting::where('user_id', $user->id)->first();
+  $basicSettings = App\Models\BasicSetting::first();
 @endphp
 
 <div class="col-lg-3">
@@ -23,12 +24,14 @@
             href="{{ route('customer.edit_profile', getParam()) }}"><i class="fal fa-user"></i>
             {{ $keywords['My Profile'] ?? __('My Profile') }}</a></li>
         @if (@$shopSettings->catalog_mode == 0)
-          <li>
-            <a class=" @if (request()->routeIs('customer.billing-details')) active @endif"
-              href="{{ route('customer.billing-details', getParam()) }}">
-              <i class="fal fa-wallet"></i>
-              {{ $keywords['Billing Details'] ?? __('Billing Details') }}</a>
-          </li>
+          @if (@$basicSettings->show_billing_details == 1)
+            <li>
+              <a class=" @if (request()->routeIs('customer.billing-details')) active @endif"
+                href="{{ route('customer.billing-details', getParam()) }}">
+                <i class="fal fa-wallet"></i>
+                {{ $keywords['Billing Details'] ?? __('Billing Details') }}</a>
+            </li>
+          @endif
           <li>
             <a class=" @if (request()->routeIs('customer.shpping-details')) active @endif"
               href="{{ route('customer.shpping-details', getParam()) }}">

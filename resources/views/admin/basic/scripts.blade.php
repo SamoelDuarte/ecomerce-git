@@ -233,6 +233,32 @@
               </div>
             </div>
           </div>
+
+          <div class="col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">{{ __('Customer Menu Settings') }}</div>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label>{{ __('Show Billing Details Menu') }}</label>
+                  <div class="selectgroup w-100">
+                    <label class="selectgroup-item">
+                      <input type="radio" name="show_billing_details" value="1" class="selectgroup-input"
+                        {{ $data->show_billing_details == 1 ? 'checked' : '' }}>
+                      <span class="selectgroup-button">{{ __('Active') }}</span>
+                    </label>
+                    <label class="selectgroup-item">
+                      <input type="radio" name="show_billing_details" value="0" class="selectgroup-input"
+                        {{ $data->show_billing_details == 0 ? 'checked' : '' }}>
+                      <span class="selectgroup-button">{{ __('Deactive') }}</span>
+                    </label>
+                  </div>
+                  <p class="text-info mb-0">{{ __('Controls the visibility of Billing Details in the customer sidebar menu.') }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-footer">

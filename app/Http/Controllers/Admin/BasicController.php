@@ -224,6 +224,8 @@ class BasicController extends Controller
             $bs->whatsapp_popup_message = Purifier::clean($request->whatsapp_popup_message);
             $bs->whatsapp_popup = $request->whatsapp_popup;
 
+            $bs->show_billing_details = $request->show_billing_details;
+
             $bs->save();
         }
 
