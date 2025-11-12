@@ -241,7 +241,7 @@
             </div>
             <div class="card-body">
               <div class="form-group">
-                <label>{{ __('Show Billing Details Menu') }}</label>
+                <label>Exibir detalhes de cobrança</label>
                 <div class="selectgroup w-100">
                   <label class="selectgroup-item">
                     <input type="radio" name="show_billing_details" value="1" class="selectgroup-input"
