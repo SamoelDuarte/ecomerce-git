@@ -515,7 +515,7 @@ $user_currency = user_currency(Session::get('user_curr'));
                         $onlyDigital = onlyDigitalItemsInCart();
                    
                     @endphp
-                    @if (!$onlyDigital)
+                    @if (!$onlyDigital and 'a' == 'b')
                     <div class="col-12 mb-5">
                         <div class="order-summery form-block border radius-md">
                             <div class="shop-title-box">

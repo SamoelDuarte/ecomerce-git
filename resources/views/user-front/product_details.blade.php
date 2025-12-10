@@ -369,7 +369,7 @@
                                     <button class="btn btn-sm btn-primary radius-sm" type="button"
                                         aria-label="Add to cart" data-bs-toggle="tooltip" data-placement="top"
                                         title="{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}"
-                                        onclick="validateDigitalStockAndAddToCart()">
+                                        onclick="@if($isDigital)validateDigitalStockAndAddToCart()@else addToCartDetails2()@endif">
                                         <i class="fas fa-cart-plus"></i><span>{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}
                                         </span>
                                     </button>
