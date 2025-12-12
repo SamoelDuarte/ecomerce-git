@@ -691,15 +691,6 @@ class ItemController extends Controller
             }
         }
         
-        if ($request->image) {
-            foreach ($request->image as $value) {
-                UserItemImage::create([
-                    'item_id' => $item->id,
-                    'image' => $value,
-                ]);
-            }
-        }
-
         $catUnique_id = UserItemCategory::where('id', $request->category)
             ->pluck('unique_id')->first();
         $subcatUnique_id = UserItemSubCategory::where('id', $request->subcategory)
@@ -742,6 +733,24 @@ class ItemController extends Controller
 
         // Processar e atualizar tags
         $this->processTags($request, $item->id);
+
+        // Atualizar imagens do slider - apenas adicionar imagens que não existem no banco
+        if ($request->image) {
+            // Obter imagens que já estão no banco de dados para este item
+            $existingImages = UserItemImage::where('item_id', $item->id)
+                ->pluck('image')
+                ->toArray();
+            
+            // Adicionar apenas as imagens que são novas (não existem no banco)
+            foreach ($request->image as $value) {
+                if (!in_array($value, $existingImages)) {
+                    UserItemImage::create([
+                        'item_id' => $item->id,
+                        'image' => $value,
+                    ]);
+                }
+            }
+        }
 
         Session::flash('success', __('Updated Successfully'));
         return "success";

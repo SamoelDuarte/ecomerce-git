@@ -230,40 +230,23 @@ class ItemOrderController extends Controller
 
             //reove pervious invoice and generate a new
             @unlink(filename: public_path('assets/front/invoices/') . $po->invoice_number);
-            $invoice = Common::generateInvoice($po, $root_user);
-            $po->update(['invoice_number' => $invoice]);
-
-            //send mail
-            $mail_template = UserEmailTemplate::where([['user_id', $user_id], ['email_type', 'product_order_status']])->first();
-            $mail_subject = $mail_template->email_subject;
-            $mail_body = $mail_template->email_body;
-
-            $mail_body = str_replace('{customer_name}', $f_name . ' ' . $l_name, $mail_body);
-            // Get status name from normalized table
-            $statusName = '';
-            if ($request->has('order_status_id')) {
-                $statusObj = \App\Models\User\OrderStatus::find($request->order_status_id);
-                $statusName = $statusObj ? $statusObj->name : ($request->order_status ?? '');
-            } else if ($request->has('order_status')) {
-                $statusObj = \App\Models\User\OrderStatus::where('code', $request->order_status)->first();
-                $statusName = $statusObj ? $statusObj->name : $request->order_status;
+            try {
+                $invoice = Common::generateInvoice($po, $root_user);
+                $po->update(['invoice_number' => $invoice]);
+            } catch (\Exception $invoiceError) {
+                \Log::warning('Erro ao gerar fatura, continuando mesmo assim: ' . $invoiceError->getMessage());
+                // Continue even if invoice generation fails
             }
-            $mail_body = str_replace('{order_status}', $statusName, $mail_body);
-            $mail_body = str_replace('{website_title}', $root_user->shop_name ?? $root_user->username, $mail_body);
 
-            $to = $email;
-
-            /******** Send mail to user using lojista's SMTP ********/
-            $data = [];
-            $data['recipient'] = $to;
-            $data['subject'] = $mail_subject;
-            $data['body'] = $mail_body;
-            $data['invoice'] = public_path('assets/front/invoices/' . $po->invoice_number);
-            BasicMailer::sendMailFromUser($root_user, $data);
+            // Send status change email
+            $this->sendOrderStatusEmail($po, $request, $root_user, $user_id, $f_name, $l_name, $email);
 
             Session::flash('success', __('Updated Successfully'));
             return back();
         } catch (\Exception $th) {
+            \Log::error('Erro ao atualizar status do pedido: ' . $th->getMessage());
+            Session::flash('error', __('An error occurred while updating the order status'));
+            return back();
         }
     }
 
@@ -380,6 +363,58 @@ class ItemOrderController extends Controller
         } catch (\Exception $e) {
             // Log error but don't fail the update
             \Log::error('Falha ao enviar email de rastreamento: ' . $e->getMessage());
+        }
+    }
+
+    private function sendOrderStatusEmail($order, $request, $root_user, $user_id, $f_name, $l_name, $email)
+    {
+        try {
+            $mail_template = UserEmailTemplate::where([['user_id', $user_id], ['email_type', 'product_order_status']])->first();
+            
+            if (!$mail_template) {
+                \Log::warning('Template de email de status do pedido não encontrada para user_id: ' . $user_id);
+                return;
+            }
+
+            $mail_subject = $mail_template->email_subject;
+            $mail_body = $mail_template->email_body;
+
+            // Substituir placeholders
+            $mail_body = str_replace('{customer_name}', $f_name . ' ' . $l_name, $mail_body);
+            
+            // Get status name from normalized table
+            $statusName = '';
+            if ($request->has('order_status_id')) {
+                $statusObj = \App\Models\User\OrderStatus::find($request->order_status_id);
+                $statusName = $statusObj ? $statusObj->name : ($request->order_status ?? '');
+            } else if ($request->has('order_status')) {
+                $statusObj = \App\Models\User\OrderStatus::where('code', $request->order_status)->first();
+                $statusName = $statusObj ? $statusObj->name : $request->order_status;
+            }
+            
+            $mail_body = str_replace('{order_status}', $statusName, $mail_body);
+            $mail_body = str_replace('{website_title}', $root_user->shop_name ?? $root_user->username, $mail_body);
+
+            /******** Send mail to user using lojista's SMTP ********/
+            $mailData = [
+                'recipient' => $email,
+                'subject' => $mail_subject,
+                'body' => $mail_body
+            ];
+            
+            // Only attach invoice if file exists
+            $invoicePath = public_path('assets/front/invoices/' . $order->invoice_number);
+            if (file_exists($invoicePath)) {
+                $mailData['invoice'] = $invoicePath;
+            }
+            
+            BasicMailer::sendMailFromUser($root_user, $mailData);
+            
+            \Log::info('Email de status do pedido enviado para: ' . $email . ' - Pedido #' . $order->order_number);
+            
+        } catch (\Exception $e) {
+            // Log error but don't fail the update
+            \Log::error('Falha ao enviar email de status do pedido: ' . $e->getMessage());
         }
     }
 

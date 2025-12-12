@@ -418,7 +418,7 @@ class CustomerController extends Controller
         $customer->save();
 
         // send a mail to user for verify his/her email address
-        if (is_null($user->first_name && $user->last_name)) {
+        if (empty($user->first_name) || empty($user->last_name)) {
             $website_title = $user->username;
         } else {
             $website_title =  $user->first_name . ' ' . $user->last_name;
