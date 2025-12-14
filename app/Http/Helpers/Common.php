@@ -603,27 +603,60 @@ class Common
 
     public static function generateInvoice($order, $user)
     {
-        $data['userBs'] = BasicSetting::where('user_id', $user->id)->first();
-        $fileName = \Str::random(4) . time() . '.pdf';
-        $dir = public_path(path: 'assets/front/invoices/');
-        $path = $dir . $fileName;
-        @mkdir($dir, 0777, true);
-        // Monta endereço completo do pedido
-        $address = ($order->billing_street ?? '') . ', ' . ($order->billing_number_home ?? '') . ', ' . ($order->billing_neighborhood ?? '') . ', ' . ($order->billing_zip ?? '');
-        $country = 'Brasil';
-        $data['order'] = $order;
-        $data['address'] = $address;
-        $data['country'] = $country;
-        $pdf = PDF::setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'logOutputFile' => storage_path('logs/log.htm'),
-            'tempDir' => storage_path('logs/')
-        ])->loadView('pdf.item', $data)->save($path);
-        UserOrder::where('id', $order->id)->update([
-            'invoice_number' => $fileName
-        ]);
-        return $fileName;
+        try {
+            $data['userBs'] = BasicSetting::where('user_id', $user->id)->first();
+            $dir = public_path('assets/front/invoices/');
+            
+            // Garante que o diretório existe
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0777, true);
+            }
+            
+            // Monta endereço completo do pedido
+            $address = ($order->billing_street ?? '') . ', ' . ($order->billing_number_home ?? '') . ', ' . ($order->billing_neighborhood ?? '') . ', ' . ($order->billing_zip ?? '');
+            $country = 'Brasil';
+            $data['order'] = $order;
+            $data['address'] = $address;
+            $data['country'] = $country;
+            
+            $fileName = null;
+            
+            // Tenta gerar PDF com dompdf (pode falhar no Windows por ImageMagick)
+            try {
+                $fileName = 'invoice_' . $order->id . '_' . time() . '.pdf';
+                $path = $dir . $fileName;
+                
+                // Desabilita imagens no PDF se ImageMagick falhar
+                $pdf = PDF::loadView('pdf.item', $data);
+                $pdf->save($path);
+                
+                \Log::info('Fatura gerada com sucesso em PDF', ['file' => $fileName, 'order_id' => $order->id]);
+                return $fileName;
+                
+            } catch (\Exception $pdfError) {
+                \Log::warning('Tentativa de PDF falhou, usando HTML: ' . $pdfError->getMessage());
+                
+                // Fallback: Gera arquivo HTML que cliente pode visualizar/imprimir
+                $fileName = 'invoice_' . $order->id . '_' . time() . '.html';
+                $path = $dir . $fileName;
+                
+                $html = view('pdf.item', $data)->render();
+                
+                // Adiciona CSS inline para melhor apresentação
+                $styledHtml = '<html><head><meta charset="UTF-8"><title>Fatura #' . $order->order_number . '</title>';
+                $styledHtml .= '<style>body { font-family: Arial, sans-serif; margin: 20px; } table { width: 100%; border-collapse: collapse; } td, th { border: 1px solid #ddd; padding: 8px; text-align: left; }</style>';
+                $styledHtml .= '</head><body>' . $html . '</body></html>';
+                
+                file_put_contents($path, $styledHtml);
+                
+                \Log::info('Fatura gerada como HTML (fallback)', ['file' => $fileName, 'order_id' => $order->id]);
+                return $fileName;
+            }
+            
+        } catch (\Exception $e) {
+            \Log::error('Erro ao gerar fatura: ' . $e->getMessage(), ['order_id' => $order->id, 'trace' => $e->getTraceAsString()]);
+            return null;
+        }
     }
 
     public static function OrderCompletedMail($order, $user)
@@ -689,8 +722,17 @@ class Common
         $data['recipient'] = $order->billing_email;
         $data['subject'] = $mailSubject;
         $data['body'] = $mailBody;
-            $data['invoice'] = public_path('assets/front/invoices/' . $order->invoice_number);
-            \Log::info('OrderCompletedMail - Invoice path:', ['invoice_path' => $data['invoice'], 'invoice_number' => $order->invoice_number]);
+        
+        // Anexa fatura apenas se existir
+        if ($order->invoice_number) {
+            $invoicePath = public_path('assets/front/invoices/' . $order->invoice_number);
+            if (file_exists($invoicePath)) {
+                $data['invoice'] = $invoicePath;
+                \Log::info('OrderCompletedMail - Invoice anexada', ['invoice_path' => $invoicePath, 'invoice_number' => $order->invoice_number]);
+            } else {
+                \Log::warning('OrderCompletedMail - Arquivo de fatura não encontrado', ['invoice_path' => $invoicePath, 'invoice_number' => $order->invoice_number]);
+            }
+        }
        
         try {
             BasicMailer::sendMailFromUser($user, $data);

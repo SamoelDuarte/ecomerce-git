@@ -230,12 +230,9 @@ class ItemOrderController extends Controller
 
             //reove pervious invoice and generate a new
             @unlink(filename: public_path('assets/front/invoices/') . $po->invoice_number);
-            try {
-                $invoice = Common::generateInvoice($po, $root_user);
+            $invoice = Common::generateInvoice($po, $root_user);
+            if ($invoice) {
                 $po->update(['invoice_number' => $invoice]);
-            } catch (\Exception $invoiceError) {
-                \Log::warning('Erro ao gerar fatura, continuando mesmo assim: ' . $invoiceError->getMessage());
-                // Continue even if invoice generation fails
             }
 
             // Send status change email
@@ -502,4 +499,25 @@ class ItemOrderController extends Controller
         }
         return Excel::download(new PorductOrderExport($orders), 'product-orders.csv');
     }
+
+    /**
+     * Download invoice (PDF or HTML)
+     */
+    public function downloadInvoice($fileName)
+    {
+        $root_user = Auth::guard('web')->user();
+        $invoicePath = public_path('assets/front/invoices/' . basename($fileName));
+        
+        // Segurança: verifica se arquivo existe e está no diretório correto
+        if (!file_exists($invoicePath) || !str_starts_with(realpath($invoicePath), realpath(public_path('assets/front/invoices/')))) {
+            return response()->json(['error' => 'Invoice not found'], 404);
+        }
+        
+        // Detecta o tipo de arquivo
+        $ext = pathinfo($invoicePath, PATHINFO_EXTENSION);
+        $mimeType = ($ext === 'pdf') ? 'application/pdf' : 'text/html';
+        
+        return response()->download($invoicePath, 'invoice_' . $fileName, ['Content-Type' => $mimeType]);
+    }
 }
+

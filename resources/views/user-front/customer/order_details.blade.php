@@ -63,10 +63,16 @@
                             </div>
                             <div class="col-lg-4">
                               <div class="prinit mb-20">
-                                <a href="{{ asset('assets/front/invoices/' . $data->invoice_number) }}"
-                                  download="{{ $data->invoice_number }}.pdf" id="print-click" class="btn btn-md radius-sm"><i
+                                @if($data->invoice_number && file_exists(public_path('assets/front/invoices/' . $data->invoice_number)))
+                                  <a href="{{ route('user.invoice.download', ['fileName' => $data->invoice_number]) }}"
+                                    class="btn btn-md radius-sm"><i
+                                      class="fas fa-download"></i>{{ $keywords['Download Invoice'] ?? __('Download Invoice') }}
+                                  </a>
+                                @else
+                                  <button class="btn btn-md radius-sm" disabled title="Fatura não disponível"><i
                                     class="fas fa-download"></i>{{ $keywords['Download Invoice'] ?? __('Download Invoice') }}
-                                </a>
+                                  </button>
+                                @endif
                               </div>
                             </div>
                           </div>
