@@ -83,6 +83,7 @@
 
                             <h2 class="product-title">{{ $product->title }} <span class="label label-2"
                                     style="background-color: #{{ $color }}">{{ $label }}</span> </h2>
+
                             <ul>
                                 @php
                                     $avgreview = \App\Models\User\UserItemReview::where(
@@ -135,6 +136,7 @@
                                             @endif
                                         @endif
                                     </div>
+                                  
                                 </div>
                             </ul>
                             @php
@@ -142,7 +144,7 @@
                                 $product_current_price = $flash_info['amount'];
                                 $flash_status = $flash_info['status'];
                             @endphp
-
+ 
                             <div class="product-price">
                                 @if ($isDigital && $hasCodes)
                                     <div class="new-price-area d-flex color-primary">
@@ -155,14 +157,14 @@
                                     </div>
 
                                     @if ($product->item->previous_price && $product->item->previous_price > $product->item->current_price)
-                                    <div class="old-price-area d-flex">
-                                        {{ $user_currency->symbol_position == 'left' ? $user_currency->symbol : '' }}
-                                        <span class="old-price" id="details_old-price"
-                                            data-old_price="{{ currency_converter($product->item->previous_price) }}">
-                                            {{ currency_converter($product->item->previous_price) }}
-                                        </span>
-                                        {{ $user_currency->symbol_position == 'right' ? $user_currency->symbol : '' }}
-                                    </div>
+                                        <div class="old-price-area d-flex">
+                                            {{ $user_currency->symbol_position == 'left' ? $user_currency->symbol : '' }}
+                                            <span class="old-price" id="details_old-price"
+                                                data-old_price="{{ currency_converter($product->item->previous_price) }}">
+                                                {{ currency_converter($product->item->previous_price) }}
+                                            </span>
+                                            {{ $user_currency->symbol_position == 'right' ? $user_currency->symbol : '' }}
+                                        </div>
                                     @endif
                                 @else
                                     @if ($flash_status == true)
@@ -358,52 +360,53 @@
                                         class="form-control final-price">
 
 
-@if ($isDigital)
-    @php
-        $totalCodes = $product->item->digitalCodes
-            ->where('is_used', false)
-            ->count();
-    @endphp
-@endif
+                                    @if ($isDigital)
+                                        @php
+                                            $totalCodes = $product->item->digitalCodes
+                                                ->where('is_used', false)
+                                                ->count();
+                                        @endphp
+                                    @endif
 
                                     <button class="btn btn-sm btn-primary radius-sm" type="button"
                                         aria-label="Add to cart" data-bs-toggle="tooltip" data-placement="top"
                                         title="{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}"
-                                        onclick="@if($isDigital)validateDigitalStockAndAddToCart()@else addToCartDetails2()@endif">
+                                        onclick="@if ($isDigital) validateDigitalStockAndAddToCart()@else addToCartDetails2() @endif">
                                         <i class="fas fa-cart-plus"></i><span>{{ $keywords['Add_to_Cart'] ?? __('Add to Cart') }}
                                         </span>
                                     </button>
 
-@if ($isDigital)
-    <script>
-        function validateDigitalStockAndAddToCart() {
-            var totalCodes = {{ $totalCodes ?? 0 }};
-            console.log('DEBUG totalCodes:', totalCodes);
-            var qtyInput = document.querySelector('.quantity_field');
-            var qty = qtyInput ? parseInt(qtyInput.value) : 1;
-            console.log('DEBUG qty:', qty);
-            var alertBox = document.getElementById('digital-stock-alert');
-            if (qty > totalCodes) {
-                if (!alertBox) {
-                    var container = document.querySelector('.product-single-details');
-                    var div = document.createElement('div');
-                    div.id = 'digital-stock-alert';
-                    div.className = 'alert alert-danger mt-3';
-                    div.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Estoque indisponível para a quantidade selecionada.';
-                    container.insertBefore(div, container.firstChild);
-                } else {
-                    alertBox.style.display = 'block';
-                }
-                return false;
-            } else {
-                if (alertBox) {
-                    alertBox.style.display = 'none';
-                }
-                addToCartDetails2();
-            }
-        }
-    </script>
-@endif
+                                    @if ($isDigital)
+                                        <script>
+                                            function validateDigitalStockAndAddToCart() {
+                                                var totalCodes = {{ $totalCodes ?? 0 }};
+                                                console.log('DEBUG totalCodes:', totalCodes);
+                                                var qtyInput = document.querySelector('.quantity_field');
+                                                var qty = qtyInput ? parseInt(qtyInput.value) : 1;
+                                                console.log('DEBUG qty:', qty);
+                                                var alertBox = document.getElementById('digital-stock-alert');
+                                                if (qty > totalCodes) {
+                                                    if (!alertBox) {
+                                                        var container = document.querySelector('.product-single-details');
+                                                        var div = document.createElement('div');
+                                                        div.id = 'digital-stock-alert';
+                                                        div.className = 'alert alert-danger mt-3';
+                                                        div.innerHTML =
+                                                            '<i class="fas fa-exclamation-triangle"></i> Estoque indisponível para a quantidade selecionada.';
+                                                        container.insertBefore(div, container.firstChild);
+                                                    } else {
+                                                        alertBox.style.display = 'block';
+                                                    }
+                                                    return false;
+                                                } else {
+                                                    if (alertBox) {
+                                                        alertBox.style.display = 'none';
+                                                    }
+                                                    addToCartDetails2();
+                                                }
+                                            }
+                                        </script>
+                                    @endif
 
                                     <div class="d-flex align-items-center flex-wrap gap-10 mt-20">
                                         <span
@@ -429,39 +432,43 @@
                                         </div>
                                     </div>
                                 @endif
-                             
+
 
                             </div>
-                               @if ($isDigital)
-                                    <div id="productDetails" class="mt-4" data-is-digital="{{ $isDigital ? '1' : '0' }}"
-                                        data-has-codes="{{ $hasCodes ? '1' : '0' }}"
-                                        data-new-price="{{ $product->price }}"
-                                        data-old-price="{{ $product->old_price ?? 0 }}">
+                            @if ($isDigital)
+                                <div id="productDetails" class="mt-4" data-is-digital="{{ $isDigital ? '1' : '0' }}"
+                                    data-has-codes="{{ $hasCodes ? '1' : '0' }}" data-new-price="{{ $product->price }}"
+                                    data-old-price="{{ $product->old_price ?? 0 }}">
+                                </div>
+                                @php
+                                    $totalCodes = $product->item->digitalCodes->where('is_used', false)->count();
+                                @endphp
+
+
+                                @if (isset($totalCodes) && $totalCodes > 0)
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $totalCodes }}
+                                        {{ $totalCodes == 1 ? 'código digital disponível' : 'códigos digitais disponíveis' }}
                                     </div>
-                                    @php
-                                        $totalCodes = $product->item->digitalCodes
-                                            ->where('is_used', false)
-                                            ->count();
-                                    @endphp
-
-
-                                    @if (isset($totalCodes) && $totalCodes > 0)
-                                        <div class="alert alert-info">
-                                            <i class="fas fa-info-circle"></i>
-                                            {{ $totalCodes }} {{ $totalCodes == 1 ? 'código digital disponível' : 'códigos digitais disponíveis' }}
-                                        </div>
-                                    @elseif (isset($totalCodes) && $totalCodes < 1)
-                                        <div class="alert alert-warning">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            Produto não disponível no momento
-                                        </div>
-                                        <style>
-                                            .product-price, .product-action { display: none !important; }
-                                        </style>
-                                    @endif
-                                    
+                                @elseif (isset($totalCodes) && $totalCodes < 1)
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Produto não disponível no momento
+                                    </div>
+                                    <style>
+                                        .product-price,
+                                        .product-action {
+                                            display: none !important;
+                                        }
+                                    </style>
                                 @endif
 
+                            @endif
+ @if ($product->summary)
+                                        <p class="product-summary mb-3 text-muted"
+                                            style="font-size: 0.95rem; font-weight: 500;">{{ $product->summary }}</p>
+                                    @endif
 
                         </div>
                     </div>
