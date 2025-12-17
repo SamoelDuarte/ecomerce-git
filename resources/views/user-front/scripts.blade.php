@@ -30,7 +30,7 @@
 <script src="{{ asset('assets/user-front/js/plugins.js') }}"></script>
 
 <!-- Main script JS -->
-<script src="{{ asset('assets/user-front/js/shop.js') }}"></script>
+<script src="{{ asset('assets/user-front/js/shop.js?v=1.0.1') }}"></script>
 <script src="{{ asset('assets/user-front/js/script.js') }}"></script>
 <script src="{{ asset('assets/user-front/js/cart.js') }}"></script>
 

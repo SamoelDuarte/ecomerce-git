@@ -93,7 +93,7 @@
                                 @endphp
 
                                 <div class="d-flex align-items-center gap-10 mb-2">
-                                    @if ($shop_settings->item_rating_system == 1)
+                                    @if ($shop_settings->item_rating_system == 1 && $avgreview > 0)
                                         <div class="rating-wrapper d-flex gap-2 align-items-center">
                                             <div class="rate-icon mt-n3">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="23"
@@ -314,7 +314,7 @@
                                     </ul>
                                 @endif
                                 @if ($shop_settings->catalog_mode != 1)
-                                    <div class="d-flex flex-wrap align-items-center gap-10 mb-20">
+                                    <div class="d-flex flex-wrap align-items-center gap-10 mt-20 mb-20">
                                         <div class="quantity-input d-flex item_quantity_details">
                                             <div class="quantity-down quantity-btn minus"
                                                 data-item_id="{{ $product->id }}">
@@ -408,7 +408,7 @@
                                         </script>
                                     @endif
 
-                                    <div class="d-flex align-items-center flex-wrap gap-10 mt-20">
+                                    <div class="d-flex align-items-center flex-wrap gap-10 mt-20 d-none">
                                         <span
                                             class="text-dark fw-semibold">{{ $keywords['Share Now'] ?? __('Share Now') }}
                                             :</span>
@@ -466,7 +466,7 @@
 
                             @endif
  @if ($product->summary)
-                                        <p class="product-summary mb-3 text-muted"
+                                        <p class="product-summary mt-20 mb-3 text-muted"
                                             style="font-size: 0.95rem; font-weight: 500;">{{ $product->summary }}</p>
                                     @endif
 

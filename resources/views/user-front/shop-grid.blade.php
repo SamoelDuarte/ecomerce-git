@@ -38,7 +38,7 @@ $showCodePriceRange = $isDigital && $item->current_price == 0 && $hasCodes && $c
                     href="{{ route('front.user.productDetails', [getParam(), 'slug' => $item->product_slug]) }}">{{ $item->title }}</a>
             </h4>
 
-            @if ($shop_settings->item_rating_system == 1)
+            @if ($shop_settings->item_rating_system == 1 && reviewCount($item->item_id) > 0)
             <div class="d-flex justify-content-center align-items-center">
                 <div class="product-ratings rate text-xsm">
                     <div class="rating" style="width:{{ $item->rating * 20 }}%"></div>

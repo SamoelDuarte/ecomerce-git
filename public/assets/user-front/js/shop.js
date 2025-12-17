@@ -105,13 +105,16 @@
 
     $(".product-single-slider2").on('setPosition afterChange', function (event, slick, currentSlide) {
         $(".zoomContainer").remove();
-        $(".product-single-slider2 .slick-active img").elevateZoom({
-            zoomWindowFadeIn: 500,
-            zoomWindowFadeOut: 750,
-            zoomType: "inner",
-            cursor: "crosshair",
-            scrollZoom: false,
-        });
+        // Desabilitar zoom em dispositivos móveis
+        if ($(window).width() > 768) {
+            $(".product-single-slider2 .slick-active img").elevateZoom({
+                zoomWindowFadeIn: 500,
+                zoomWindowFadeOut: 750,
+                zoomType: "inner",
+                cursor: "crosshair",
+                scrollZoom: false,
+            });
+        }
     });
 
     (function ($) {

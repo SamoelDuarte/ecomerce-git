@@ -10,7 +10,7 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-6 col-xl-5">
-          <div class="auth-form p-30 border radius-md">
+          <div class="auth-form p-20 border radius-md">
             @if (Session::has('error'))
               <div class="alert alert-danger text-danger">{{ Session::get('error') }}</div>
             @endif

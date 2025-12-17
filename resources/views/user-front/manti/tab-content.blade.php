@@ -220,7 +220,7 @@
                      <a href="{{ route('front.user.productDetails', [getParam(), 'slug' => $product_details->itemContents[0]->slug]) }}"
                        tabindex="0">{{ $product_details->itemContents[0]->title }}</a>
                    </h4>
-                   @if ($shop_settings->item_rating_system == 1)
+                   @if ($shop_settings->item_rating_system == 1 && reviewCount($product_details->id) > 0)
                      <div class="d-flex align-items-center">
                        <div class="product-ratings rate text-xsm">
                          <div class="rating" style="width:{{ $product_details->rating * 20 }}%">

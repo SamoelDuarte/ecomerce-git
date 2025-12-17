@@ -141,7 +141,7 @@
                 <a
                   href="{{ route('front.user.productDetails', [getParam(), 'slug' => $firstItem->slug]) }}">{{ $firstItem->title }}</a>
               </h3>
-              @if ($shop_settings->item_rating_system == 1)
+              @if ($shop_settings->item_rating_system == 1 && reviewCount($firstItem->item_id) > 0)
                 <div class="d-flex align-items-center">
                   <div class="product-ratings rate text-xsm">
                     <div class="rating" style="width:{{ $firstItem->rating * 20 }}%"></div>
@@ -353,7 +353,7 @@
                         href="{{ route('front.user.productDetails', [getParam(), 'slug' => $item->slug]) }}">{{ $item->title }}</a>
                     </h4>
 
-                    @if ($shop_settings->item_rating_system == 1)
+                    @if ($shop_settings->item_rating_system == 1 && reviewCount($item->item_id) > 0)
                       <div class="d-flex align-items-center">
                         <div class="product-ratings rate text-xsm">
                           <div class="rating" style="width:{{ $item->rating * 20 }}%"></div>

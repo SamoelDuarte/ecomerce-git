@@ -2113,6 +2113,10 @@ input[type="radio"]:checked+.form-check-label::after {
     justify-content: space-between;
 }
 
+.mobile-navbar .mobile-navbar-inner img {
+    max-height: 45px;
+}
+
 .mobile-navbar .mobile-menu-toggler {
     border-width: 0;
     background-color: transparent;
@@ -3285,6 +3289,7 @@ input[type="radio"]:checked+.form-check-label::after {
 .product-single-details .product-countdown .count-period,
 .product-default .product-countdown .count-period {
     color: var(--color-primary);
+    font-size: 11px;
 }
 
 .product-default .btn-icon-group {
@@ -3937,6 +3942,12 @@ input[type="radio"]:checked+.form-check-label::after {
     object-fit: cover;
 }
 
+@media screen and (max-width: 767.98px) {
+    .product-single-default .product-single-slider2 .product-single-single-item img {
+        object-fit: contain;
+    }
+}
+
 
 
 .product-single-default .product-single-slider2 figure,
@@ -3957,7 +3968,7 @@ input[type="radio"]:checked+.form-check-label::after {
 
 .product-single-default .product-single-details .product-title {
     margin-bottom: 10px;
-    font-size: 32px;
+    font-size: 27px;
 }
 
 .product-single-default .product-single-details .product-ratings i {
@@ -4002,9 +4013,13 @@ input[type="radio"]:checked+.form-check-label::after {
     text-decoration: line-through;
 }
 
+.old-price-area {
+    font-size: 13px;
+}
+
 .product-single-default .product-single-details .product-price .discountoff {
     color: #fb8c00;
-    font-size: 22px;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -4422,7 +4437,7 @@ a.btn-icon.view-type.active {
     padding: 0;
     cursor: pointer;
     border: none;
-    font-size: 22px;
+    font-size: 16px;
     font-weight: 600;
 }
 
@@ -5680,6 +5695,12 @@ figure.product-img.skeleton.skeleton-big-img {
     transition: all 0.3s ease;
 }
 
+@media screen and (max-width: 768px) {
+    .product-single-default .product-single-details .product-action .btn-primary {
+        width: 100%;
+    }
+}
+
 .product-single-default .product-single-details .product-action .btn-primary i {
     margin-right: 7px;
 }
@@ -6677,10 +6698,17 @@ h4.product-title.lc-2 {
     margin-top: 23px
 }
 
-.list-item{
+.list-item {
     padding: 3px;
 }
 
 .hide {
     display: none !important
+}
+
+
+@media screen and (max-width: 768px) {
+    .page-title-area.header-next {
+        margin-top: 100px !important;
+    }
 }

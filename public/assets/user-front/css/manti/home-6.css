@@ -268,7 +268,7 @@
     text-align: center;
 }
 .category-6 .category-item:hover .category-img img {
-   transform: scale(1.4);
+   transform: scale(1.1);
 }
 .category-6 .category-item .category-img img{
     transition: all 0.4s ease;

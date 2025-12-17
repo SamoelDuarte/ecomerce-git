@@ -28,7 +28,7 @@
               </div>
             @endif
 
-          <div class="auth-form p-30 border radius-md">
+          <div class="auth-form p-20 border radius-md">
             @if (Session::has('error'))
               <div class="alert alert-danger text-danger">{{ Session::get('error') }}</div>
             @endif
