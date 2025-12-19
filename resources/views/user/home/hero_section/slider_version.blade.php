@@ -93,6 +93,7 @@
                         <th scope="col">#</th>
                         @if ($userBs->theme === 'vegetables' || $userBs->theme === 'electronics' || $userBs->theme === 'manti')
                           <th scope="col">{{ __('Image') }}</th>
+                          <th scope="col">{{ __('Image Mobile') }}</th>
                         @endif
                         <th scope="col">{{ __('Title') }}</th>
                         <th scope="col">{{ __('Actions') }}</th>
@@ -108,6 +109,14 @@
                             <td>
                               <img src="{{ asset('assets/front/img/hero_slider/' . $slider->img) }}" alt="image"
                                 class="table-image">
+                            </td>
+                            <td>
+                              @if (!is_null($slider->img_mobile))
+                                <img src="{{ asset('assets/front/img/hero_slider/' . $slider->img_mobile) }}" alt="image"
+                                  class="table-image">
+                              @else
+                                <span class="text-muted">{{ __('No Image') }}</span>
+                              @endif
                             </td>
                           @endif
                           <td>{{ $slider->title }}</td>

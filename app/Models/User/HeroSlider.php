@@ -15,6 +15,7 @@ class HeroSlider extends Model
         'user_id',
         'language_id',
         'img',
+        'img_mobile',
         'title',
         'subtitle',
         'text',

@@ -55,6 +55,7 @@ class HeroSliderController extends Controller
                 'btn_url' => 'nullable|max:255',
                 'serial_number' => 'required',
                 'slider_img' => $userBs->theme == 'vegetables' || $userBs->theme == 'electronics' ? 'required|mimes:jpeg,jpg,png|max:1000' : '',
+                'slider_img_mobile' => 'nullable|mimes:jpeg,jpg,png|max:1000',
                 'user_language_id' => 'required',
             ]
         );
@@ -62,9 +63,16 @@ class HeroSliderController extends Controller
             $request['image_name'] = Uploader::upload_picture(public_path('assets/front/img/hero_slider'), $request->file('slider_img'));
         }
 
-        HeroSlider::create($request->except('language_id', 'img', 'user_id', 'title') + [
+        if ($request->hasFile('slider_img_mobile')) {
+            $request['image_name_mobile'] = Uploader::upload_picture(public_path('assets/front/img/hero_slider'), $request->file('slider_img_mobile'));
+        } else {
+            $request['image_name_mobile'] = $request->image_name ?? null;
+        }
+
+        HeroSlider::create($request->except('language_id', 'img', 'img_mobile', 'user_id', 'title') + [
             'language_id' => $request->user_language_id,
             'img' => $request->image_name,
+            'img_mobile' => $request->image_name_mobile,
             'user_id' => Auth::guard('web')->user()->id,
             'title' => Purifier::clean($request->title, 'youtube')
         ]);
@@ -90,6 +98,7 @@ class HeroSliderController extends Controller
             'text' => 'nullable|max:255',
             'btn_name' => 'nullable|max:255',
             'btn_url' => 'nullable|max:255',
+            'slider_img_mobile' => 'nullable|mimes:jpeg,jpg,png|max:1000',
             'serial_number' => 'required',
         ], [
             'title.max' => __('The title field can contain maximum 255 characters'),
@@ -101,11 +110,19 @@ class HeroSliderController extends Controller
         ]);
         $slider = HeroSlider::where('user_id', Auth::guard('web')->user()->id)->where('id', $id)->firstOrFail();
         $request['image_name'] = $slider->img;
+        $request['image_name_mobile'] = $slider->img_mobile;
+        
         if ($request->hasFile('slider_img')) {
             $request['image_name'] = Uploader::update_picture(public_path('assets/front/img/hero_slider'), $request->file('slider_img'), $slider->img);
         }
-        $slider->update($request->except('img', 'title') + [
+        
+        if ($request->hasFile('slider_img_mobile')) {
+            $request['image_name_mobile'] = Uploader::update_picture(public_path('assets/front/img/hero_slider'), $request->file('slider_img_mobile'), $slider->img_mobile);
+        }
+        
+        $slider->update($request->except('img', 'img_mobile', 'title') + [
             'img' => $request->image_name,
+            'img_mobile' => $request->image_name_mobile,
             'title' => Purifier::clean($request->title, 'youtube')
         ]);
         Session::flash('success', __('Updated Successfully'));
@@ -116,6 +133,9 @@ class HeroSliderController extends Controller
     {
         $slider = HeroSlider::findOrFail($request->slider_id);
         @unlink(public_path('assets/front/img/hero_slider/') . $slider->img);
+        if (!is_null($slider->img_mobile)) {
+            @unlink(public_path('assets/front/img/hero_slider/') . $slider->img_mobile);
+        }
         $slider->delete();
         Session::flash('success', __('Deleted successfully'));
         return redirect()->back();

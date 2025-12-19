@@ -32,8 +32,15 @@
           @if (count($hero_sliders) > 0)
             @foreach ($hero_sliders as $hero_slider)
               <div class="slider-item ratio radius-md">
-                <img class="lazyload bg-img blur-up" src="{{ asset('assets/front/images/placeholder.png') }}"
-                  data-src="{{ asset('assets/front/img/hero_slider/' . $hero_slider->img) }}" alt="Banner">
+                @if (!is_null($hero_slider->img_mobile))
+                  <img class="lazyload bg-img blur-up d-none d-lg-block" src="{{ asset('assets/front/images/placeholder.png') }}"
+                    data-src="{{ asset('assets/front/img/hero_slider/' . $hero_slider->img) }}" alt="Banner">
+                  <img class="lazyload bg-img blur-up d-lg-none" src="{{ asset('assets/front/images/placeholder.png') }}"
+                    data-src="{{ asset('assets/front/img/hero_slider/' . $hero_slider->img_mobile) }}" alt="Banner Mobile">
+                @else
+                  <img class="lazyload bg-img blur-up" src="{{ asset('assets/front/images/placeholder.png') }}"
+                    data-src="{{ asset('assets/front/img/hero_slider/' . $hero_slider->img) }}" alt="Banner">
+                @endif
                 <div class="d-flex align-items-center">
                   <div class="slider-content">
                     <span class="sub-title lc-1" data-animation="animate__fadeInUp" data-delay=".3s">

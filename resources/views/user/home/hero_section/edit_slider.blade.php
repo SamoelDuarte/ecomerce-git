@@ -93,6 +93,25 @@
                       <p class="mt-2 mb-0 text-danger">{{ $errors->first('slider_img') }}</p>
                     @endif
                   </div>
+
+                  <div class="form-group">
+                    <div class="col-12 mb-2 pl-0">
+                      <label for="image-mobile"><strong>{{ __('Background Image Mobile') }} <span
+                            class="text-danger">**</span></strong></label>
+                    </div>
+                    <div class="col-md-12 showImageMobile mb-3 pl-0 pr-0">
+                      <img
+                        src="{{ isset($slider->img_mobile) ? asset('assets/front/img/hero_slider/' . $slider->img_mobile) : asset('assets/admin/img/noimage.jpg') }}"
+                        alt="..." class="img-thumbnail">
+                    </div>
+                    <div role="button" class="btn btn-primary btn-sm upload-btn" id="image-mobile">
+                      {{ __('Choose Image') }}
+                      <input type="file" class="img-input" id="slider_img_mobile" name="slider_img_mobile">
+                    </div>
+                    @if ($errors->has('slider_img_mobile'))
+                      <p class="mt-2 mb-0 text-danger">{{ $errors->first('slider_img_mobile') }}</p>
+                    @endif
+                  </div>
                 @endif
                 <div class="row">
                   <div class="col-lg-6">
