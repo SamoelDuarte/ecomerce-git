@@ -97,6 +97,24 @@
                                 <p id="errdias_despacho" class="mb-0 text-danger em"></p>
                             </div>
                         </div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>{{ __('Frete Frenet') }} <span class="text-danger">**</span></label>
+                                <input type="hidden" name="frenet_enable" value="0">
+                                <div class="selectgroup w-100">
+                                    <label class="selectgroup-item">
+                                        <input type="radio" name="frenet_enable" value="1" class="selectgroup-input"
+                                            {{ ($address->frenet_enable ?? 1) == 1 ? 'checked' : '' }}>
+                                        <span class="selectgroup-button">{{ __('Active') }}</span>
+                                    </label>
+                                    <label class="selectgroup-item">
+                                        <input type="radio" name="frenet_enable" value="0" class="selectgroup-input"
+                                            {{ ($address->frenet_enable ?? 1) == 0 ? 'checked' : '' }}>
+                                        <span class="selectgroup-button">{{ __('Deactive') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

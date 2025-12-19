@@ -366,8 +366,7 @@ function paymentFormUpdate(opaqueData) {
 }
 
 
-// Função para atualizar mensagem de dias de despacho - REMOVIDA
-/*
+// Função para atualizar mensagem de dias de despacho
 function updateDispatchMessage(dias) {
     let message = `<li class="d-flex justify-content-between dispatch-info">
         <h5 class="mb-0" style="color: #28a745;">
@@ -377,15 +376,24 @@ function updateDispatchMessage(dias) {
     </li>`;
     $('#frenetShippingDetails').html(message);
 }
-*/
 
 $(document).ready(function () {
     let carregandoCEP = false;
 
     function carregarEntregaPorCep() {
-        // Verificar se a seção de métodos de entrega existe (só para produtos físicos)
-        if ($('#frenetShippingMethods').length === 0) {
-            console.log('Métodos de entrega não disponíveis - apenas produtos digitais');
+        // // Verificar se a seção de métodos de entrega existe (só para produtos físicos)
+        // if ($('#frenetShippingMethods').length === 0) {
+        //     console.log('Métodos de entrega não disponíveis - apenas produtos digitais');
+        //     return;
+        // }
+
+        // Verificar se o frete está ativo
+        if (typeof frenet_enable !== 'undefined' && frenet_enable === 0) {
+            console.log('Frete Frenet desativado');
+            $('#frenetShippingMethods').html('<div class="alert alert-info text-center"><h5>🚚 Frete não disponível neste momento</h5></div>');
+            $('#shipping_service_price').val(0);
+            $('#shipping_service_name').val('Frete não disponível');
+            recalculateTotal();
             return;
         }
 
@@ -447,6 +455,7 @@ $(document).ready(function () {
                             if (servicosValidos === 1) {
                                 $('#shipping_service_price').val(servico.ShippingPrice);
                                 $('#shipping_service_name').val(`${servico.ServiceDescription} - ${servico.Carrier} - ${servico.DeliveryTime} dia(s)`);
+                                updateDispatchMessage(servico.DeliveryTime);
                             }
                         } else {
                             // Coleta os erros para mostrar ao usuário
@@ -505,6 +514,7 @@ $(document).ready(function () {
 
             $('#shipping_service_price').val(price);
             $('#shipping_service_name').val(`${service} - ${carrier} - ${delivery} dia(s)`);
+            updateDispatchMessage(delivery);
         }
     });
 

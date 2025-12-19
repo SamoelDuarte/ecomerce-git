@@ -17,7 +17,8 @@ class UserAddress extends Model
         'complemento',
         'bairro',
         'cidade',
-        'estado'
+        'estado',
+        'frenet_enable'
     ];
 
     public function user()

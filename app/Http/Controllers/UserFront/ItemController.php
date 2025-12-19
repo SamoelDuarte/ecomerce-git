@@ -17,6 +17,7 @@ use App\Models\User\UserOfflineGateway;
 use App\Models\User\UserPaymentGeteway;
 use App\Models\User\UserShippingCharge;
 use App\Models\User\UserShopSetting;
+use App\Models\User\UserAddress;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -407,6 +408,11 @@ class ItemController extends Controller
 
         $data['seo'] = SEO::where('language_id', $userCurrentLang->id)->where('user_id', $user->id)->first();
         $data['userShop'] = $userShop;
+        
+        // Buscar endereço do usuário para verificar frenet_enable
+        $address = UserAddress::where('user_id', $user->id)->first() ?? null;
+        $data['address'] = $address;
+        
         $anet = UserPaymentGeteway::where([['keyword', 'authorize.net'], ['user_id', $user->id]])->first();
         if ($anet) {
             $data['anerInfo'] = $anet->convertAutoData();
@@ -480,6 +486,11 @@ class ItemController extends Controller
 
         $data['seo'] = SEO::where('language_id', $userCurrentLang->id)->where('user_id', $user->id)->first();
         $data['userShop'] = $userShop;
+        
+        // Buscar endereço do usuário para verificar frenet_enable
+        $address = UserAddress::where('user_id', $user->id)->first() ?? null;
+        $data['address'] = $address;
+        
         $anet = UserPaymentGeteway::where([['keyword', 'authorize.net'], ['user_id', $user->id]])->first();
         if ($anet) {
             $data['anerInfo'] = $anet->convertAutoData();

@@ -58,13 +58,26 @@ class ShopSettingController extends Controller
             ], 400);
         }
         
-       
+        $user_id = Auth::guard('web')->user()->id;
         
-        $input['user_id'] = Auth::guard('web')->user()->id;
+        // Preparar dados para salvar
+        $data = [
+            'token_frenet' => $request->token_frenet,
+            'cnpj' => $input['cnpj'] ?? null,
+            'cep' => $request->cep,
+            'rua' => $request->rua,
+            'numero' => $request->numero,
+            'complemento' => $request->complemento ?? null,
+            'bairro' => $request->bairro,
+            'cidade' => $request->cidade,
+            'estado' => $request->estado,
+            'dias_despacho' => $request->dias_despacho ?? 0,
+            'frenet_enable' => $request->frenet_enable ?? 1,
+        ];
 
         UserAddress::updateOrCreate(
-            ['user_id' => $input['user_id']],
-            $input
+            ['user_id' => $user_id],
+            $data
         );
 
         Session::flash('success', __('Endereço salvo com sucesso'));

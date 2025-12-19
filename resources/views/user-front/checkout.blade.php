@@ -513,9 +513,9 @@ $user_currency = user_currency(Session::get('user_curr'));
                     {{-- Seção de Métodos de Entrega via Frenet --}}
                     @php
                         $onlyDigital = onlyDigitalItemsInCart();
-                   
+                        $frenetEnable = (isset($address) && $address && $address->frenet_enable) ? 1 : 0;
                     @endphp
-                    @if (!$onlyDigital and 'a' == 'b')
+                    @if (!$onlyDigital && $frenetEnable == 1)
                     <div class="col-12 mb-5">
                         <div class="order-summery form-block border radius-md">
                             <div class="shop-title-box">
@@ -662,6 +662,7 @@ $user_currency = user_currency(Session::get('user_curr'));
     var place_order = "{{ $keywords['Place Order'] ?? __('Place Order') }}";
     var ucurrency_position = "{{ $user_currency->symbol_position }}";
     var ucurrency_symbol = "{{ $user_currency->symbol }}";
+    var frenet_enable = {{ (isset($address) && $address && $address->frenet_enable) ? 1 : 1 }};
 </script>
 {{-- START: Authorize.net Scripts --}}
 @if (!is_null(@$anerInfo))
