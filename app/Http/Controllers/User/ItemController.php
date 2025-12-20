@@ -85,7 +85,7 @@ class ItemController extends Controller
     {
         $user_id = Auth::guard('web')->user()->id;
         $data['digitalCount'] = UserItem::where([['type', 'digital'], ['user_id', $user_id]])->count();
-        $data['physicalCount'] = UserItem::where([['type', 'physical'], ['user_id', $user_id]])->count();
+        $data['physicalCount'] = UserItem::where([['type', 'fisico'], ['user_id', $user_id]])->count();
         return view('user.item.type', $data);
     }
 

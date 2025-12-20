@@ -583,6 +583,7 @@ class ShopController extends Controller
                 ->where('language_id', $uLang)
                 ->where('category_id', $category_id)
                 ->where('slug', '!=', $slug)
+                ->take(9)
                 ->get(),
             'ubs' => BasicSetting::where('user_id', $user->id)->firstOrFail(),
             'reviews' => UserItemReview::where('item_id', $product->item_id)->get(),
