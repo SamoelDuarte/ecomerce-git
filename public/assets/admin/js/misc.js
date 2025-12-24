@@ -258,6 +258,16 @@
         reader.readAsDataURL(file);
     })
 
+    // Preview para imagem mobile do slider
+    $(document).on('change', '#slider_img_mobile', function (event) {
+        let file = event.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            $('.showImageMobile img').attr('src', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    })
+
     var today = new Date();
     $("#submissionDate").datepicker({
         autoclose: true,
